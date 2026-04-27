@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserStats, CertificateInfo } from './types';
-import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, User, handleFirestoreError, OperationType } from './lib/firebase';
-import { doc, getDoc, setDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove, collection, serverTimestamp } from 'firebase/firestore';
+import { supabase } from './lib/supabase';
+import type { User } from '@supabase/supabase-js';
 
 interface AppStateContextType {
   stats: UserStats;
   user: User | null;
   loading: boolean;
   theme: 'light' | 'dark';
-  login: () => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
   toggleSolved: (id: string) => Promise<void>;
   isSolved: (id: string) => boolean;
@@ -43,16 +44,30 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (!currentUser) {
-        // Clear stats on logout or load guest state
+    // Check initial auth state
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+      if (!session?.user) {
+        const saved = localStorage.getItem('codepath_stats_guest');
+        setStats(saved ? JSON.parse(saved) : DEFAULT_STATS);
+        setLoading(false);
+      }
+    };
+
+    getInitialSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setUser(session?.user || null);
+      if (!session?.user) {
         const saved = localStorage.getItem('codepath_stats_guest');
         setStats(saved ? JSON.parse(saved) : DEFAULT_STATS);
         setLoading(false);
       }
     });
-    return () => unsubscribeAuth();
+
+    return () => subscription?.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -61,42 +76,73 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    const userDoc = doc(db, 'users', user.uid);
-    const unsubscribeStats = onSnapshot(userDoc, (docSnap) => {
-      let currentStats: UserStats;
-      if (docSnap.exists()) {
-        currentStats = docSnap.data() as UserStats;
-      } else {
-        // Initialize user in firestore
-        currentStats = { ...DEFAULT_STATS };
-        setDoc(userDoc, currentStats).catch(err => handleFirestoreError(err, OperationType.CREATE, `users/${user.uid}`));
-      }
+    const fetchUserStats = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', user.id)
+          .single();
 
-      // Hardcoded admin check for the user
-      if (user.email === 'ismailtonmoy478@gmail.com') {
-        currentStats.isAdmin = true;
-      }
-      
-      setStats(currentStats);
-      setLoading(false);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
-    });
+        if (error && error.code !== 'PGRST116') throw error;
 
-    return () => unsubscribeStats();
+        if (data) {
+          const currentStats: UserStats = {
+            solvedIds: data.solved_ids || [],
+            solvedAt: data.solved_at || {},
+            certificates: data.certificates || {},
+            isAdmin: data.is_admin || user.email === 'ismailtonmoy478@gmail.com'
+          };
+          setStats(currentStats);
+        } else {
+          // Initialize user in Supabase
+          const newStats = { ...DEFAULT_STATS };
+          newStats.isAdmin = user.email === 'ismailtonmoy478@gmail.com';
+          
+          await supabase.from('users').insert({
+            id: user.id,
+            email: user.email,
+            solved_ids: newStats.solvedIds,
+            solved_at: newStats.solvedAt,
+            certificates: newStats.certificates,
+            is_admin: newStats.isAdmin
+          });
+          
+          setStats(newStats);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching user stats:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchUserStats();
   }, [user]);
 
-  const login = async () => {
+  const login = async (email: string, password: string) => {
     if (loading) return;
     setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-        console.warn('Login popup was closed before completion.');
-      } else {
-        console.error('Login error:', error);
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signup = async (email: string, password: string, displayName: string) => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Signup error:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -104,7 +150,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -133,21 +180,27 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
 
     if (user) {
-      const userDoc = doc(db, 'users', user.uid);
-      const updates: any = {
-        solvedIds: alreadySolved ? arrayRemove(id) : arrayUnion(id)
-      };
-
-      if (alreadySolved) {
-        updates[`solvedAt.${id}`] = null;
-      } else {
-        updates[`solvedAt.${id}`] = now;
-      }
-
       try {
-        await updateDoc(userDoc, updates);
+        const newSolvedIds = alreadySolved
+          ? stats.solvedIds.filter(i => i !== id)
+          : [...stats.solvedIds, id];
+
+        const newSolvedAt = { ...(stats.solvedAt || {}) };
+        if (alreadySolved) {
+          delete newSolvedAt[id];
+        } else {
+          newSolvedAt[id] = now;
+        }
+
+        await supabase
+          .from('users')
+          .update({
+            solved_ids: newSolvedIds,
+            solved_at: newSolvedAt
+          })
+          .eq('id', user.id);
       } catch (err) {
-        handleFirestoreError(err, OperationType.UPDATE, `users/${user.uid}`);
+        console.error('Error updating solved problems:', err);
       }
     }
   };
@@ -156,11 +209,13 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const updateVJudgeId = async (vjudgeId: string) => {
     if (!user) return;
-    const userDoc = doc(db, 'users', user.uid);
     try {
-      await updateDoc(userDoc, { vjudgeId });
+      await supabase
+        .from('users')
+        .update({ vjudge_id: vjudgeId })
+        .eq('id', user.id);
     } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, `users/${user.uid}`);
+      console.error('Error updating VJudge ID:', err);
     }
   };
 
@@ -172,30 +227,38 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       topicSlug
     };
     
-    const userDoc = doc(db, 'users', user.uid);
     try {
-      await updateDoc(userDoc, {
-        [`certificates.${topicSlug}`]: certInfo,
-        vjudgeId
-      });
+      // Update user certificates
+      const newCerts = { ...(stats.certificates || {}) };
+      newCerts[topicSlug] = certInfo;
 
-      await setDoc(doc(db, 'certificate_requests', `${user.uid}_${topicSlug}`), {
-        userId: user.uid,
-        userEmail: user.email,
-        userName: user.displayName,
-        topicSlug,
-        vjudgeId,
-        status: 'pending',
-        requestedAt: serverTimestamp()
-      });
+      await supabase
+        .from('users')
+        .update({
+          certificates: newCerts,
+          vjudge_id: vjudgeId
+        })
+        .eq('id', user.id);
+
+      // Create certificate request
+      await supabase
+        .from('certificate_requests')
+        .insert({
+          user_id: user.id,
+          user_email: user.email,
+          user_name: user.user_metadata?.display_name || user.email,
+          topic_slug: topicSlug,
+          vjudge_id: vjudgeId,
+          status: 'pending'
+        });
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `certificate_requests/${user.uid}_${topicSlug}`);
+      console.error('Error requesting certificate:', err);
     }
   };
 
   return (
     <AppStateContext.Provider value={{ 
-      stats, user, loading, theme, login, logout, 
+      stats, user, loading, theme, login, signup, logout, 
       toggleSolved, isSolved, updateVJudgeId, requestCertificate, toggleTheme
     }}>
       {children}

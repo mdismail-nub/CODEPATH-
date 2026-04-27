@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Rocket, LayoutGrid, BookOpen, BarChart3, Settings, LogOut, User, Award, Home as HomeIcon, Sun, Moon } from 'lucide-react';
+import { Menu, X, Rocket, LayoutGrid, BookOpen, BarChart3, Settings, LogOut, Award, Home as HomeIcon, Sun, Moon } from 'lucide-react';
 import { useAppState } from '../AppStateContext';
+import { AuthModal } from './AuthModal';
 import { cn } from '../lib/utils';
 
 export const Navbar = () => {
-  const { user, logout, stats, login, theme, toggleTheme } = useAppState();
+  const { user, logout, stats, theme, toggleTheme } = useAppState();
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
   const location = useLocation();
 
   const navLinks = [
@@ -30,7 +32,7 @@ export const Navbar = () => {
             <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center text-white shadow-sm shadow-primary-600/20">
               <BookOpen className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">CodePath</span>
+            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">CodePath.</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -64,12 +66,9 @@ export const Navbar = () => {
 
               {user ? (
                 <div className="flex items-center gap-3">
-                  <Link to="/dashboard" className="flex items-center gap-3 p-1 rounded-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all">
-                    <div className="text-right hidden lg:block pr-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase leading-none mb-0.5">Profile</p>
-                      <p className="text-xs font-bold text-slate-900 dark:text-white leading-none">{user.displayName?.split(' ')[0]}</p>
-                    </div>
-                    <img src={user.photoURL || ''} alt="" className="h-7 w-7 rounded-full bg-slate-200 dark:bg-slate-800" referrerPolicy="no-referrer" />
+                  <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline">{user.email?.split('@')[0]}</span>
                   </Link>
                   <button
                     onClick={logout}
@@ -81,10 +80,10 @@ export const Navbar = () => {
                 </div>
               ) : (
                 <button
-                  onClick={login}
+                  onClick={() => setIsAuthOpen(true)}
                   className="bg-primary-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-primary-700 transition-all shadow-sm shadow-primary-600/10"
                 >
-                  Get Started
+                  Sign In
                 </button>
               )}
             </div>
@@ -148,12 +147,8 @@ export const Navbar = () => {
               <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
                 {user ? (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3 px-4">
-                      <img src={user.photoURL || ''} alt="" className="h-10 w-10 rounded-full" referrerPolicy="no-referrer" />
-                      <div>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">{user.displayName}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
-                      </div>
+                    <div className="px-4">
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">{user.email}</p>
                     </div>
                     <button
                       onClick={logout}
@@ -165,10 +160,13 @@ export const Navbar = () => {
                   </div>
                 ) : (
                   <button
-                    onClick={login}
+                    onClick={() => {
+                      setIsAuthOpen(true);
+                      setIsOpen(false);
+                    }}
                     className="w-full bg-primary-600 text-white px-4 py-4 rounded-xl text-center text-base font-bold shadow-md shadow-primary-600/10"
                   >
-                    Authenticate with Google
+                    Sign In
                   </button>
                 )}
               </div>
@@ -176,6 +174,8 @@ export const Navbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </nav>
   );
 };
