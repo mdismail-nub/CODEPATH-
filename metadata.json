@@ -1,0 +1,9 @@
+{
+  "name": "CodePath – Curated Problems from Top Platforms",
+  "description": "Master competitive programming with curated problem sets from Codeforces, CSES, AtCoder, and more. Track your progress, earn certificates, and follow structured roadmaps.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}

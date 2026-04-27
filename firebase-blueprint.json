@@ -1,0 +1,45 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and statistics",
+      "type": "object",
+      "properties": {
+        "solvedIds": { "type": "array", "description": "List of solved problem IDs" },
+        "vjudgeId": { "type": "string", "description": "VJudge username" },
+        "certificates": { "type": "object", "description": "Map of topic slug to certificate info" },
+        "isAdmin": { "type": "boolean", "description": "Whether the user is an admin" }
+      },
+      "required": ["solvedIds", "certificates"]
+    },
+    "CertificateRequest": {
+      "title": "Certificate Request",
+      "description": "A request for a certificate from a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "userName": { "type": "string" },
+        "topicSlug": { "type": "string" },
+        "vjudgeId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "issued"] },
+        "requestedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "topicSlug", "vjudgeId", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Individual user data"
+    },
+    "/admins/{userId}": {
+      "schema": { "type": "object", "properties": { "role": { "type": "string" } } },
+      "description": "Admin access control list"
+    },
+    "/certificate_requests/{requestId}": {
+      "schema": "CertificateRequest",
+      "description": "Requests queue for admins"
+    }
+  }
+}
