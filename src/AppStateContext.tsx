@@ -28,6 +28,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<UserStats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
+  const [authBusy, setAuthBusy] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('codepath_theme');
     return (saved as 'light' | 'dark') || 'dark';
@@ -87,8 +88,10 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [user]);
 
   const login = async () => {
-    if (loading) return;
-    setLoading(true);
+    // Allow login even while the app is still loading initial state.
+    // Only guard against double-clicking / concurrent auth.
+    if (authBusy) return;
+    setAuthBusy(true);
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error: any) {
@@ -98,7 +101,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         console.error('Login error:', error);
       }
     } finally {
-      setLoading(false);
+      setAuthBusy(false);
     }
   };
 
