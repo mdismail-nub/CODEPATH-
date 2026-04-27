@@ -26,9 +26,9 @@ export const Home = () => {
     return (
       <div className="relative pt-16 bg-white dark:bg-slate-950 transition-colors duration-300">
         {/* Simplified Hero Section */}
-        <section className="relative bg-white dark:bg-slate-950 pb-24 pt-20 sm:pb-32 sm:pt-40 overflow-hidden">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.primary.100),white)] dark:bg-[radial-gradient(45rem_50rem_at_top,theme(colors.slate.900),theme(colors.slate.950))]" />
-          <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
+        <section className="relative bg-blue-grain noise-overlay pb-24 pt-20 sm:pb-32 sm:pt-40 overflow-hidden">
+          <div className="absolute inset-0 -z-10 opacity-30" />
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -36,7 +36,7 @@ export const Home = () => {
               className="mx-auto max-w-3xl"
             >
               <div className="mb-8 flex justify-center">
-                <span className="inline-flex items-center gap-2 rounded-full bg-primary-50 dark:bg-primary-900/20 px-4 py-1.5 text-xs font-semibold text-primary-700 dark:text-primary-400 ring-1 ring-inset ring-primary-700/10 dark:ring-primary-400/20">
+                <span className="inline-flex items-center gap-2 rounded-full bg-primary-400/10 px-4 py-1.5 text-xs font-semibold text-primary-600 dark:text-primary-400 ring-1 ring-inset ring-primary-700/10 dark:ring-primary-400/20">
                   <Star className="h-3 w-3" />
                   <span>The future of technical learning</span>
                 </span>
@@ -44,10 +44,10 @@ export const Home = () => {
               
               <h1 className="text-5xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-7xl mb-8 leading-tight">
                 Master the world of <br />
-                <span className="text-primary-600 dark:text-primary-500">Problem Solving</span>
+                <span className="text-primary-600 dark:text-primary-400">Problem Solving</span>
               </h1>
               
-              <p className="text-lg leading-8 text-slate-600 dark:text-slate-400 mb-12 max-w-2xl mx-auto">
+              <p className="text-lg leading-8 text-slate-600 dark:text-slate-300 mb-12 max-w-2xl mx-auto">
                 Discover a world-class training platform for competitive programming. 
                 Follow structured paths, build your technical portfolio, and earn recognized rewards.
               </p>
@@ -61,7 +61,7 @@ export const Home = () => {
                 </button>
                 <Link
                   to="/roadmap"
-                  className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 px-8 py-4 rounded-xl font-bold text-base hover:bg-slate-50 dark:hover:bg-slate-800 transition-all w-full sm:w-auto flex items-center justify-center gap-2"
+                  className="bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 px-8 py-4 rounded-xl font-bold text-base hover:bg-slate-100 dark:hover:bg-slate-800 transition-all w-full sm:w-auto flex items-center justify-center gap-2"
                 >
                   View Learning Path
                   <ChevronRight className="h-4 w-4" />
@@ -72,13 +72,13 @@ export const Home = () => {
         </section>
 
         {/* Feature Grid */}
-        <section className="py-24 bg-slate-50 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="py-24 bg-warm-grain noise-overlay border-y border-slate-200 dark:border-slate-800/50">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                { title: 'Structured Learning', desc: 'Step-by-step paths designed to take you from basics to advanced coding skills.', icon: Rocket, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-                { title: 'Earn Certificates', desc: 'Finish learning sets to get digital certificates that prove what you know.', icon: Award, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-                { title: 'Track Progress', desc: 'See all your solved problems from different platforms in one easy place.', icon: Globe, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20' }
+                { title: 'Structured Learning', desc: 'Step-by-step paths designed to take you from basics to advanced coding skills.', icon: Rocket, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-400/10' },
+                { title: 'Earn Certificates', desc: 'Finish learning sets to get digital certificates that prove what you know.', icon: Award, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-400/10' },
+                { title: 'Track Progress', desc: 'See all your solved problems from different platforms in one easy place.', icon: Globe, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-400/10' }
               ].map((item, i) => (
                 <motion.div 
                   key={i}
@@ -86,7 +86,7 @@ export const Home = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md dark:shadow-slate-900/50 transition-all"
+                  className="bg-white/80 dark:bg-slate-900/40 backdrop-blur-sm p-8 rounded-3xl border border-slate-200 dark:border-white/5 shadow-xl dark:shadow-2xl transition-all hover:bg-slate-50 dark:hover:bg-slate-900/60"
                 >
                   <div className={`h-12 w-12 rounded-xl ${item.bg} ${item.color} flex items-center justify-center mb-6`}>
                     <item.icon className="h-6 w-6" />
@@ -101,16 +101,18 @@ export const Home = () => {
 
         {/* Footer CTA */}
         <section className="px-6 py-32 text-center bg-white dark:bg-slate-950">
-          <div className="p-12 rounded-[3rem] bg-slate-900 dark:bg-slate-900 border border-slate-800 dark:border-slate-700 max-w-4xl mx-auto relative overflow-hidden group">
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary-400 to-primary-600" />
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Ready to reach the next level?</h2>
-            <p className="text-slate-400 text-lg mb-10">Sign in to start your personalized journey today.</p>
-            <button
-               onClick={login}
-               className="px-10 py-4 rounded-xl bg-white text-slate-900 font-bold hover:scale-105 active:scale-95 transition-all shadow-xl"
-            >
-              Get Started for Free
-            </button>
+          <div className="p-12 rounded-[3rem] bg-blue-grain noise-overlay border border-slate-200 dark:border-white/5 max-w-4xl mx-auto relative overflow-hidden group shadow-2xl">
+            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary-400 to-sky-400" />
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">Ready to reach the next level?</h2>
+              <p className="text-slate-600 dark:text-slate-300 text-lg mb-10 font-medium">Sign in to start your personalized journey today.</p>
+              <button
+                 onClick={login}
+                 className="px-10 py-4 rounded-xl bg-primary-600 dark:bg-white text-white dark:text-slate-950 font-bold hover:scale-105 active:scale-95 transition-all shadow-xl"
+              >
+                Get Started for Free
+              </button>
+            </div>
           </div>
         </section>
       </div>
@@ -119,8 +121,9 @@ export const Home = () => {
 
   // Dashboard for Members
   return (
-    <div className="relative pt-24 pb-32 bg-white dark:bg-slate-950 transition-colors duration-300">
-       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="relative pt-24 pb-32 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 min-h-screen">
+       <div className="absolute inset-0 -z-10 opacity-[0.03] dark:opacity-[0.05] bg-blue-grain pointer-events-none" />
+       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <header className="mb-16">
              <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <motion.div

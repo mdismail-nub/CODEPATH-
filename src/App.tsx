@@ -14,7 +14,7 @@ export default function App() {
   return (
     <AppStateProvider>
       <Router>
-        <div className="min-h-screen bg-white dark:bg-[#050505] text-slate-900 dark:text-white selection:bg-primary-500/30 selection:text-primary-900 dark:selection:bg-sky-500/30 dark:selection:text-sky-200 transition-colors duration-300">
+        <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-white selection:bg-primary-500/30 selection:text-primary-900 dark:selection:bg-sky-500/30 dark:selection:text-sky-200 transition-colors duration-300">
           <Navbar />
           <main className="mx-auto max-w-screen-2xl">
             <Routes>
