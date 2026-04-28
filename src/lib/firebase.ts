@@ -1,10 +1,21 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot } from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
+import configFromJson from '../../firebase-applet-config.json';
+
+const firebaseConfig = {
+  apiKey: (import.meta as any).env.VITE_FIREBASE_API_KEY || configFromJson.apiKey,
+  authDomain: (import.meta as any).env.VITE_FIREBASE_AUTH_DOMAIN || configFromJson.authDomain,
+  projectId: (import.meta as any).env.VITE_FIREBASE_PROJECT_ID || configFromJson.projectId,
+  storageBucket: (import.meta as any).env.VITE_FIREBASE_STORAGE_BUCKET || configFromJson.storageBucket,
+  messagingSenderId: (import.meta as any).env.VITE_FIREBASE_MESSAGING_SENDER_ID || configFromJson.messagingSenderId,
+  appId: (import.meta as any).env.VITE_FIREBASE_APP_ID || configFromJson.appId,
+  measurementId: (import.meta as any).env.VITE_FIREBASE_MEASUREMENT_ID || configFromJson.measurementId,
+  firestoreDatabaseId: (import.meta as any).env.VITE_FIREBASE_DATABASE_ID || (configFromJson as any).firestoreDatabaseId
+};
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, (firebaseConfig as any).firestoreDatabaseId);
+export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 

@@ -28,7 +28,6 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<UserStats>(DEFAULT_STATS);
   const [loading, setLoading] = useState(true);
-  const [authBusy, setAuthBusy] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('codepath_theme');
     return (saved as 'light' | 'dark') || 'dark';
@@ -88,20 +87,23 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [user]);
 
   const login = async () => {
-    // Allow login even while the app is still loading initial state.
-    // Only guard against double-clicking / concurrent auth.
-    if (authBusy) return;
-    setAuthBusy(true);
+    if (loading) return;
+    setLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
         console.warn('Login popup was closed before completion.');
+      } else if (error.code === 'auth/popup-blocked') {
+        alert('Authentication popup was blocked by your browser. Please allow popups for this site or try a different browser.');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        alert(`This domain is not authorized for Firebase Authentication. Please add it to the Authorized Domains in your Firebase Console.`);
       } else {
         console.error('Login error:', error);
+        alert('Login failed: ' + (error.message || 'Unknown error'));
       }
     } finally {
-      setAuthBusy(false);
+      setLoading(false);
     }
   };
 

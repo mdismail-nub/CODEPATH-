@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, onSnapshot, doc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { Check, X, Clock, User, Award, ShieldCheck, Database, Filter } from 'lucide-react';
@@ -85,14 +86,23 @@ export const AdminDashboard = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
+    <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
       <div className="absolute inset-0 -z-10 subtle-grid opacity-10" />
       
-      <div className="mx-auto max-w-7xl px-6 py-24 md:py-32 lg:px-8">
-        <BackButton />
+      <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8">
+        <motion.div
+           initial={{ opacity: 0, x: -10 }}
+           animate={{ opacity: 1, x: 0 }}
+        >
+          <BackButton />
+        </motion.div>
         
         <header className="mb-20 pt-12">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col md:flex-row md:items-end justify-between gap-8"
+          >
              <div>
                 <div className="flex items-center gap-2 mb-8">
                   <div className="h-5 w-1 bg-primary-600 dark:bg-sky-400 rounded-full" />
@@ -113,7 +123,7 @@ export const AdminDashboard = () => {
                  </div>
                ))}
              </div>
-          </div>
+          </motion.div>
         </header>
 
         {/* Table Section */}

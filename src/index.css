@@ -36,7 +36,7 @@
   }
 
   .dark body {
-    @apply bg-slate-950 text-white;
+    @apply bg-[#020617] text-white;
     color-scheme: dark;
   }
 

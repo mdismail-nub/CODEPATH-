@@ -20,8 +20,7 @@ export const Certificates = () => {
 
   if (!user) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center bg-white dark:bg-slate-950 transition-colors duration-300">
-        <div className="absolute inset-0 -z-10 subtle-grid opacity-10" />
+      <div className="relative min-h-screen flex items-center justify-center bg-transparent transition-colors duration-300">
         <div className="text-center p-8">
           <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-900 dark:bg-slate-900 border border-slate-800 dark:border-slate-800 text-slate-700 glass-surface shadow-2xl">
             <Award className="h-10 w-10 text-slate-400 dark:text-slate-500" />
@@ -42,21 +41,31 @@ export const Certificates = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
-      <div className="absolute inset-0 -z-10 subtle-grid opacity-10" />
+    <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40" />
       
-      <div className="mx-auto max-w-7xl px-6 py-24 md:py-32 lg:px-8">
-        <BackButton />
+      <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <BackButton />
+        </motion.div>
         
         <header className="mb-24 pt-12">
-          <div className="flex items-center gap-2 mb-8">
-            <div className="h-5 w-1 bg-primary-600 dark:bg-sky-400 rounded-full" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Your Record</span>
-          </div>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">Certificates.</h1>
-          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
-            View and download the certificates you've earned from completing courses.
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center gap-2 mb-8">
+              <div className="h-5 w-1 bg-primary-600 dark:bg-sky-400 rounded-full" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Your Record</span>
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">Certificates.</h1>
+            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed">
+              View and download the certificates you've earned from completing courses.
+            </p>
+          </motion.div>
         </header>
 
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-3">

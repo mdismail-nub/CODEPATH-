@@ -114,10 +114,10 @@ export const Dashboard = () => {
   ).length;
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
+    <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40" />
       
-      <div className="mx-auto max-w-7xl px-6 py-24 md:py-32 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8">
         <header className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-8 pt-12">
           <div>
             <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/20 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-400/20 mb-6">

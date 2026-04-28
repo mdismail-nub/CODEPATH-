@@ -15,16 +15,25 @@ export const Topics = () => {
   );
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
+    <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40" />
       
-      <div className="mx-auto max-w-7xl px-6 py-24 md:py-32 lg:px-8">
-        <div className="mb-12">
+      <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-12"
+        >
           <BackButton />
-        </div>
+        </motion.div>
         
         <header className="mb-20">
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            className="flex flex-col lg:flex-row lg:items-end justify-between gap-8"
+          >
             <div className="max-w-2xl">
               <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/20 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-400/20 mb-6">
                 Learning Paths
@@ -60,7 +69,7 @@ export const Topics = () => {
                 )}
               </AnimatePresence>
             </div>
-          </div>
+          </motion.div>
         </header>
 
         <section>

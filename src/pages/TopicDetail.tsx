@@ -32,14 +32,23 @@ export const TopicDetail = () => {
   const existingCert = stats.certificates[topic.slug];
 
   return (
-    <div className="pt-24 pb-32 bg-white dark:bg-slate-950 transition-colors duration-300">
+    <div className="pt-32 pb-32 bg-white dark:bg-[#020617] transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <BackButton />
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <BackButton />
+        </motion.div>
         
         {/* Header Section */}
         <header className="mb-20 pt-12">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
-            <div className="max-w-3xl">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="max-w-3xl"
+            >
               <div className="flex items-center gap-2 mb-6">
                 <div className="h-6 w-1 bg-primary-600 dark:bg-primary-400 rounded-full" />
                 <span className="text-[11px] font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400">Lesson List</span>
@@ -55,7 +64,7 @@ export const TopicDetail = () => {
               <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
                 {topic.description}
               </p>
-            </div>
+            </motion.div>
 
             <div className="w-full lg:w-80 p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
                <div className="flex items-center justify-between mb-8">

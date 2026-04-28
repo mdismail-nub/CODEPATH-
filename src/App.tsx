@@ -14,7 +14,11 @@ export default function App() {
   return (
     <AppStateProvider>
       <Router>
-        <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-white selection:bg-primary-500/30 selection:text-primary-900 dark:selection:bg-sky-500/30 dark:selection:text-sky-200 transition-colors duration-300">
+        <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 selection:bg-primary-500/30 selection:text-primary-900 dark:selection:bg-sky-500/30 dark:selection:text-sky-200 transition-colors duration-500 relative overflow-hidden">
+          {/* Subtle Grain Background */}
+          <div className="fixed inset-0 -z-50 bg-blue-grain noise-overlay opacity-40" />
+          <div className="fixed inset-0 -z-50 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.05),transparent_50%)]" />
+          
           <Navbar />
           <main className="mx-auto max-w-screen-2xl">
             <Routes>

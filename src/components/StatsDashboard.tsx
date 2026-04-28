@@ -30,10 +30,6 @@ export const StatsDashboard = () => {
         
         <div className="flex items-center justify-between mb-12 relative z-10">
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="h-4 w-1 bg-primary-600 dark:bg-sky-400 rounded-full" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Global status</p>
-            </div>
             <h2 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">Analytics.</h2>
             <p className="text-slate-600 dark:text-slate-400 font-medium mt-1">Real-time aggregate data review.</p>
           </div>
@@ -51,11 +47,11 @@ export const StatsDashboard = () => {
             <div className="flex items-center gap-3 text-primary-600 dark:text-sky-400">
               <span className="text-5xl font-bold tracking-tighter mb-2">{solved}</span>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-primary-600 dark:text-sky-500">Validated</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary-600 dark:text-sky-500">Solved</span>
           </div>
           <div className="p-8 rounded-[2rem] bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center group/card transition-all hover:bg-slate-50 dark:hover:bg-slate-950 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm dark:shadow-none">
             <span className="text-5xl font-bold text-slate-400 dark:text-slate-700 tracking-tighter mb-2">{total - solved}</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600">Queue</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600">Unsolved</span>
           </div>
         </div>
       </div>
@@ -101,14 +97,14 @@ export const StatsDashboard = () => {
           <div className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5 shadow-sm dark:shadow-none">
             <div className="flex items-center gap-3">
               <div className="h-2 w-2 rounded-full bg-primary-600 dark:bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]" />
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Validated</span>
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Solved</span>
             </div>
             <span className="text-sm font-bold text-slate-900 dark:text-white">{solved}</span>
           </div>
           <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/[0.02] shadow-sm dark:shadow-none">
             <div className="flex items-center gap-3">
               <div className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-800" />
-              <span className="text-xs font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest">Residual</span>
+              <span className="text-xs font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest">Unsolved</span>
             </div>
             <span className="text-sm font-bold text-slate-500">{total - solved}</span>
           </div>

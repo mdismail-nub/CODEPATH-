@@ -24,15 +24,14 @@ export const Home = () => {
   // Landing Page for Guests
   if (!user) {
     return (
-      <div className="relative pt-16 bg-white dark:bg-slate-950 transition-colors duration-300">
+      <div className="relative pt-24 bg-white dark:bg-[#020617] transition-colors duration-300">
         {/* Simplified Hero Section */}
-        <section className="relative bg-blue-grain noise-overlay pb-24 pt-20 sm:pb-32 sm:pt-40 overflow-hidden">
-          <div className="absolute inset-0 -z-10 opacity-30" />
+        <section className="relative pb-24 pt-20 sm:pb-32 sm:pt-40 overflow-hidden">
           <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center relative z-10">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
               className="mx-auto max-w-3xl"
             >
               <div className="mb-8 flex justify-center">
@@ -100,8 +99,8 @@ export const Home = () => {
         </section>
 
         {/* Footer CTA */}
-        <section className="px-6 py-32 text-center bg-white dark:bg-slate-950">
-          <div className="p-12 rounded-[3rem] bg-blue-grain noise-overlay border border-slate-200 dark:border-white/5 max-w-4xl mx-auto relative overflow-hidden group shadow-2xl">
+        <section className="px-6 py-32 text-center bg-transparent">
+          <div className="p-12 rounded-[3rem] bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200 dark:border-white/5 max-w-4xl mx-auto relative overflow-hidden group shadow-2xl">
             <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-primary-400 to-sky-400" />
             <div className="relative z-10">
               <h2 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">Ready to reach the next level?</h2>
@@ -121,14 +120,15 @@ export const Home = () => {
 
   // Dashboard for Members
   return (
-    <div className="relative pt-24 pb-32 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 min-h-screen">
+    <div className="relative pt-28 pb-32 bg-transparent transition-colors duration-300 min-h-screen">
        <div className="absolute inset-0 -z-10 opacity-[0.03] dark:opacity-[0.05] bg-blue-grain pointer-events-none" />
        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <header className="mb-16">
              <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
                 <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
                 >
                    <p className="text-sm font-bold text-primary-600 dark:text-primary-400 mb-2">Member Home</p>
                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">

@@ -20,9 +20,14 @@ export const RoadmapPage = () => {
   const icons = [Rocket, Target, Award, Star];
 
   return (
-    <div className="relative pt-24 pb-32 bg-white dark:bg-slate-950 transition-colors duration-300">
+    <div className="relative pt-32 pb-32 bg-white dark:bg-[#020617] transition-colors duration-300">
       <div className="mx-auto max-w-5xl px-6 lg:px-8">
-        <BackButton />
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <BackButton />
+        </motion.div>
         
         <header className="text-center mb-24 pt-12">
           <motion.div
