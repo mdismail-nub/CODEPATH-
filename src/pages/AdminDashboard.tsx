@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { collection, onSnapshot, doc, updateDoc, query, orderBy } from 'firebase/firestore';
-import { Check, X, Clock, User, Award, ShieldCheck, Database, Filter } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { Check, X, User, Award, ShieldCheck, Database } from 'lucide-react';
 import { useAppState } from '../AppStateContext';
 import { TOPICS } from '../data';
 import { cn } from '../lib/utils';
@@ -10,13 +9,13 @@ import { BackButton } from '../components/BackButton';
 
 interface CertRequest {
   id: string;
-  userId: string;
-  userEmail: string;
-  userName: string;
-  topicSlug: string;
-  vjudgeId: string;
+  user_id: string;
+  user_email: string;
+  user_name: string;
+  topic_slug: string;
+  vjudge_id: string;
   status: 'pending' | 'issued' | 'rejected';
-  requestedAt: any;
+  requested_at: string;
 }
 
 export const AdminDashboard = () => {
@@ -27,46 +26,122 @@ export const AdminDashboard = () => {
   useEffect(() => {
     if (!stats.isAdmin) return;
 
-    const q = query(collection(db, 'certificate_requests'), orderBy('requestedAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const reqs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CertRequest));
-      setRequests(reqs);
+    const fetchRequests = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('certificate_requests')
+        .select('*')
+        .order('requested_at', { ascending: false });
+      
+      if (!error && data) {
+        setRequests(data as CertRequest[]);
+      }
       setLoading(false);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'certificate_requests');
-    });
+    };
 
-    return () => unsubscribe();
+    fetchRequests();
+
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('admin_requests')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'certificate_requests' 
+      }, () => {
+        fetchRequests();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [stats.isAdmin]);
 
   const approveRequest = async (req: CertRequest) => {
     try {
-      await updateDoc(doc(db, 'certificate_requests', req.id), {
-        status: 'issued',
-        issuedAt: new Date().toISOString()
-      });
+      const issuedAt = new Date().toISOString();
+      
+      // Update request status
+      const { error: reqError } = await supabase
+        .from('certificate_requests')
+        .update({
+          status: 'issued',
+          issued_at: issuedAt
+        })
+        .eq('id', req.id);
 
-      await updateDoc(doc(db, 'users', req.userId), {
-        [`certificates.${req.topicSlug}.status`]: 'issued',
-        [`certificates.${req.topicSlug}.issuedAt`]: new Date().toISOString()
-      });
+      if (reqError) throw reqError;
+
+      // Update user profile certificates
+      const { data: profile, error: profileFetchError } = await supabase
+        .from('profiles')
+        .select('certificates')
+        .eq('id', req.user_id)
+        .single();
+
+      if (profileFetchError) throw profileFetchError;
+
+      const updatedCertificates = {
+        ...(profile.certificates || {}),
+        [req.topic_slug]: {
+          ...(profile.certificates?.[req.topic_slug] || {}),
+          status: 'issued',
+          issuedAt: issuedAt
+        }
+      };
+
+      const { error: profileUpdateError } = await supabase
+        .from('profiles')
+        .update({ certificates: updatedCertificates })
+        .eq('id', req.user_id);
+
+      if (profileUpdateError) throw profileUpdateError;
+
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, `certificate_requests/${req.id}`);
+      console.error('Error approving request:', error);
+      alert('Failed to approve request');
     }
   };
 
   const rejectRequest = async (req: CertRequest) => {
     if (!window.confirm('Confirm rejection of this audit request?')) return;
     try {
-      await updateDoc(doc(db, 'certificate_requests', req.id), {
-        status: 'rejected'
-      });
+      // Update request status
+      const { error: reqError } = await supabase
+        .from('certificate_requests')
+        .update({ status: 'rejected' })
+        .eq('id', req.id);
 
-      await updateDoc(doc(db, 'users', req.userId), {
-        [`certificates.${req.topicSlug}.status`]: 'rejected'
-      });
+      if (reqError) throw reqError;
+
+      // Update user profile certificates
+      const { data: profile, error: profileFetchError } = await supabase
+        .from('profiles')
+        .select('certificates')
+        .eq('id', req.user_id)
+        .single();
+
+      if (profileFetchError) throw profileFetchError;
+
+      const updatedCertificates = {
+        ...(profile.certificates || {}),
+        [req.topic_slug]: {
+          ...(profile.certificates?.[req.topic_slug] || {}),
+          status: 'rejected'
+        }
+      };
+
+      const { error: profileUpdateError } = await supabase
+        .from('profiles')
+        .update({ certificates: updatedCertificates })
+        .eq('id', req.user_id);
+
+      if (profileUpdateError) throw profileUpdateError;
+
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, `certificate_requests/${req.id}`);
+      console.error('Error rejecting request:', error);
+      alert('Failed to reject request');
     }
   };
 
@@ -141,7 +216,7 @@ export const AdminDashboard = () => {
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {requests.map((req) => {
-                  const topic = TOPICS.find(t => t.slug === req.topicSlug);
+                  const topic = TOPICS.find(t => t.slug === req.topic_slug);
                   return (
                     <tr key={req.id} className="group hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
                       <td className="px-8 py-8">
@@ -150,8 +225,8 @@ export const AdminDashboard = () => {
                             <User className="h-5 w-5" />
                           </div>
                           <div>
-                            <div className="text-sm font-bold text-slate-900 dark:text-white mb-0.5">{req.userName}</div>
-                            <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-800 tracking-tighter">ID: {req.vjudgeId}</div>
+                            <div className="text-sm font-bold text-slate-900 dark:text-white mb-0.5">{req.user_name}</div>
+                            <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/50 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-800 tracking-tighter">ID: {req.vjudge_id}</div>
                           </div>
                         </div>
                       </td>
@@ -165,7 +240,7 @@ export const AdminDashboard = () => {
                         </div>
                       </td>
                       <td className="px-8 py-8 text-xs font-bold text-slate-500 dark:text-slate-400">
-                        {req.requestedAt?.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        {new Date(req.requested_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </td>
                       <td className="px-8 py-8">
                         <div className={cn(

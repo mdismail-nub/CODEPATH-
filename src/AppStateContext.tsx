@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserStats, CertificateInfo } from './types';
-import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, User, handleFirestoreError, OperationType } from './lib/firebase';
-import { doc, getDoc, setDoc, onSnapshot, updateDoc, arrayUnion, arrayRemove, collection, serverTimestamp } from 'firebase/firestore';
+import { supabase, Profile } from './lib/supabase';
+import { User } from '@supabase/supabase-js';
 
 interface AppStateContextType {
   stats: UserStats;
@@ -43,73 +43,121 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (!currentUser) {
-        // Clear stats on logout or load guest state
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (!session) {
         const saved = localStorage.getItem('codepath_stats_guest');
         setStats(saved ? JSON.parse(saved) : DEFAULT_STATS);
         setLoading(false);
       }
     });
-    return () => unsubscribeAuth();
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
     if (!user) {
-      localStorage.setItem('codepath_stats_guest', JSON.stringify(stats));
+      if (!loading) {
+        localStorage.setItem('codepath_stats_guest', JSON.stringify(stats));
+      }
       return;
     }
 
-    const userDoc = doc(db, 'users', user.uid);
-    const unsubscribeStats = onSnapshot(userDoc, (docSnap) => {
-      let currentStats: UserStats;
-      if (docSnap.exists()) {
-        currentStats = docSnap.data() as UserStats;
-      } else {
-        // Initialize user in firestore
-        currentStats = { ...DEFAULT_STATS };
-        setDoc(userDoc, currentStats).catch(err => handleFirestoreError(err, OperationType.CREATE, `users/${user.uid}`));
-      }
+    const fetchStats = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
 
-      // Hardcoded admin check for the user
-      if (user.email === 'ismailtonmoy478@gmail.com') {
-        currentStats.isAdmin = true;
+        if (error && error.code === 'PGRST116') {
+          // Profile doesn't exist, create it
+          const initialStats = {
+            id: user.id,
+            solved_ids: [],
+            certificates: {},
+            is_admin: user.email === 'ismailtonmoy478@gmail.com'
+          };
+          const { error: insertError } = await supabase.from('profiles').insert(initialStats);
+          if (insertError) throw insertError;
+          
+          setStats({
+            solvedIds: [],
+            certificates: {},
+            isAdmin: initialStats.is_admin
+          });
+        } else if (error) {
+          throw error;
+        } else {
+          setStats({
+            solvedIds: data.solved_ids || [],
+            certificates: data.certificates || {},
+            isAdmin: data.is_admin || user.email === 'ismailtonmoy478@gmail.com',
+            vjudgeId: data.vjudge_id,
+            solvedAt: data.solved_at || {}
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching/creating profile:', err);
+      } finally {
+        setLoading(false);
       }
-      
-      setStats(currentStats);
-      setLoading(false);
-    }, (error) => {
-      handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
-    });
+    };
 
-    return () => unsubscribeStats();
+    fetchStats();
+
+    // Set up realtime subscription for profile changes
+    const channel = supabase
+      .channel(`profile:${user.id}`)
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'profiles', 
+        filter: `id=eq.${user.id}` 
+      }, (payload: any) => {
+        const data = payload.new;
+        setStats({
+          solvedIds: data.solved_ids || [],
+          certificates: data.certificates || {},
+          isAdmin: data.is_admin || user.email === 'ismailtonmoy478@gmail.com',
+          vjudgeId: data.vjudge_id,
+          solvedAt: data.solved_at || {}
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const login = async () => {
-    if (loading) return;
-    setLoading(true);
     try {
-      await signInWithPopup(auth, googleProvider);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
     } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-        console.warn('Login popup was closed before completion.');
-      } else if (error.code === 'auth/popup-blocked') {
-        alert('Authentication popup was blocked by your browser. Please allow popups for this site or try a different browser.');
-      } else if (error.code === 'auth/unauthorized-domain') {
-        alert(`This domain is not authorized for Firebase Authentication. Please add it to the Authorized Domains in your Firebase Console.`);
-      } else {
-        console.error('Login error:', error);
-        alert('Login failed: ' + (error.message || 'Unknown error'));
-      }
-    } finally {
-      setLoading(false);
+      console.error('Login error:', error);
+      alert('Login failed: ' + error.message);
     }
   };
 
   const logout = async () => {
     try {
-      await signOut(auth);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -138,21 +186,27 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
 
     if (user) {
-      const userDoc = doc(db, 'users', user.uid);
-      const updates: any = {
-        solvedIds: alreadySolved ? arrayRemove(id) : arrayUnion(id)
-      };
-
+      const newSolvedIds = alreadySolved 
+        ? stats.solvedIds.filter(i => i !== id)
+        : [...stats.solvedIds, id];
+      
+      const newSolvedAt = { ...(stats.solvedAt || {}) };
       if (alreadySolved) {
-        updates[`solvedAt.${id}`] = null;
+        delete newSolvedAt[id];
       } else {
-        updates[`solvedAt.${id}`] = now;
+        newSolvedAt[id] = now;
       }
 
       try {
-        await updateDoc(userDoc, updates);
+        await supabase
+          .from('profiles')
+          .update({ 
+            solved_ids: newSolvedIds,
+            solved_at: newSolvedAt
+          })
+          .eq('id', user.id);
       } catch (err) {
-        handleFirestoreError(err, OperationType.UPDATE, `users/${user.uid}`);
+        console.error('Error updating solved status:', err);
       }
     }
   };
@@ -161,11 +215,13 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const updateVJudgeId = async (vjudgeId: string) => {
     if (!user) return;
-    const userDoc = doc(db, 'users', user.uid);
     try {
-      await updateDoc(userDoc, { vjudgeId });
+      await supabase
+        .from('profiles')
+        .update({ vjudge_id: vjudgeId })
+        .eq('id', user.id);
     } catch (err) {
-      handleFirestoreError(err, OperationType.UPDATE, `users/${user.uid}`);
+      console.error('Error updating VJudge ID:', err);
     }
   };
 
@@ -177,24 +233,34 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       topicSlug
     };
     
-    const userDoc = doc(db, 'users', user.uid);
     try {
-      await updateDoc(userDoc, {
-        [`certificates.${topicSlug}`]: certInfo,
-        vjudgeId
-      });
+      const newCertificates = {
+        ...(stats.certificates || {}),
+        [topicSlug]: certInfo
+      };
 
-      await setDoc(doc(db, 'certificate_requests', `${user.uid}_${topicSlug}`), {
-        userId: user.uid,
-        userEmail: user.email,
-        userName: user.displayName,
-        topicSlug,
-        vjudgeId,
-        status: 'pending',
-        requestedAt: serverTimestamp()
-      });
+      await supabase
+        .from('profiles')
+        .update({
+          certificates: newCertificates,
+          vjudge_id: vjudgeId
+        })
+        .eq('id', user.id);
+
+      await supabase
+        .from('certificate_requests')
+        .upsert({
+          id: `${user.id}_${topicSlug}`,
+          user_id: user.id,
+          user_email: user.email,
+          user_name: user.user_metadata.full_name || user.email,
+          topic_slug: topicSlug,
+          vjudge_id: vjudgeId,
+          status: 'pending',
+          requested_at: new Date().toISOString()
+        });
     } catch (err) {
-      handleFirestoreError(err, OperationType.WRITE, `certificate_requests/${user.uid}_${topicSlug}`);
+      console.error('Error requesting certificate:', err);
     }
   };
 
