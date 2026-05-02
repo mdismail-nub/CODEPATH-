@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { AppStateProvider } from './AppStateContext';
 import { Navbar } from './components/Navbar';
 import { Home } from './pages/Home';
@@ -76,6 +77,7 @@ export default function App() {
           </footer>
         </div>
       </Router>
+      <Analytics />
     </AppStateProvider>
   );
 }
