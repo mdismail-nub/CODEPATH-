@@ -17,10 +17,8 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export const Dashboard = () => {
-  const { stats, user } = useAppState();
+  const { stats } = useAppState();
   const reportRef = useRef<HTMLDivElement>(null);
-
-  if (!user) return null;
 
   const totalSolved = stats.solvedIds.length;
   const totalProblems = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
@@ -106,7 +104,7 @@ export const Dashboard = () => {
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`${user.displayName || 'User'}_Progress_Report.pdf`);
+    pdf.save(`CodePath_Progress_Report.pdf`);
   };
 
   const topicsCompleted = TOPICS.filter(t => 
@@ -121,11 +119,11 @@ export const Dashboard = () => {
         <header className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-8 pt-12">
           <div>
             <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/20 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-400/20 mb-6">
-              User Dashboard
+              Local Dashboard
             </span>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900 dark:text-white mb-4 font-outfit">My Progress</h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-xl">
-              Track your learning journey, view your stats, and monitor your consistency.
+              Track your learning journey, view your stats, and monitor your consistency locally in this browser.
             </p>
           </div>
           <button
@@ -279,7 +277,7 @@ export const Dashboard = () => {
               <h1 className="text-5xl font-bold tracking-tight text-gray-900 mb-8 font-outfit">My Progress.</h1>
               <div className="text-sm text-gray-500 uppercase tracking-widest font-semibold flex items-center gap-2">
                 <div className="h-2 w-2 bg-blue-600 rounded-full" />
-                Authenticated Record: {new Date().toLocaleDateString()}
+                Local Record: {new Date().toLocaleDateString()}
               </div>
             </div>
             <div className="h-20 w-20 bg-gray-900 rounded-3xl flex items-center justify-center">
@@ -289,7 +287,7 @@ export const Dashboard = () => {
 
           <div className="mb-16">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Participant</p>
-            <h2 className="text-4xl font-bold text-gray-900">{user.displayName}</h2>
+            <h2 className="text-4xl font-bold text-gray-900">Guest User</h2>
           </div>
 
           <div className="grid grid-cols-3 gap-6 mb-20">
@@ -335,12 +333,12 @@ export const Dashboard = () => {
               </div>
               <div>
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Verification ID</p>
-                <p className="text-sm font-mono text-gray-900">CP-AUTH-{user.uid.slice(0, 8).toUpperCase()}</p>
+                <p className="text-sm font-mono text-gray-900">CP-LOCAL-{Date.now().toString(36).toUpperCase()}</p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Platform Verification</p>
-              <div className="text-2xl font-bold text-gray-900">CodePath Archive</div>
+              <div className="text-2xl font-bold text-gray-900">CodePath Local Archive</div>
             </div>
           </div>
         </div>

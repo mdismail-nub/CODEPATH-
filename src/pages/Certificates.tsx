@@ -8,7 +8,7 @@ import { BackButton } from '../components/BackButton';
 import { CertificateInfo } from '../types';
 
 export const Certificates = () => {
-  const { stats, user, login } = useAppState();
+  const { stats } = useAppState();
 
   const myCertificates = Object.values(stats.certificates || {}) as CertificateInfo[];
   const issuedCerts = myCertificates.filter(c => c.status === 'issued');
@@ -17,28 +17,6 @@ export const Certificates = () => {
   const downloadCertificate = (topicSlug: string) => {
     alert('Generating high-resolution audit certificate for ' + topicSlug + '...');
   };
-
-  if (!user) {
-    return (
-      <div className="relative min-h-screen flex items-center justify-center bg-transparent transition-colors duration-300">
-        <div className="text-center p-8">
-          <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-900 dark:bg-slate-900 border border-slate-800 dark:border-slate-800 text-slate-700 glass-surface shadow-2xl">
-            <Award className="h-10 w-10 text-slate-400 dark:text-slate-500" />
-          </div>
-          <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">Credentials Required.</h1>
-          <p className="max-w-md mx-auto text-slate-600 dark:text-slate-400 text-lg mb-10 leading-relaxed">
-            Please authenticate to access your personal achievement records and earned certifications.
-          </p>
-          <button
-            onClick={login}
-            className="px-12 py-5 rounded-2xl bg-primary-600 dark:bg-sky-400 text-white dark:text-slate-950 text-xs font-bold uppercase tracking-widest hover:bg-primary-700 dark:hover:bg-sky-300 transition-all shadow-xl shadow-primary-600/20 dark:shadow-sky-500/20"
-          >
-            Authenticate with Google
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">

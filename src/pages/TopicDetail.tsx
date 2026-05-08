@@ -11,7 +11,7 @@ import { BackButton } from '../components/BackButton';
 
 export const TopicDetail = () => {
   const { slug } = useParams();
-  const { isSolved, toggleSolved, user, login, stats } = useAppState();
+  const { isSolved, toggleSolved, stats } = useAppState();
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'All'>('All');
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
 
@@ -88,14 +88,7 @@ export const TopicDetail = () => {
 
                {isAllSolved && (
                   <div className="pt-8 border-t border-slate-100 dark:border-slate-800">
-                     {!user ? (
-                      <button 
-                        onClick={login}
-                        className="w-full py-4 rounded-xl bg-amber-500 text-white text-xs font-bold uppercase tracking-widest hover:bg-amber-600 transition-all flex items-center justify-center gap-2"
-                      >
-                        Log in to get certificate
-                      </button>
-                    ) : existingCert ? (
+                     {existingCert ? (
                       <div className={cn(
                         "w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3",
                         existingCert.status === 'issued' ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30" : "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-800/30"
