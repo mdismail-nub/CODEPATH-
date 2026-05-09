@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { UserStats, CertificateInfo } from './types';
 
 interface AppStateContextType {
@@ -25,13 +25,18 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const saved = localStorage.getItem('codepath_stats');
     return saved ? JSON.parse(saved) : DEFAULT_STATS;
   });
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('codepath_theme');
     return (saved as 'light' | 'dark') || 'dark';
   });
 
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  // Optimization: Use a Set for O(1) lookups of solved problem IDs
+  const solvedSet = useMemo(() => new Set(stats.solvedIds), [stats.solvedIds]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  }, []);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -44,12 +49,12 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('codepath_stats', JSON.stringify(stats));
   }, [stats]);
 
-  const toggleSolved = (id: string) => {
-    const alreadySolved = stats.solvedIds.includes(id);
-    const now = Date.now();
-    
+  const toggleSolved = useCallback((id: string) => {
     setStats(prev => {
+      const alreadySolved = prev.solvedIds.includes(id);
+      const now = Date.now();
       const newSolvedAt = { ...(prev.solvedAt || {}) };
+
       if (alreadySolved) {
         delete newSolvedAt[id];
       } else {
@@ -64,15 +69,15 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         solvedAt: newSolvedAt
       };
     });
-  };
+  }, []);
 
-  const isSolved = (id: string) => stats.solvedIds.includes(id);
+  const isSolved = useCallback((id: string) => solvedSet.has(id), [solvedSet]);
 
-  const updateVJudgeId = (vjudgeId: string) => {
+  const updateVJudgeId = useCallback((vjudgeId: string) => {
     setStats(prev => ({ ...prev, vjudgeId }));
-  };
+  }, []);
 
-  const requestCertificate = (topicSlug: string, vjudgeId: string) => {
+  const requestCertificate = useCallback((topicSlug: string, vjudgeId: string) => {
     const certInfo: CertificateInfo = {
       status: 'pending',
       vjudgeId,
@@ -87,17 +92,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       },
       vjudgeId
     }));
+  }, []);
 
-    // In a simple guest-only version, we can just "approve" it immediately 
-    // or leave it as pending to show progress. 
-    // Let's leave it as pending for now to maintain the UI flow.
-  };
+  // Optimization: Memoize context value to prevent unnecessary re-renders of all consumers
+  const value = useMemo(() => ({
+    stats, loading, theme,
+    toggleSolved, isSolved, updateVJudgeId, requestCertificate, toggleTheme
+  }), [stats, loading, theme, toggleSolved, isSolved, updateVJudgeId, requestCertificate, toggleTheme]);
 
   return (
-    <AppStateContext.Provider value={{ 
-      stats, loading, theme, 
-      toggleSolved, isSolved, updateVJudgeId, requestCertificate, toggleTheme
-    }}>
+    <AppStateContext.Provider value={value}>
       {children}
     </AppStateContext.Provider>
   );
