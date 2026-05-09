@@ -63,6 +63,7 @@ export const Topics = () => {
                     exit={{ opacity: 0, scale: 0.8 }}
                     onClick={() => setSearchQuery('')}
                     className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-slate-800 text-gray-500 dark:text-gray-400 transition-colors"
+                    aria-label="Clear search"
                   >
                     <X className="h-4 w-4" />
                   </motion.button>
