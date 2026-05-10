@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import * as Icons from 'lucide-react';
@@ -11,14 +11,24 @@ interface TopicCardProps {
   index: number;
 }
 
-export const TopicCard: React.FC<TopicCardProps> = ({ topic, index }) => {
-  const { stats } = useAppState();
+// Optimization: Memoize the component to prevent re-renders when other topics change or when search query in parent changes
+export const TopicCard: React.FC<TopicCardProps> = React.memo(({ topic, index }) => {
+  const { isSolved } = useAppState();
   const Icon = (Icons as any)[topic.icon] || Icons.HelpCircle;
   
-  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+  // Optimization: Memoize progress calculations to avoid redundant O(Problems) work on every render
+  const { solvedCount, progressPercent, isCompleted } = useMemo(() => {
+    const solved = topic.problems.filter(p => isSolved(p.id)).length;
+    const total = topic.problems.length;
+    const percent = Math.round((solved / total) * 100) || 0;
+    return {
+      solvedCount: solved,
+      progressPercent: percent,
+      isCompleted: percent === 100
+    };
+  }, [topic.problems, isSolved]);
+
   const totalCount = topic.problems.length;
-  const progressPercent = Math.round((solvedCount / totalCount) * 100) || 0;
-  const isCompleted = progressPercent === 100;
 
   return (
     <motion.div
@@ -80,4 +90,4 @@ export const TopicCard: React.FC<TopicCardProps> = ({ topic, index }) => {
       </Link>
     </motion.div>
   );
-};
+});
