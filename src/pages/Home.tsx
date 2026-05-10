@@ -41,8 +41,8 @@ export const Home = () => {
               </span>
             </div>
             
-            <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-6xl mb-6 leading-tight">
-              Master the world of <br />
+            <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-6xl mb-6 leading-[1.15]">
+              Master the world of <br className="hidden sm:block" />
               <span className="text-primary-600 dark:text-primary-400">Problem Solving</span>
             </h1>
             
@@ -71,7 +71,7 @@ export const Home = () => {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 space-y-16 pb-32">
-        <header>
+        <header className="section-container !px-0">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -114,7 +114,7 @@ export const Home = () => {
             <div className="lg:col-span-2">
               <DailyChallenge />
             </div>
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm flex flex-col justify-between">
+            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 rounded-3xl p-8 shadow-sm flex flex-col justify-between">
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-6 font-display">Shortcuts</h3>
                 <div className="space-y-1">

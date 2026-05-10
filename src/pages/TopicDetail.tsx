@@ -33,7 +33,7 @@ export const TopicDetail = () => {
 
   return (
     <div className="pt-32 pb-32 bg-white dark:bg-[#020617] transition-colors duration-300">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="section-container">
         <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
@@ -113,8 +113,8 @@ export const TopicDetail = () => {
         {/* Content Section */}
         <section>
           {/* Filters */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
-            <div className="flex p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 overflow-x-auto pb-2 md:pb-0">
+            <div className="flex flex-shrink-0 p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
               {(['All', 'Easy', 'Medium', 'Hard'] as const).map((diff) => (
                 <button
                   key={diff}
