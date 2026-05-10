@@ -44,7 +44,11 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="relative w-full max-w-lg overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 md:p-12 shadow-2xl transition-colors duration-300"
           >
-            <button onClick={onClose} className="absolute right-8 top-8 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+            <button
+              onClick={onClose}
+              className="absolute right-8 top-8 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+              aria-label="Close modal"
+            >
               <X className="h-6 w-6" />
             </button>
 
