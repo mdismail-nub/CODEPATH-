@@ -43,19 +43,19 @@ export default function App() {
 
             <div className="h-px w-20 bg-slate-200 dark:bg-slate-800 my-12" />
             
-            <div className="flex flex-wrap justify-center gap-12">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-x-8 gap-y-12 sm:gap-12 w-full max-w-sm sm:max-w-none">
               <div className="text-left">
                 <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-6 font-mono">Learning</h4>
                 <ul className="space-y-4">
-                   <li><Link to="/topics" className="text-sm font-bold text-slate-600 dark:text-slate-500 hover:text-primary-600 dark:hover:text-sky-400 transition-colors">All Courses</Link></li>
-                   <li><Link to="/roadmap" className="text-sm font-bold text-slate-600 dark:text-slate-500 hover:text-primary-600 dark:hover:text-sky-400 transition-colors">Your Path</Link></li>
+                   <li><Link to="/topics" className="text-sm font-bold text-slate-600 dark:text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">All Courses</Link></li>
+                   <li><Link to="/roadmap" className="text-sm font-bold text-slate-600 dark:text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Your Path</Link></li>
                 </ul>
               </div>
               <div className="text-left">
                 <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-6 font-mono">My Account</h4>
                 <ul className="space-y-4">
-                   <li><Link to="/dashboard" className="text-sm font-bold text-slate-600 dark:text-slate-500 hover:text-primary-600 dark:hover:text-sky-400 transition-colors">My Progress</Link></li>
-                   <li><Link to="/certificates" className="text-sm font-bold text-slate-600 dark:text-slate-500 hover:text-primary-600 dark:hover:text-sky-400 transition-colors">My Certificates</Link></li>
+                   <li><Link to="/dashboard" className="text-sm font-bold text-slate-600 dark:text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">My Progress</Link></li>
+                   <li><Link to="/certificates" className="text-sm font-bold text-slate-600 dark:text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">My Certificates</Link></li>
                 </ul>
               </div>
             </div>

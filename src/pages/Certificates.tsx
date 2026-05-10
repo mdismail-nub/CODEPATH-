@@ -36,7 +36,7 @@ export const Certificates = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="flex items-center gap-2 mb-8">
-              <div className="h-5 w-1 bg-primary-600 dark:bg-sky-400 rounded-full" />
+              <div className="h-5 w-1 bg-primary-600 dark:bg-primary-400 rounded-full" />
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Your Record</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">Certificates.</h1>
@@ -52,7 +52,7 @@ export const Certificates = () => {
             <div>
               <div className="flex items-center justify-between mb-10 pb-6 border-b border-slate-200 dark:border-slate-800">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-                  <Award className="h-5 w-5 text-primary-600 dark:text-sky-400" />
+                  <Award className="h-5 w-5 text-primary-600 dark:text-primary-400" />
                   My Certificates
                 </h2>
                 <span className="px-3 py-1 rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -77,8 +77,8 @@ export const Certificates = () => {
                         className="group overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-2xl hover:shadow-md transition-all"
                       >
                         <div className="aspect-[1.5/1] bg-slate-50 dark:bg-slate-950 p-8 flex flex-col items-center justify-center relative overflow-hidden">
-                           <div className="absolute inset-0 bg-gradient-to-br from-primary-400/5 dark:from-sky-400/5 to-transparent pointer-events-none" />
-                           <div className="h-20 w-20 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-primary-600/50 dark:text-sky-400/50 group-hover:text-primary-600 dark:group-hover:text-sky-400 transition-all group-hover:scale-110 shadow-sm">
+                           <div className="absolute inset-0 bg-gradient-to-br from-primary-400/5 dark:from-primary-400/5 to-transparent pointer-events-none" />
+                           <div className="h-20 w-20 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-primary-600/50 dark:text-primary-400/50 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-all group-hover:scale-110 shadow-sm">
                              <Award className="h-10 w-10" />
                            </div>
                            <div className="mt-8 text-center">
@@ -101,7 +101,7 @@ export const Certificates = () => {
                           <div className="flex gap-3">
                             <button 
                               onClick={() => downloadCertificate(cert.topicSlug)}
-                              className="flex-1 px-6 py-4 rounded-xl bg-primary-600 dark:bg-sky-400 text-white dark:text-slate-950 text-[10px] font-bold uppercase tracking-widest hover:bg-primary-700 dark:hover:bg-sky-300 transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary-600/20 dark:shadow-sky-500/20"
+                              className="flex-1 px-6 py-4 rounded-xl bg-primary-600 dark:bg-primary-500 text-white dark:text-slate-950 text-[10px] font-bold uppercase tracking-widest hover:bg-primary-700 dark:hover:bg-primary-400 transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary-600/20 dark:shadow-primary-500/20"
                             >
                               <Download className="h-4 w-4" /> Download Certificate
                             </button>
@@ -146,7 +146,7 @@ export const Certificates = () => {
                         className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between group shadow-sm"
                       >
                         <div>
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-slate-200 group-hover:text-primary-600 dark:group-hover:text-sky-400 transition-colors tracking-tight">{topic?.name}</h4>
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-slate-200 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors tracking-tight">{topic?.name}</h4>
                           <p className="text-[9px] text-slate-400 dark:text-slate-600 uppercase tracking-widest font-bold mt-1">Request ID: {cert.vjudgeId}</p>
                         </div>
                         <div className="px-3 py-1 rounded-md bg-amber-400/10 text-[8px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400 border border-amber-400/20">
@@ -172,7 +172,7 @@ export const Certificates = () => {
                    "Get your certificate once verified."
                  ].map((text, i) => (
                    <div key={i} className="flex gap-4">
-                      <div className="h-6 w-6 rounded-md bg-primary-600 dark:bg-sky-400 flex items-center justify-center text-white dark:text-slate-950 text-[10px] font-bold flex-shrink-0">{i+1}</div>
+                      <div className="h-6 w-6 rounded-md bg-primary-600 dark:bg-primary-400 flex items-center justify-center text-white dark:text-slate-950 text-[10px] font-bold flex-shrink-0">{i+1}</div>
                       <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">{text}</p>
                    </div>
                  ))}
