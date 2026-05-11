@@ -538,3 +538,6 @@ export const ROADMAP_STEPS = [
   { id: 'step7', title: 'Phase 9: System Optimization', description: 'Sliding Window, Heaps, and Greedy Strategies.', topics: ['sz13', 'sz14', 'sz15'] },
   { id: 'step8', title: 'Phase 10: High-Level Concepts', description: 'Advanced Recursion, Graphs, and Dynamic Programming.', topics: ['sz11', 'sz17', 'sz18'] }
 ];
+
+export const TOPICS_BY_ID = Object.fromEntries(TOPICS.map(t => [t.id, t]));
+export const TOPICS_BY_SLUG = Object.fromEntries(TOPICS.map(t => [t.slug, t]));

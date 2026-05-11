@@ -1,21 +1,40 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Map as MapIcon, Flag, ChevronRight, CheckCircle2, Circle, Trophy, Rocket, Target, Award, Star, BookOpen } from 'lucide-react';
-import { ROADMAP_STEPS, TOPICS } from '../data';
+import { ROADMAP_STEPS, TOPICS, TOPICS_BY_SLUG } from '../data';
 import { Link } from 'react-router-dom';
 import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 import { BackButton } from '../components/BackButton';
+import { useMemo, useCallback } from 'react';
 
 export const RoadmapPage = () => {
-  const { stats } = useAppState();
+  const { isSolved } = useAppState();
 
-  const getTopicProgress = (topicSlug: string) => {
-    const topic = TOPICS.find(t => t.slug === topicSlug);
+  // Optimization: Use O(1) TOPICS_BY_SLUG and isSolved helpers
+  const getTopicProgress = useCallback((topicSlug: string) => {
+    const topic = TOPICS_BY_SLUG[topicSlug];
     if (!topic) return 0;
-    const solved = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+    const solved = topic.problems.filter(p => isSolved(p.id)).length;
     return Math.round((solved / topic.problems.length) * 100);
-  };
+  }, [isSolved]);
+
+  // Optimization: Memoize steps data to avoid O(Steps * Topics) work on each render
+  const stepsData = useMemo(() => ROADMAP_STEPS.map((step, idx) => {
+    const stepTopics = step.topics.map(slug => TOPICS_BY_SLUG[slug]).filter(Boolean);
+    const previousProgress = idx === 0 ? 100 : getTopicProgress(ROADMAP_STEPS[idx - 1].topics[0]);
+    const isLatestUnlocked = idx === 0 || previousProgress > 0;
+
+    return {
+      ...step,
+      stepTopics,
+      isLatestUnlocked,
+      topicProgresses: step.topics.reduce((acc, slug) => {
+        acc[slug] = getTopicProgress(slug);
+        return acc;
+      }, {} as Record<string, number>)
+    };
+  }), [getTopicProgress]);
 
   const icons = [Rocket, Target, Award, Star];
 
@@ -47,9 +66,7 @@ export const RoadmapPage = () => {
           {/* Central Line */}
           <div className="absolute left-[31px] md:left-1/2 top-4 bottom-4 w-px bg-slate-200 dark:bg-slate-800 -translate-x-1/2" />
 
-          {ROADMAP_STEPS.map((step, idx) => {
-            const stepTopics = step.topics.map(slug => TOPICS.find(t => t.slug === slug)).filter(Boolean);
-            const isLatestUnlocked = idx === 0 || getTopicProgress(ROADMAP_STEPS[idx-1].topics[0]) > 0;
+          {stepsData.map((step, idx) => {
             const PhaseIcon = icons[idx % icons.length];
 
             return (
@@ -63,7 +80,7 @@ export const RoadmapPage = () => {
                 {/* Milestone Node */}
                 <div className={cn(
                   "absolute left-[31px] md:left-1/2 -translate-x-1/2 h-16 w-16 md:h-14 md:w-14 rounded-2xl border-4 border-slate-50 dark:border-slate-950 flex items-center justify-center z-10 transition-all duration-500 shadow-sm",
-                  isLatestUnlocked ? "bg-primary-600 dark:bg-primary-500 text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600"
+                  step.isLatestUnlocked ? "bg-primary-600 dark:bg-primary-500 text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600"
                 )}>
                   <PhaseIcon className="h-6 w-6" />
                 </div>
@@ -83,8 +100,8 @@ export const RoadmapPage = () => {
                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">{step.description}</p>
                        
                        <div className="space-y-2">
-                         {stepTopics.map((topic: any) => {
-                           const progress = getTopicProgress(topic.slug);
+                         {step.stepTopics.map((topic: any) => {
+                           const progress = step.topicProgresses[topic.slug];
                            const isDone = progress === 100;
                            return (
                              <Link

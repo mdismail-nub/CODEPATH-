@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import * as Icons from 'lucide-react';
-import { TOPICS } from '../data';
+import { TOPICS_BY_SLUG } from '../data';
 import { useAppState } from '../AppStateContext';
 import { Difficulty } from '../types';
 import { cn } from '../lib/utils';
 import { GetCertificateModal } from '../components/GetCertificateModal';
 import { BackButton } from '../components/BackButton';
+import { useMemo } from 'react';
 
 export const TopicDetail = () => {
   const { slug } = useParams();
@@ -15,19 +16,30 @@ export const TopicDetail = () => {
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'All'>('All');
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
 
-  const topic = TOPICS.find(t => t.slug === slug);
+  // Optimization: Use O(1) TOPICS_BY_SLUG map
+  const topic = slug ? TOPICS_BY_SLUG[slug] : undefined;
   if (!topic) return <Navigate to="/topics" />;
 
   const Icon = (Icons as any)[topic.icon] || Icons.HelpCircle;
 
-  const filteredProblems = difficultyFilter === 'All'
-    ? topic.problems
-    : topic.problems.filter(p => p.difficulty === difficultyFilter);
+  // Optimization: Memoize problem filtering and progress calculations
+  const { filteredProblems, solvedCount, totalCount, progressPercent, isAllSolved } = useMemo(() => {
+    const filtered = difficultyFilter === 'All'
+      ? topic.problems
+      : topic.problems.filter(p => p.difficulty === difficultyFilter);
 
-  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
-  const totalCount = topic.problems.length;
-  const progressPercent = Math.round((solvedCount / totalCount) * 100) || 0;
-  const isAllSolved = solvedCount === totalCount && totalCount > 0;
+    const solved = topic.problems.filter(p => isSolved(p.id)).length;
+    const total = topic.problems.length;
+    const percent = Math.round((solved / total) * 100) || 0;
+
+    return {
+      filteredProblems: filtered,
+      solvedCount: solved,
+      totalCount: total,
+      progressPercent: percent,
+      isAllSolved: solved === total && total > 0
+    };
+  }, [topic, difficultyFilter, isSolved]);
   
   const existingCert = stats.certificates[topic.slug];
 
