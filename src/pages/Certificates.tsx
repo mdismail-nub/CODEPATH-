@@ -2,17 +2,23 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Award, Clock, Download, Share2, Search, ChevronRight, LayoutGrid } from 'lucide-react';
 import { useAppState } from '../AppStateContext';
-import { TOPICS } from '../data';
+import { TOPICS_BY_SLUG } from '../data';
 import { cn } from '../lib/utils';
 import { BackButton } from '../components/BackButton';
 import { CertificateInfo } from '../types';
+import { useMemo } from 'react';
 
 export const Certificates = () => {
   const { stats } = useAppState();
 
-  const myCertificates = Object.values(stats.certificates || {}) as CertificateInfo[];
-  const issuedCerts = myCertificates.filter(c => c.status === 'issued');
-  const pendingCerts = myCertificates.filter(c => c.status === 'pending');
+  // Optimization: Memoize certificate lists and use O(1) map lookups
+  const { issuedCerts, pendingCerts } = useMemo(() => {
+    const myCertificates = Object.values(stats.certificates || {}) as CertificateInfo[];
+    return {
+      issuedCerts: myCertificates.filter(c => c.status === 'issued'),
+      pendingCerts: myCertificates.filter(c => c.status === 'pending')
+    };
+  }, [stats.certificates]);
 
   const downloadCertificate = (topicSlug: string) => {
     alert('Generating high-resolution audit certificate for ' + topicSlug + '...');
@@ -68,7 +74,7 @@ export const Certificates = () => {
               ) : (
                 <div className="grid gap-8 sm:grid-cols-2">
                   {issuedCerts.map((cert) => {
-                    const topic = TOPICS.find(t => t.slug === cert.topicSlug);
+                    const topic = TOPICS_BY_SLUG[cert.topicSlug];
                     return (
                       <motion.div
                         key={cert.topicSlug}
@@ -137,7 +143,7 @@ export const Certificates = () => {
                 )}
                 <AnimatePresence>
                   {pendingCerts.map((cert) => {
-                    const topic = TOPICS.find(t => t.slug === cert.topicSlug);
+                    const topic = TOPICS_BY_SLUG[cert.topicSlug];
                     return (
                       <motion.div 
                         key={cert.topicSlug}
