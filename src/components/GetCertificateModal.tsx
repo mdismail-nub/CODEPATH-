@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Award, Send, CheckCircle2, ChevronRight } from 'lucide-react';
 import { useAppState } from '../AppStateContext';
@@ -26,6 +26,16 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
     }, 2000);
   };
 
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -42,6 +52,9 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
             className="relative w-full max-w-lg overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 md:p-12 shadow-2xl transition-colors duration-300"
           >
             <button
@@ -49,15 +62,15 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
               className="absolute right-8 top-8 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
               aria-label="Close modal"
             >
-              <X className="h-6 w-6" />
+              <X className="h-6 w-6" aria-hidden="true" />
             </button>
 
             {submitted ? (
-              <div className="flex flex-col items-center py-12 text-center">
+              <div className="flex flex-col items-center py-12 text-center" aria-live="polite">
                 <div className="mb-10 h-24 w-24 rounded-3xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm dark:shadow-2xl dark:shadow-emerald-500/10">
-                  <CheckCircle2 className="h-12 w-12" />
+                  <CheckCircle2 className="h-12 w-12" aria-hidden="true" />
                 </div>
-                <h3 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-6">Request Logs.</h3>
+                <h3 id="modal-title" className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-6">Request Logs.</h3>
                 <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-medium max-w-xs">
                   Your audit request for <span className="text-slate-900 dark:text-white">{topicName}</span> has been queued for verification.
                 </p>
@@ -72,10 +85,10 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
                 <header className="mb-12">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="h-12 w-12 rounded-2xl bg-primary-50 dark:bg-sky-400/10 border border-primary-100 dark:border-sky-400/20 flex items-center justify-center text-primary-600 dark:text-sky-400">
-                      <Award className="h-6 w-6" />
+                      <Award className="h-6 w-6" aria-hidden="true" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">Claim Credential.</h3>
+                      <h3 id="modal-title" className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">Claim Credential.</h3>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mt-2">Verification Registry</p>
                     </div>
                   </div>
@@ -88,8 +101,9 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="group">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-3 block group-focus-within:text-primary-600 dark:group-focus-within:text-sky-400 transition-colors">VJudge Identification</label>
+                    <label htmlFor="vjudge-id" className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-3 block group-focus-within:text-primary-600 dark:group-focus-within:text-sky-400 transition-colors">VJudge Identification</label>
                     <input
+                      id="vjudge-id"
                       type="text"
                       required
                       value={vjudgeId}
@@ -103,7 +117,7 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
                     type="submit"
                     className="flex w-full items-center justify-center gap-4 rounded-2xl bg-primary-600 dark:bg-sky-400 p-5 text-xs font-bold uppercase tracking-widest text-white dark:text-slate-950 shadow-xl shadow-primary-600/20 dark:shadow-sky-500/20 transition-all hover:bg-primary-700 dark:hover:bg-sky-300 active:scale-[0.98]"
                   >
-                    Transmit Request <Send className="h-4 w-4" />
+                    Transmit Request <Send className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </form>
 
