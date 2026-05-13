@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useAppState } from '../AppStateContext';
 import { TOPICS } from '../data';
@@ -16,62 +16,69 @@ import { cn } from '../lib/utils';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+// Optimization: Move constants and simple helpers outside component to avoid re-creation
+const TOTAL_PROBLEMS = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
+const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
 export const Dashboard = () => {
-  const { stats } = useAppState();
+  const { stats, isSolved } = useAppState();
   const reportRef = useRef<HTMLDivElement>(null);
 
   const totalSolved = stats.solvedIds.length;
-  const totalProblems = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
-  const totalProgress = Math.round((totalSolved / totalProblems) * 100);
+  const totalProgress = Math.round((totalSolved / TOTAL_PROBLEMS) * 100);
 
-  const formatDate = (date: Date) => date.toISOString().split('T')[0];
+  // Optimization: Memoize complex date-based solve calculations
+  const solvesByDate = useMemo(() => {
+    const history = stats.solvedAt || {};
+    const result: Record<string, number> = {};
+    Object.values(history).forEach((timestamp: any) => {
+      if (timestamp) {
+        const dateStr = formatDate(new Date(timestamp));
+        result[dateStr] = (result[dateStr] || 0) + 1;
+      }
+    });
+    return result;
+  }, [stats.solvedAt]);
 
-  const history = stats.solvedAt || {};
-  const solvesByDate: Record<string, number> = {};
-  Object.values(history).forEach((timestamp: any) => {
-    if (timestamp) {
-      const dateStr = formatDate(new Date(timestamp));
-      solvesByDate[dateStr] = (solvesByDate[dateStr] || 0) + 1;
-    }
-  });
-
-  const calculateStreak = () => {
-    let streak = 0;
+  // Optimization: Memoize streak calculation
+  const streak = useMemo(() => {
+    let currentStreak = 0;
     let current = new Date();
     
     if (solvesByDate[formatDate(current)]) {
-      streak++;
+      currentStreak++;
     } else {
       current.setDate(current.getDate() - 1);
       if (!solvesByDate[formatDate(current)]) return 0;
-      streak++;
+      currentStreak++;
     }
 
     while (true) {
       current.setDate(current.getDate() - 1);
       if (solvesByDate[formatDate(current)]) {
-        streak++;
+        currentStreak++;
       } else {
         break;
       }
-      if (streak > 365) break;
+      if (currentStreak > 365) break;
     }
-    return streak;
-  };
+    return currentStreak;
+  }, [solvesByDate]);
 
-  const streak = calculateStreak();
-
-  const heatmapData = Array.from({ length: 154 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (153 - i));
-    const dateStr = formatDate(d);
-    const count = solvesByDate[dateStr] || 0;
-    return {
-      active: count > 0,
-      value: Math.min(count, 4),
-      date: dateStr
-    };
-  });
+  // Optimization: Memoize heatmap data generation
+  const heatmapData = useMemo(() => {
+    return Array.from({ length: 154 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (153 - i));
+      const dateStr = formatDate(d);
+      const count = solvesByDate[dateStr] || 0;
+      return {
+        active: count > 0,
+        value: Math.min(count, 4),
+        date: dateStr
+      };
+    });
+  }, [solvesByDate]);
 
   const downloadProgress = async () => {
     if (!reportRef.current) return;
@@ -107,9 +114,30 @@ export const Dashboard = () => {
     pdf.save(`CodePath_Progress_Report.pdf`);
   };
 
-  const topicsCompleted = TOPICS.filter(t => 
-    t.problems.every(p => stats.solvedIds.includes(p.id))
-  ).length;
+  // Optimization: Use isSolved helper for O(1) lookups and memoize result
+  const topicsCompleted = useMemo(() => {
+    return TOPICS.filter(t =>
+      t.problems.every(p => isSolved(p.id))
+    ).length;
+  }, [isSolved]);
+
+  // Optimization: Memoize proficiency data for the sidebar
+  const proficiencyTopics = useMemo(() => {
+    return TOPICS.slice(0, 6).map((topic) => {
+      const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
+      const percent = Math.round((solvedCount / topic.problems.length) * 100);
+      return { ...topic, solvedCount, percent };
+    });
+  }, [isSolved]);
+
+  // Optimization: Memoize PDF report data
+  const pdfTopics = useMemo(() => {
+    return TOPICS.slice(0, 10).map(topic => {
+      const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
+      const percent = Math.round((solvedCount / topic.problems.length) * 100);
+      return { ...topic, percent };
+    });
+  }, [isSolved]);
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
@@ -235,30 +263,25 @@ export const Dashboard = () => {
               </div>
 
               <div className="space-y-6">
-                {TOPICS.slice(0, 6).map((topic) => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
-                  const percent = Math.round((solvedCount / topic.problems.length) * 100);
-                  
-                  return (
-                    <div key={topic.id}>
-                       <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{topic.name}</span>
-                          <span className="text-xs font-bold text-primary-600 dark:text-primary-400 font-mono">{percent}%</span>
-                       </div>
-                       <div className="h-2 w-full bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${percent}%` }}
-                            transition={{ duration: 1 }}
-                            className={cn(
-                              "h-full rounded-full bg-primary-600 dark:bg-primary-400",
-                              percent === 100 && "bg-green-500 dark:bg-green-500"
-                            )} 
-                          />
-                       </div>
-                    </div>
-                  );
-                })}
+                {proficiencyTopics.map((topic) => (
+                  <div key={topic.id}>
+                     <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{topic.name}</span>
+                        <span className="text-xs font-bold text-primary-600 dark:text-primary-400 font-mono">{topic.percent}%</span>
+                     </div>
+                     <div className="h-2 w-full bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${topic.percent}%` }}
+                          transition={{ duration: 1 }}
+                          className={cn(
+                            "h-full rounded-full bg-primary-600 dark:bg-primary-400",
+                            topic.percent === 100 && "bg-green-500 dark:bg-green-500"
+                          )}
+                        />
+                     </div>
+                  </div>
+                ))}
               </div>
 
               <div className="mt-10 p-5 rounded-2xl bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-800 text-center">
@@ -310,21 +333,17 @@ export const Dashboard = () => {
           <div>
              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-8 pb-4 border-b border-gray-100">Top Module Performance</h3>
              <div className="grid grid-cols-2 gap-x-12 gap-y-8">
-                {TOPICS.slice(0, 10).map(topic => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
-                  const percent = Math.round((solvedCount / topic.problems.length) * 100);
-                  return (
-                    <div key={topic.id} className="flex items-center justify-between">
-                      <div className="flex flex-col gap-2">
-                        <span className="text-sm font-bold text-gray-800 uppercase tracking-tight">{topic.name}</span>
-                        <div className="h-1.5 w-32 bg-gray-100 rounded-full">
-                          <div className="h-full bg-primary-600 rounded-full" style={{ width: `${percent}%` }} />
-                        </div>
+                {pdfTopics.map(topic => (
+                  <div key={topic.id} className="flex items-center justify-between">
+                    <div className="flex flex-col gap-2">
+                      <span className="text-sm font-bold text-gray-800 uppercase tracking-tight">{topic.name}</span>
+                      <div className="h-1.5 w-32 bg-gray-100 rounded-full">
+                        <div className="h-full bg-primary-600 rounded-full" style={{ width: `${topic.percent}%` }} />
                       </div>
-                      <span className="text-xl font-bold text-primary-600 font-mono">{percent}%</span>
                     </div>
-                  );
-                })}
+                    <span className="text-xl font-bold text-primary-600 font-mono">{topic.percent}%</span>
+                  </div>
+                ))}
              </div>
           </div>
 
