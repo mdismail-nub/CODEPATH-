@@ -105,7 +105,11 @@ export const Certificates = () => {
                             >
                               <Download className="h-4 w-4" /> Download Certificate
                             </button>
-                            <button className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+                            <button
+                              className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                              aria-label="Share certificate"
+                              title="Share certificate"
+                            >
                               <Share2 className="h-4 w-4" />
                             </button>
                           </div>

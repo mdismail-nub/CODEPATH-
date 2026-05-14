@@ -119,6 +119,7 @@ export const TopicDetail = () => {
                 <button
                   key={diff}
                   onClick={() => setDifficultyFilter(diff)}
+                  aria-pressed={difficultyFilter === diff}
                   className={cn(
                     "px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all",
                     difficultyFilter === diff 
