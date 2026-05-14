@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Award, Send, CheckCircle2, ChevronRight } from 'lucide-react';
+import { X, Award, Send, CheckCircle2, CircleDashed } from 'lucide-react';
 import { useAppState } from '../AppStateContext';
+import { cn } from '../lib/utils';
 
 interface GetCertificateModalProps {
   isOpen: boolean;
@@ -14,12 +15,31 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
   const { stats, requestCertificate } = useAppState();
   const [vjudgeId, setVjudgeId] = useState(stats.vjudgeId || '');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleEscape);
+    }
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!vjudgeId.trim()) return;
+    if (!vjudgeId.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    // Synthetic delay for UX feedback
+    await new Promise(resolve => setTimeout(resolve, 800));
+
     await requestCertificate(topicSlug, vjudgeId);
     setSubmitted(true);
+    setIsSubmitting(false);
+
     setTimeout(() => {
       onClose();
       setSubmitted(false);
@@ -29,7 +49,12 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+        >
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -46,7 +71,7 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
           >
             <button
               onClick={onClose}
-              className="absolute right-8 top-8 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+              className="absolute right-8 top-8 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all hover:rotate-90 duration-300"
               aria-label="Close modal"
             >
               <X className="h-6 w-6" />
@@ -57,7 +82,7 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
                 <div className="mb-10 h-24 w-24 rounded-3xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm dark:shadow-2xl dark:shadow-emerald-500/10">
                   <CheckCircle2 className="h-12 w-12" />
                 </div>
-                <h3 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-6">Request Logs.</h3>
+                <h3 id="modal-title" className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-6">Request Logs.</h3>
                 <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-medium max-w-xs">
                   Your audit request for <span className="text-slate-900 dark:text-white">{topicName}</span> has been queued for verification.
                 </p>
@@ -75,7 +100,7 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
                       <Award className="h-6 w-6" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">Claim Credential.</h3>
+                      <h3 id="modal-title" className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">Claim Credential.</h3>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mt-2">Verification Registry</p>
                     </div>
                   </div>
@@ -88,22 +113,34 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="group">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-3 block group-focus-within:text-primary-600 dark:group-focus-within:text-sky-400 transition-colors">VJudge Identification</label>
+                    <label htmlFor="vjudge-id" className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-3 block group-focus-within:text-primary-600 dark:group-focus-within:text-sky-400 transition-colors">VJudge Identification</label>
                     <input
+                      id="vjudge-id"
                       type="text"
                       required
                       value={vjudgeId}
                       onChange={(e) => setVjudgeId(e.target.value)}
                       placeholder="Enter VJudge Handle..."
-                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-800 focus:border-primary-600 dark:focus:border-sky-400 focus:outline-none transition-all shadow-inner"
+                      disabled={isSubmitting}
+                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-800 focus:border-primary-600 dark:focus:border-sky-400 focus:outline-none transition-all shadow-inner disabled:opacity-50"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="flex w-full items-center justify-center gap-4 rounded-2xl bg-primary-600 dark:bg-sky-400 p-5 text-xs font-bold uppercase tracking-widest text-white dark:text-slate-950 shadow-xl shadow-primary-600/20 dark:shadow-sky-500/20 transition-all hover:bg-primary-700 dark:hover:bg-sky-300 active:scale-[0.98]"
+                    disabled={isSubmitting}
+                    className={cn(
+                      "flex w-full items-center justify-center gap-4 rounded-2xl p-5 text-xs font-bold uppercase tracking-widest text-white transition-all shadow-xl active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed",
+                      isSubmitting
+                        ? "bg-slate-400 dark:bg-slate-700 shadow-none"
+                        : "bg-primary-600 dark:bg-sky-400 dark:text-slate-950 shadow-primary-600/20 dark:shadow-sky-500/20 hover:bg-primary-700 dark:hover:bg-sky-300"
+                    )}
                   >
-                    Transmit Request <Send className="h-4 w-4" />
+                    {isSubmitting ? (
+                      <>Processing... <CircleDashed className="h-4 w-4 animate-spin" /></>
+                    ) : (
+                      <>Transmit Request <Send className="h-4 w-4" /></>
+                    )}
                   </button>
                 </form>
 
