@@ -115,8 +115,9 @@ export const Dashboard = () => {
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40" />
       
-      <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8">
-        <header className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-8 pt-12">
+      {/* Responsive fix by Responsiveness Guardian — 320px-768px */}
+      <div className="mx-auto max-w-7xl px-6 pt-24 pb-16 md:py-32 lg:px-8">
+        <header className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-8 pt-6 md:pt-12">
           <div>
             <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/20 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-400/20 mb-6">
               Local Dashboard
@@ -196,12 +197,14 @@ export const Dashboard = () => {
                  </div>
                </div>
 
-               <div className="flex flex-wrap gap-[3px]">
-                 {heatmapData.map((day, i) => (
-                   <div
-                     key={i}
-                     className={cn(
-                       "h-[13px] w-[13px] rounded-[2px] transition-all relative group cursor-help",
+               {/* Responsive fix by Responsiveness Guardian — 320px */}
+               <div className="overflow-x-auto pb-4 -mb-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                 <div className="flex flex-col flex-wrap h-[110px] gap-[3px] min-w-max">
+                   {heatmapData.map((day, i) => (
+                     <div
+                       key={i}
+                       className={cn(
+                         "h-[13px] w-[13px] shrink-0 rounded-[2px] transition-all relative group cursor-help",
                        !day.active ? "bg-gray-100 dark:bg-slate-800" :
                        day.value === 1 ? "bg-blue-600/30 dark:bg-blue-400/30" :
                        day.value === 2 ? "bg-blue-600/55 dark:bg-blue-400/55" :
@@ -214,6 +217,7 @@ export const Dashboard = () => {
                       </div>
                    </div>
                  ))}
+                 </div>
                </div>
                <p className="mt-8 text-xs text-gray-500 dark:text-gray-400">Practice consistency over the last six months.</p>
             </div>
