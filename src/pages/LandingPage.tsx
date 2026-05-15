@@ -11,7 +11,8 @@ import {
   Code,
   LayoutGrid,
   Search,
-  BrainCircuit
+  BrainCircuit,
+  Target
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { TOPICS } from '../data';
@@ -60,7 +61,7 @@ export const LandingPage = () => {
                   Start Learning <ChevronRight className="h-6 w-6 transition-transform group-hover:translate-x-1" />
                 </Link>
                 <Link
-                  to="/discover"
+                  to="/topics"
                   className="w-full sm:w-auto px-10 py-5 bg-slate-900/50 backdrop-blur-md text-white border border-white/10 rounded-2xl font-bold text-xl hover:bg-white/5 transition-all flex items-center justify-center gap-3 hover:border-white/20"
                 >
                   See What's Inside
@@ -241,6 +242,9 @@ const getIcon = (iconName: string) => {
     case 'Box': return <LayoutGrid className="h-6 w-6 text-blue-400" />;
     case 'LayoutGrid': return <LayoutGrid className="h-6 w-6 text-blue-400" />;
     case 'Type': return <Search className="h-6 w-6 text-blue-400" />;
+    case 'Target': return <Target className="h-6 w-6 text-blue-400" />;
+    case 'Award': return <Award className="h-6 w-6 text-blue-400" />;
+    case 'BookOpen': return <BookOpen className="h-6 w-6 text-blue-400" />;
     default: return <Terminal className="h-6 w-6 text-blue-400" />;
   }
 };

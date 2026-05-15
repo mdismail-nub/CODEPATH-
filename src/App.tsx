@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react
 import { AppStateProvider } from './AppStateContext';
 import { Navbar } from './components/Navbar';
 import { LandingPage } from './pages/LandingPage';
-import { Discover } from './pages/Discover';
 import { Topics } from './pages/Topics';
 import { TopicDetail } from './pages/TopicDetail';
 import { RoadmapPage } from './pages/RoadmapPage';
@@ -20,7 +19,7 @@ export default function App() {
   const isLandingPage = location.pathname === '/';
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 selection:bg-primary-500/30 selection:text-primary-900 dark:selection:bg-sky-500/30 dark:selection:text-sky-200 transition-colors duration-500 relative overflow-hidden">
+    <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 selection:bg-primary-500/30 selection:text-primary-900 dark:selection:bg-sky-500/30 dark:selection:text-sky-200 transition-colors duration-500 relative">
       {/* Subtle Grain Background */}
       <div className="fixed inset-0 -z-50 bg-blue-grain noise-overlay opacity-40" />
       <div className="fixed inset-0 -z-50 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.05),transparent_50%)]" />
@@ -32,7 +31,6 @@ export default function App() {
       )}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/discover" element={<Discover />} />
           <Route path="/learn" element={<LearnHome />} />
           <Route path="/learn/:slug" element={<CoursePage />} />
           <Route path="/learn/:courseSlug/:lessonSlug" element={<LessonPage />} />

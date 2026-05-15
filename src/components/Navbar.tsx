@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, Rocket, LayoutGrid, BookOpen, BarChart3, Settings, LogOut, User, Award, Home as HomeIcon, Sun, Moon, Calendar, Target, ChevronRight } from 'lucide-react';
+import { Menu, X, LayoutGrid, BookOpen, BarChart3, Settings, LogOut, User, Award, Home as HomeIcon, Sun, Moon, Calendar, Target, ChevronRight } from 'lucide-react';
 import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 
@@ -10,8 +10,18 @@ export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   const navLinks = [
-    { name: 'Discover', path: '/discover', icon: Rocket },
     { name: 'Learn', path: '/learn', icon: BookOpen },
     { name: 'Problems', path: '/topics', icon: LayoutGrid },
     { name: 'Path', path: '/roadmap', icon: Target },
@@ -106,62 +116,73 @@ export const Navbar = () => {
       {/* Mobile Nav */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="md:hidden fixed inset-0 top-[65px] z-40 bg-white dark:bg-[#020617] overflow-y-auto"
-          >
-            <div className="px-6 py-8 space-y-3">
-              <Link
-                to="/"
-                onClick={() => setIsOpen(false)}
-                className={cn(
-                  "flex items-center gap-4 px-5 py-4 rounded-2xl text-lg font-bold transition-all border border-transparent",
-                  location.pathname === '/' ? "bg-slate-100 dark:bg-slate-800 text-primary-600 dark:text-sky-400 border-slate-200 dark:border-slate-700" : "text-slate-600 dark:text-slate-400"
-                )}
-              >
-                <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 transition-colors">
-                  <HomeIcon className="h-5 w-5" />
-                </div>
-                Home
-              </Link>
-              {navLinks.map((link) => (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="md:hidden fixed inset-0 top-16 bg-slate-900/60 backdrop-blur-sm z-40"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              className="md:hidden absolute top-16 left-4 right-4 z-50 bg-white dark:bg-[#020617] rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl shadow-slate-900/20 overflow-hidden mt-2"
+            >
+              <div className="p-4 space-y-2">
                 <Link
-                  key={link.path}
-                  to={link.path}
+                  to="/"
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    "flex items-center gap-4 px-5 py-4 rounded-2xl text-lg font-bold transition-all border border-transparent",
-                    location.pathname === link.path
-                      ? "bg-slate-100 dark:bg-slate-800 text-primary-600 dark:text-sky-400 border-slate-200 dark:border-slate-700"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white"
+                    "flex items-center gap-4 px-4 py-3.5 rounded-2xl text-base font-bold transition-all border border-transparent",
+                    location.pathname === '/' ? "bg-slate-100 dark:bg-slate-800 text-primary-600 dark:text-sky-400 border-slate-200 dark:border-slate-700" : "text-slate-600 dark:text-slate-400"
                   )}
                 >
-                  <div className={cn(
-                    "h-10 w-10 flex items-center justify-center rounded-xl border transition-colors",
-                    location.pathname === link.path ? "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700" : "bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800"
-                  )}>
-                    <link.icon className="h-5 w-5" />
+                  <div className="h-9 w-9 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                    <HomeIcon className="h-5 w-5" />
                   </div>
-                  {link.name}
+                  Home
                 </Link>
-              ))}
-              
-              <div className="pt-8 mt-8 border-t border-slate-100 dark:border-slate-800">
-                <button
-                  onClick={() => { toggleTheme(); setIsOpen(false); }}
-                  className="w-full flex items-center justify-between px-6 py-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold"
-                >
-                  <div className="flex items-center gap-3">
-                    {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-                  </div>
-                  <ChevronRight className="h-4 w-4" />
-                </button>
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setIsOpen(false)}
+                    className={cn(
+                      "flex items-center gap-4 px-4 py-3.5 rounded-2xl text-base font-bold transition-all border border-transparent",
+                      location.pathname === link.path
+                        ? "bg-slate-100 dark:bg-slate-800 text-primary-600 dark:text-sky-400 border-slate-200 dark:border-slate-700"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-white"
+                    )}
+                  >
+                    <div className={cn(
+                      "h-9 w-9 flex items-center justify-center rounded-xl border transition-colors",
+                      location.pathname === link.path ? "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700" : "bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800"
+                    )}>
+                      <link.icon className="h-4 w-4" />
+                    </div>
+                    {link.name}
+                  </Link>
+                ))}
+                
+                <div className="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    onClick={() => { toggleTheme(); setIsOpen(false); }}
+                    className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold"
+                  >
+                    <div className="flex items-center gap-3">
+                      {theme === 'dark' ? <Sun className="h-5 w-5 text-amber-500" /> : <Moon className="h-5 w-5 text-indigo-500" />}
+                      {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                    </div>
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </nav>

@@ -74,11 +74,11 @@ export const CertificateView = () => {
         <div className="flex flex-col lg:flex-row gap-12 items-start">
           
           {/* Left: Certificate Preview */}
-          <div className="flex-1 w-full overflow-x-auto lg:overflow-visible pb-8 lg:pb-0">
+          <div className="flex-1 w-full overflow-hidden pb-8 lg:pb-0">
              <motion.div
                initial={{ opacity: 0, scale: 0.95 }}
                animate={{ opacity: 1, scale: 1 }}
-               className="min-w-[800px] lg:min-w-0"
+               className="w-full"
              >
                 <Link to="/certificates" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white mb-8 transition-colors">
                   <ChevronLeft className="h-4 w-4" />

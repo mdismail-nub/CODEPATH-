@@ -22,7 +22,7 @@ export const LearnHome = () => {
             <div className="flex items-center gap-2 mb-4">
               <span className="bg-primary-600/10 text-primary-600 dark:text-primary-400 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2">
                 <Rocket className="h-3 w-3" />
-                Interative Learning
+                Interactive Learning
               </span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900 dark:text-white mb-6 font-outfit">

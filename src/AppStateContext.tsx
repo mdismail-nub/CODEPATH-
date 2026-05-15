@@ -8,7 +8,7 @@ interface AppStateContextType {
   toggleSolved: (id: string) => void;
   isSolved: (id: string) => boolean;
   updateVJudgeId: (id: string) => void;
-  requestCertificate: (topicSlug: string, vjudgeId: string) => void;
+  requestCertificate: (topicSlug: string, recipientName: string) => void;
   completeLesson: (lessonId: string, xpReward: number) => void;
   isLessonCompleted: (lessonId: string) => boolean;
   toggleTheme: () => void;
