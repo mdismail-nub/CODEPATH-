@@ -84,11 +84,11 @@ export const LessonPage = () => {
         />
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* Left Column: Lesson Content */}
-        <div className="w-1/2 overflow-y-auto border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#020617] custom-scrollbar">
-          <div className="max-w-[700px] mx-auto px-8 py-12 lg:px-12">
-            <Link to={`/learn/${courseSlug}`} className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-900 dark:hover:text-white mb-10 uppercase tracking-widest transition-colors">
+        <div className="w-full lg:w-1/2 overflow-y-auto border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#020617] custom-scrollbar h-[50vh] lg:h-full">
+          <div className="max-w-[700px] mx-auto px-6 py-10 md:px-8 md:py-12 lg:px-12">
+            <Link to={`/learn/${courseSlug}`} className="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold text-slate-400 hover:text-slate-900 dark:hover:text-white mb-6 md:mb-10 uppercase tracking-widest transition-colors">
               <ArrowLeft className="h-4 w-4" />
               {course.title}
             </Link>
@@ -126,7 +126,7 @@ export const LessonPage = () => {
         </div>
 
         {/* Right Column: Interaction Layer */}
-        <div className="w-1/2 flex flex-col bg-[#F8FAFC] dark:bg-[#020617] relative">
+        <div className="w-full lg:w-1/2 flex flex-col bg-[#F8FAFC] dark:bg-[#020617] relative flex-1">
           <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-blue-grain pointer-events-none" />
           
           <div className="flex-1 overflow-y-auto px-8 py-12 lg:px-16 relative z-10 flex flex-col items-center justify-center">

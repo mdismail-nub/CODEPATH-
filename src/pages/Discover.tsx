@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 
-export const Home = () => {
+export const Discover = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { stats, isSolved, toggleSolved } = useAppState();
 

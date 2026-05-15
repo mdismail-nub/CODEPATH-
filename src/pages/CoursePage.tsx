@@ -25,24 +25,24 @@ export const CoursePage = () => {
         </Link>
 
         <header className="mb-16">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
             <div className="max-w-2xl">
-              <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 font-outfit">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 font-outfit">
                 {course.title}
               </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-400">
+              <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
                 {course.description}
               </p>
             </div>
             
-            <div className="flex-shrink-0 bg-slate-50 dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 text-center min-w-[200px]">
+            <div className="flex-shrink-0 bg-slate-50 dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 text-center min-w-[240px]">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Overall Progress</p>
-                <p className="text-3xl font-bold text-slate-900 dark:text-white">{progress}%</p>
-                <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full mt-4 overflow-hidden">
+                <p className="text-4xl font-bold text-slate-900 dark:text-white">{progress}%</p>
+                <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full mt-6 overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
-                    className="h-full bg-primary-600"
+                    className="h-full bg-primary-600 shadow-[0_0_10px_rgba(37,99,235,0.4)]"
                   />
                 </div>
             </div>

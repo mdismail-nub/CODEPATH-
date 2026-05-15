@@ -18,7 +18,7 @@ export const Topics = () => {
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40" />
       
-      <div className="mx-auto max-w-7xl px-6 py-32 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-24 sm:py-32 lg:px-8">
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

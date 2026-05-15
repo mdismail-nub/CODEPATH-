@@ -38,10 +38,10 @@ export const LearnHome = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mt-12 flex flex-wrap gap-4 items-center bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-slate-800"
+            className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8 bg-slate-50 dark:bg-slate-900/50 p-8 rounded-3xl border border-slate-200 dark:border-slate-800"
           >
-            <div className="flex items-center gap-4 px-4 border-r border-slate-200 dark:border-slate-800">
-              <div className="h-10 w-10 flex items-center justify-center bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-xl">
+            <div className="flex items-center gap-4 sm:border-r border-slate-200 dark:border-slate-800">
+              <div className="h-10 w-10 flex items-center justify-center bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-xl flex-shrink-0">
                 <Zap className="h-6 w-6" />
               </div>
               <div>
@@ -50,8 +50,8 @@ export const LearnHome = () => {
               </div>
             </div>
             
-            <div className="flex items-center gap-4 px-4 border-r border-slate-200 dark:border-slate-800">
-              <div className="h-10 w-10 flex items-center justify-center bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-xl">
+            <div className="flex items-center gap-4 sm:border-r border-slate-200 dark:border-slate-800">
+              <div className="h-10 w-10 flex items-center justify-center bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-xl flex-shrink-0">
                 <BookOpen className="h-6 w-6" />
               </div>
               <div>
@@ -59,9 +59,9 @@ export const LearnHome = () => {
                 <p className="text-xl font-bold text-slate-900 dark:text-white">{stats.completedLessonIds?.length || 0}</p>
               </div>
             </div>
-
-            <div className="flex items-center gap-4 px-4">
-              <div className="h-10 w-10 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl">
+ 
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl flex-shrink-0">
                 <Trophy className="h-6 w-6" />
               </div>
               <div>
