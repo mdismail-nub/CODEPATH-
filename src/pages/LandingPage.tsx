@@ -6,7 +6,6 @@ import {
   Award, 
   ChevronRight, 
   Download,
-  Star,
   Terminal,
   Code,
   LayoutGrid,
@@ -123,8 +122,8 @@ export const LandingPage = () => {
           <div className="bg-slate-900/40 border border-white/10 rounded-[2.5rem] p-10 md:p-20 overflow-hidden relative backdrop-blur-xl">
             <div className="absolute inset-0 -z-10 opacity-20 bg-blue-grain pointer-events-none" />
             
-            <div className="flex flex-col lg:flex-row items-center gap-20">
-              <div className="lg:w-1/2">
+            <div className="flex flex-col items-center text-center">
+              <div className="max-w-3xl">
                 <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-blue-500/10 text-blue-400 text-sm font-black mb-8 border border-blue-500/20">
                   <Award className="h-5 w-5" />
                   REAL CERTIFICATES
@@ -135,7 +134,7 @@ export const LandingPage = () => {
                 <p className="text-lg md:text-xl text-slate-400 mb-10 leading-relaxed font-medium">
                   Finish a topic and get a certificate instantly. You can download them as high-quality PNGs or PDFs to share with others or add to your LinkedIn profile.
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+                <div className="flex flex-wrap justify-center gap-x-12 gap-y-6 mb-12">
                    <div className="flex items-center gap-4 text-slate-300 font-bold text-lg">
                      <ShieldCheck className="text-blue-500 h-6 w-6" />
                      Verified Achievement
@@ -151,42 +150,6 @@ export const LandingPage = () => {
                 >
                   See My Certificates <ChevronRight className="h-6 w-6" />
                 </Link>
-              </div>
-              
-              <div className="lg:w-1/2 relative perspective-1000">
-                <motion.div 
-                  initial={{ opacity: 0, rotateY: 15 }}
-                  whileInView={{ opacity: 1, rotateY: -10 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1 }}
-                  className="relative"
-                >
-                  <div className="absolute inset-0 bg-blue-500 rounded-2xl blur-[60px] opacity-10" />
-                  <div className="relative bg-[#f8fafc] p-1.5 rounded-2xl shadow-[0_0_100px_rgba(0,0,0,0.5)] border-4 border-slate-900 overflow-hidden transform-gpu">
-                    <div className="aspect-[1.41/1] w-full bg-white flex flex-col items-center justify-between p-10">
-                      <div className="w-full flex justify-between items-start">
-                        <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-[10px] font-bold">CP</div>
-                        <div className="text-[6px] font-black text-slate-900 tracking-widest">ID: CP-2026-X99</div>
-                      </div>
-                      <div className="text-center">
-                        <h3 className="text-[12px] font-black text-slate-900 mb-1 border-b border-slate-900 pb-1 px-4">CERTIFICATE OF MASTERY</h3>
-                        <p className="text-[5px] text-slate-400 font-bold uppercase tracking-widest mt-4">THIS IS PRESENTED TO</p>
-                        <p className="text-[14px] font-serif italic text-slate-900 my-2">Your Name Here</p>
-                        <p className="text-[6px] text-slate-600 font-medium">For completing all problems in {TOPICS[0].name}</p>
-                      </div>
-                      <div className="w-full flex justify-between items-end">
-                        <div className="text-[5px] text-slate-400 font-black">MAY 2026</div>
-                        <div className="h-8 w-8 border border-blue-600 rounded-full flex items-center justify-center">
-                           <ShieldCheck className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <div className="text-right">
-                          <div className="h-[0.5px] w-12 bg-slate-900 mb-1" />
-                          <div className="text-[5px] text-slate-900 font-bold">Director CodePath</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
               </div>
             </div>
           </div>
