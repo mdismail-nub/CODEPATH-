@@ -522,6 +522,20 @@ export const TOPICS: Topic[] = [
       { id: 'a2z-17-1-2', name: 'Implement Trie II', difficulty: 'Medium', platform: 'GeeksForGeeks', link: 'https://www.geeksforgeeks.org/problems/trie-insert-and-search0651/1' },
       { id: 'a2z-17-2-1', name: 'Maximum XOR of Two Numbers', difficulty: 'Medium', platform: 'LeetCode', link: 'https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array/' }
     ]
+  },
+  {
+    id: 'daily',
+    name: 'Daily Problems',
+    slug: 'daily-problems',
+    description: 'A curated list of problems for daily practice.',
+    icon: 'Calendar',
+    problems: [
+      { id: 'cf-4a', name: 'A. Watermelon', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/problemset/problem/4/A' },
+      { id: 'cf-71a', name: 'A. Way Too Long Words', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/problemset/problem/71/A' },
+      { id: 'cf-231a', name: 'A. Team', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/problemset/problem/231/A' },
+      { id: 'cf-282a', name: 'A. Bit++', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/problemset/problem/282/A' },
+      { id: 'cf-158a', name: 'A. Next Round', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/problemset/problem/158/A' }
+    ]
   }
 ];
 

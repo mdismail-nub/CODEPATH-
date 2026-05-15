@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Award, Clock, Download, Share2, Search, ChevronRight, LayoutGrid } from 'lucide-react';
+import { Award, Clock, Download, Share2, Search, ChevronRight, LayoutGrid, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAppState } from '../AppStateContext';
 import { TOPICS } from '../data';
 import { cn } from '../lib/utils';
@@ -12,11 +13,6 @@ export const Certificates = () => {
 
   const myCertificates = Object.values(stats.certificates || {}) as CertificateInfo[];
   const issuedCerts = myCertificates.filter(c => c.status === 'issued');
-  const pendingCerts = myCertificates.filter(c => c.status === 'pending');
-
-  const downloadCertificate = (topicSlug: string) => {
-    alert('Generating high-resolution audit certificate for ' + topicSlug + '...');
-  };
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
@@ -36,7 +32,7 @@ export const Certificates = () => {
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="flex items-center gap-2 mb-8">
-              <div className="h-5 w-1 bg-primary-600 dark:bg-primary-400 rounded-full" />
+              <div className="h-5 w-1 bg-primary-600 dark:bg-sky-400 rounded-full" />
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Your Record</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">Certificates.</h1>
@@ -52,7 +48,7 @@ export const Certificates = () => {
             <div>
               <div className="flex items-center justify-between mb-10 pb-6 border-b border-slate-200 dark:border-slate-800">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-                  <Award className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <Award className="h-5 w-5 text-primary-600 dark:text-sky-400" />
                   My Certificates
                 </h2>
                 <span className="px-3 py-1 rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -77,8 +73,8 @@ export const Certificates = () => {
                         className="group overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-2xl hover:shadow-md transition-all"
                       >
                         <div className="aspect-[1.5/1] bg-slate-50 dark:bg-slate-950 p-8 flex flex-col items-center justify-center relative overflow-hidden">
-                           <div className="absolute inset-0 bg-gradient-to-br from-primary-400/5 dark:from-primary-400/5 to-transparent pointer-events-none" />
-                           <div className="h-20 w-20 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-primary-600/50 dark:text-primary-400/50 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-all group-hover:scale-110 shadow-sm">
+                           <div className="absolute inset-0 bg-gradient-to-br from-primary-400/5 dark:from-sky-400/5 to-transparent pointer-events-none" />
+                           <div className="h-20 w-20 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-primary-600/50 dark:text-sky-400/50 group-hover:text-primary-600 dark:group-hover:text-sky-400 transition-all group-hover:scale-110 shadow-sm">
                              <Award className="h-10 w-10" />
                            </div>
                            <div className="mt-8 text-center">
@@ -99,15 +95,19 @@ export const Certificates = () => {
                           </div>
                           
                           <div className="flex gap-3">
-                            <button 
-                              onClick={() => downloadCertificate(cert.topicSlug)}
-                              className="flex-1 px-6 py-4 rounded-xl bg-primary-600 dark:bg-primary-500 text-white dark:text-slate-950 text-[10px] font-bold uppercase tracking-widest hover:bg-primary-700 dark:hover:bg-primary-400 transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary-600/20 dark:shadow-primary-500/20"
+                            <Link 
+                              to={`/certificate/${cert.topicSlug}`}
+                              className="flex-1 px-6 py-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-700 dark:hover:bg-slate-200 transition-all flex items-center justify-center gap-3 shadow-lg shadow-slate-900/10"
                             >
-                              <Download className="h-4 w-4" /> Download Certificate
-                            </button>
-                            <button className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+                              <ExternalLink className="h-4 w-4" /> View Certificate
+                            </Link>
+                            <Link 
+                                to={`/certificate/${cert.topicSlug}`}
+                                className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                                title="Share"
+                            >
                               <Share2 className="h-4 w-4" />
-                            </button>
+                            </Link>
                           </div>
                         </div>
                       </motion.div>
@@ -120,45 +120,6 @@ export const Certificates = () => {
 
           {/* Sidebar Area */}
           <aside className="space-y-12">
-            <div>
-              <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200 dark:border-slate-800">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-3">
-                  <Clock className="h-4 w-4 text-amber-500 dark:text-amber-400" />
-                  Processing
-                </h2>
-                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">{pendingCerts.length}</span>
-              </div>
-
-              <div className="space-y-4">
-                {pendingCerts.length === 0 && (
-                   <div className="p-8 text-center rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5">
-                      <p className="text-[10px] text-slate-400 dark:text-slate-600 font-bold uppercase tracking-widest">Workspace Clear</p>
-                   </div>
-                )}
-                <AnimatePresence>
-                  {pendingCerts.map((cert) => {
-                    const topic = TOPICS.find(t => t.slug === cert.topicSlug);
-                    return (
-                      <motion.div 
-                        key={cert.topicSlug}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between group shadow-sm"
-                      >
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-slate-200 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors tracking-tight">{topic?.name}</h4>
-                          <p className="text-[9px] text-slate-400 dark:text-slate-600 uppercase tracking-widest font-bold mt-1">Request ID: {cert.vjudgeId}</p>
-                        </div>
-                        <div className="px-3 py-1 rounded-md bg-amber-400/10 text-[8px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400 border border-amber-400/20">
-                          Checking...
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-              </div>
-            </div>
-
             <div className="p-8 rounded-[2.5rem] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-none relative overflow-hidden group">
                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
                   <Award className="h-32 w-32 text-slate-900 dark:text-white" />
@@ -167,12 +128,12 @@ export const Certificates = () => {
                <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight mb-8">How it works.</h3>
                <div className="space-y-6">
                  {[
-                   "Solve all the problems in a course module.",
-                   "Send your VJudge ID to us for checking.",
-                   "Get your certificate once verified."
+                   "Complete all lessons and problems in a module.",
+                   "Claim your certificate by entering your name.",
+                   "Download or share your verified achievement."
                  ].map((text, i) => (
                    <div key={i} className="flex gap-4">
-                      <div className="h-6 w-6 rounded-md bg-primary-600 dark:bg-primary-400 flex items-center justify-center text-white dark:text-slate-950 text-[10px] font-bold flex-shrink-0">{i+1}</div>
+                      <div className="h-6 w-6 rounded-md bg-primary-600 dark:bg-sky-400 flex items-center justify-center text-white dark:text-slate-950 text-[10px] font-bold flex-shrink-0">{i+1}</div>
                       <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">{text}</p>
                    </div>
                  ))}

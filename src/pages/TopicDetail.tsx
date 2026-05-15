@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import * as Icons from 'lucide-react';
 import { TOPICS } from '../data';
@@ -33,7 +33,7 @@ export const TopicDetail = () => {
 
   return (
     <div className="pt-32 pb-32 bg-white dark:bg-[#020617] transition-colors duration-300">
-      <div className="section-container">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
@@ -89,13 +89,15 @@ export const TopicDetail = () => {
                {isAllSolved && (
                   <div className="pt-8 border-t border-slate-100 dark:border-slate-800">
                      {existingCert ? (
-                      <div className={cn(
+                      <Link 
+                        to={`/certificate/${topic.slug}`}
+                        className={cn(
                         "w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3",
-                        existingCert.status === 'issued' ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30" : "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-800/30"
+                        "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30 hover:bg-emerald-100 transition-colors"
                       )}>
-                        {existingCert.status === 'issued' ? <Icons.Award className="h-4 w-4" /> : <Icons.Clock className="h-4 w-4" />}
-                        {existingCert.status === 'issued' ? 'Certificate Earned' : 'Checking...'}
-                      </div>
+                        <Icons.Award className="h-4 w-4" />
+                        View Certificate
+                      </Link>
                     ) : (
                       <button 
                         onClick={() => setIsCertModalOpen(true)}
@@ -113,8 +115,8 @@ export const TopicDetail = () => {
         {/* Content Section */}
         <section>
           {/* Filters */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 overflow-x-auto pb-2 md:pb-0">
-            <div className="flex flex-shrink-0 p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+            <div className="flex p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
               {(['All', 'Easy', 'Medium', 'Hard'] as const).map((diff) => (
                 <button
                   key={diff}
@@ -157,7 +159,6 @@ export const TopicDetail = () => {
                       ? "bg-emerald-500 dark:bg-emerald-400 border-emerald-500 dark:border-emerald-400 text-white"
                       : "border-slate-200 dark:border-slate-800 text-transparent group-hover:border-primary-300 dark:group-hover:border-primary-700"
                   )}
-                  aria-label={isSolved(problem.id) ? 'Mark as unsolved' : 'Mark as solved'}
                 >
                   <Icons.Check className={cn("h-5 w-5 stroke-[2.5px]", isSolved(problem.id) ? "opacity-100" : "opacity-0")} />
                 </button>
@@ -190,7 +191,6 @@ export const TopicDetail = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-shrink-0 h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-primary-600 dark:hover:bg-primary-500 hover:text-white dark:hover:text-slate-900 transition-all transition-transform hover:scale-105 active:scale-95 shadow-sm"
-                  aria-label={`Open ${problem.name} on ${problem.platform}`}
                 >
                   <Icons.ExternalLink className="h-5 w-5" />
                 </a>

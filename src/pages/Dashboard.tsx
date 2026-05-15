@@ -17,8 +17,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export const Dashboard = () => {
-  // Optimization: Destructure isSolved to use O(1) Set lookups instead of O(N) Array.includes()
-  const { stats, isSolved } = useAppState();
+  const { stats } = useAppState();
   const reportRef = useRef<HTMLDivElement>(null);
 
   const totalSolved = stats.solvedIds.length;
@@ -109,7 +108,7 @@ export const Dashboard = () => {
   };
 
   const topicsCompleted = TOPICS.filter(t => 
-    t.problems.every(p => isSolved(p.id))
+    t.problems.every(p => stats.solvedIds.includes(p.id))
   ).length;
 
   return (
@@ -145,7 +144,7 @@ export const Dashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="h-10 w-10 mb-6 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center text-primary-600 dark:text-primary-400">
+                <div className="h-10 w-10 mb-6 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
                   <Target className="h-5 w-5" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{totalSolved}</div>
@@ -183,32 +182,31 @@ export const Dashboard = () => {
             <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 shadow-sm">
                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                  <div className="flex items-center gap-3">
-                    <Calendar className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                    <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">Activity Graph</h3>
                  </div>
                  <div className="flex items-center gap-2 text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                     <span>Less</span>
                     <div className="flex gap-1">
                       {[0.2, 0.4, 0.7, 1].map(v => (
-                        <div key={v} className="h-3 w-3 rounded-[2px] bg-primary-600 dark:bg-primary-400" style={{ opacity: v }} />
+                        <div key={v} className="h-3 w-3 rounded-[2px] bg-blue-600 dark:bg-blue-400" style={{ opacity: v }} />
                       ))}
                     </div>
                     <span>More</span>
                  </div>
                </div>
 
-               <div className="overflow-x-auto pb-4 -mx-2 px-2 scrollbar-none">
-                 <div className="flex flex-wrap gap-[3px] min-w-[700px] md:min-w-0">
+               <div className="flex flex-wrap gap-[3px]">
                  {heatmapData.map((day, i) => (
                    <div
                      key={i}
                      className={cn(
                        "h-[13px] w-[13px] rounded-[2px] transition-all relative group cursor-help",
                        !day.active ? "bg-gray-100 dark:bg-slate-800" :
-                       day.value === 1 ? "bg-primary-600/30 dark:bg-primary-400/30" :
-                       day.value === 2 ? "bg-primary-600/55 dark:bg-primary-400/55" :
-                       day.value === 3 ? "bg-primary-600/80 dark:bg-primary-400/80" :
-                       "bg-primary-600 dark:bg-primary-400"
+                       day.value === 1 ? "bg-blue-600/30 dark:bg-blue-400/30" :
+                       day.value === 2 ? "bg-blue-600/55 dark:bg-blue-400/55" :
+                       day.value === 3 ? "bg-blue-600/80 dark:bg-blue-400/80" :
+                       "bg-blue-600 dark:bg-blue-400"
                      )}
                    >
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-900 text-[10px] text-white opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-20 shadow-lg">
@@ -216,7 +214,6 @@ export const Dashboard = () => {
                       </div>
                    </div>
                  ))}
-                 </div>
                </div>
                <p className="mt-8 text-xs text-gray-500 dark:text-gray-400">Practice consistency over the last six months.</p>
             </div>
@@ -227,7 +224,7 @@ export const Dashboard = () => {
             <div className="p-8 rounded-3xl bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800">
               <div className="flex items-center gap-4 mb-8">
                  <div className="h-12 w-12 rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 flex items-center justify-center shadow-sm">
-                    <Award className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+                    <Award className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                  </div>
                  <div>
                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">Proficiency</h3>
@@ -237,14 +234,14 @@ export const Dashboard = () => {
 
               <div className="space-y-6">
                 {TOPICS.slice(0, 6).map((topic) => {
-                  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
+                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
                   const percent = Math.round((solvedCount / topic.problems.length) * 100);
                   
                   return (
                     <div key={topic.id}>
                        <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{topic.name}</span>
-                          <span className="text-xs font-bold text-primary-600 dark:text-primary-400 font-mono">{percent}%</span>
+                          <span className="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">{percent}%</span>
                        </div>
                        <div className="h-2 w-full bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden">
                           <motion.div 
@@ -252,7 +249,7 @@ export const Dashboard = () => {
                             animate={{ width: `${percent}%` }}
                             transition={{ duration: 1 }}
                             className={cn(
-                              "h-full rounded-full bg-primary-600 dark:bg-primary-400",
+                              "h-full rounded-full bg-blue-600 dark:bg-blue-400",
                               percent === 100 && "bg-green-500 dark:bg-green-500"
                             )} 
                           />
@@ -276,10 +273,10 @@ export const Dashboard = () => {
         <div ref={reportRef} className="w-[800px] bg-white p-20 text-gray-900 font-sans border-[20px] border-gray-50">
           <div className="flex items-start justify-between border-b-2 border-gray-100 pb-12 mb-12">
             <div>
-              <p className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-4">Progress Report</p>
+              <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-4">Progress Report</p>
               <h1 className="text-5xl font-bold tracking-tight text-gray-900 mb-8 font-outfit">My Progress.</h1>
               <div className="text-sm text-gray-500 uppercase tracking-widest font-semibold flex items-center gap-2">
-                <div className="h-2 w-2 bg-primary-600 rounded-full" />
+                <div className="h-2 w-2 bg-blue-600 rounded-full" />
                 Local Record: {new Date().toLocaleDateString()}
               </div>
             </div>
@@ -312,17 +309,17 @@ export const Dashboard = () => {
              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-8 pb-4 border-b border-gray-100">Top Module Performance</h3>
              <div className="grid grid-cols-2 gap-x-12 gap-y-8">
                 {TOPICS.slice(0, 10).map(topic => {
-                  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
+                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
                   const percent = Math.round((solvedCount / topic.problems.length) * 100);
                   return (
                     <div key={topic.id} className="flex items-center justify-between">
                       <div className="flex flex-col gap-2">
                         <span className="text-sm font-bold text-gray-800 uppercase tracking-tight">{topic.name}</span>
                         <div className="h-1.5 w-32 bg-gray-100 rounded-full">
-                          <div className="h-full bg-primary-600 rounded-full" style={{ width: `${percent}%` }} />
+                          <div className="h-full bg-blue-600 rounded-full" style={{ width: `${percent}%` }} />
                         </div>
                       </div>
-                      <span className="text-xl font-bold text-primary-600 font-mono">{percent}%</span>
+                      <span className="text-xl font-bold text-blue-600 font-mono">{percent}%</span>
                     </div>
                   );
                 })}

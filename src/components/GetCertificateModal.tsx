@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useId } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Award, Send, CheckCircle2, Loader2 } from 'lucide-react';
+import { X, Award, Send, CheckCircle2, ChevronRight } from 'lucide-react';
 import { useAppState } from '../AppStateContext';
 
 interface GetCertificateModalProps {
@@ -12,55 +12,24 @@ interface GetCertificateModalProps {
 
 export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen, onClose, topicSlug, topicName }) => {
   const { stats, requestCertificate } = useAppState();
-  const [vjudgeId, setVjudgeId] = useState(stats.vjudgeId || '');
+  const [recipientName, setRecipientName] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const inputId = useId();
-  const titleId = useId();
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-
-    if (isOpen) {
-      window.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      window.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!vjudgeId.trim() || isSubmitting) return;
-
-    setIsSubmitting(true);
-    try {
-      await requestCertificate(topicSlug, vjudgeId);
-      setSubmitted(true);
-      setTimeout(() => {
-        onClose();
-        setSubmitted(false);
-        setIsSubmitting(false);
-      }, 2000);
-    } catch (error) {
-      setIsSubmitting(false);
-    }
+    if (!recipientName.trim()) return;
+    requestCertificate(topicSlug, recipientName);
+    setSubmitted(true);
+    setTimeout(() => {
+      onClose();
+      setSubmitted(false);
+    }, 2000);
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-6"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={titleId}
-        >
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -75,11 +44,7 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="relative w-full max-w-lg overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 md:p-12 shadow-2xl transition-colors duration-300"
           >
-            <button
-              onClick={onClose}
-              className="absolute right-8 top-8 p-2 rounded-xl text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all focus-visible:ring-2 focus-visible:ring-primary-500 outline-none"
-              aria-label="Close modal"
-            >
+            <button onClick={onClose} className="absolute right-8 top-8 text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
               <X className="h-6 w-6" />
             </button>
 
@@ -88,14 +53,14 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
                 <div className="mb-10 h-24 w-24 rounded-3xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm dark:shadow-2xl dark:shadow-emerald-500/10">
                   <CheckCircle2 className="h-12 w-12" />
                 </div>
-                <h3 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-6">Request Logs.</h3>
+                <h3 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-6">Credential Issued.</h3>
                 <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-medium max-w-xs">
-                  Your audit request for <span className="text-slate-900 dark:text-white">{topicName}</span> has been queued for verification.
+                  Your certificate for <span className="text-slate-900 dark:text-white">{topicName}</span> has been generated successfully.
                 </p>
                 
                 <div className="mt-12 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600">
                    <div className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-                   Processing Node
+                   Redirecting to Dashboard
                 </div>
               </div>
             ) : (
@@ -106,7 +71,7 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
                       <Award className="h-6 w-6" />
                     </div>
                     <div>
-                      <h3 id={titleId} className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">Claim Credential.</h3>
+                      <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">Claim Credential.</h3>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mt-2">Verification Registry</p>
                     </div>
                   </div>
@@ -114,38 +79,27 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
                 </header>
 
                 <p className="text-slate-600 dark:text-slate-400 mb-10 text-lg leading-relaxed max-w-sm">
-                  Module curriculum completed. Provide your <span className="text-slate-900 dark:text-white font-bold">VJudge Identity</span> to finalize technical verification.
+                  Module curriculum completed. Enter your full <span className="text-slate-900 dark:text-white font-bold">Legal Name</span> to finalize your certificate.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="group">
-                    <label
-                      htmlFor={inputId}
-                      className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-3 block group-focus-within:text-primary-600 dark:group-focus-within:text-sky-400 transition-colors cursor-pointer"
-                    >
-                      VJudge Identification
-                    </label>
+                    <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-3 block group-focus-within:text-primary-600 dark:group-focus-within:text-sky-400 transition-colors">Recipient Name</label>
                     <input
-                      id={inputId}
                       type="text"
                       required
-                      value={vjudgeId}
-                      onChange={(e) => setVjudgeId(e.target.value)}
-                      placeholder="Enter VJudge Handle..."
+                      value={recipientName}
+                      onChange={(e) => setRecipientName(e.target.value)}
+                      placeholder="e.g. John Doe"
                       className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-800 focus:border-primary-600 dark:focus:border-sky-400 focus:outline-none transition-all shadow-inner"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="flex w-full items-center justify-center gap-4 rounded-2xl bg-primary-600 dark:bg-sky-400 p-5 text-xs font-bold uppercase tracking-widest text-white dark:text-slate-950 shadow-xl shadow-primary-600/20 dark:shadow-sky-500/20 transition-all hover:bg-primary-700 dark:hover:bg-sky-300 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="flex w-full items-center justify-center gap-4 rounded-2xl bg-emerald-600 p-5 text-xs font-bold uppercase tracking-widest text-white shadow-xl shadow-emerald-600/20 transition-all hover:bg-emerald-700 active:scale-[0.98]"
                   >
-                    {isSubmitting ? (
-                      <>Processing... <Loader2 className="h-4 w-4 animate-spin" /></>
-                    ) : (
-                      <>Transmit Request <Send className="h-4 w-4" /></>
-                    )}
+                    Generate Certificate <CheckCircle2 className="h-4 w-4" />
                   </button>
                 </form>
 

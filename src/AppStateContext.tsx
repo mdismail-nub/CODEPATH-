@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserStats, CertificateInfo } from './types';
 
 interface AppStateContextType {
@@ -9,13 +9,17 @@ interface AppStateContextType {
   isSolved: (id: string) => boolean;
   updateVJudgeId: (id: string) => void;
   requestCertificate: (topicSlug: string, vjudgeId: string) => void;
+  completeLesson: (lessonId: string, xpReward: number) => void;
+  isLessonCompleted: (lessonId: string) => boolean;
   toggleTheme: () => void;
 }
 
 const DEFAULT_STATS: UserStats = {
   solvedIds: [],
   certificates: {},
-  solvedAt: {}
+  solvedAt: {},
+  xp: 0,
+  completedLessonIds: []
 };
 
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
@@ -23,20 +27,23 @@ const AppStateContext = createContext<AppStateContextType | undefined>(undefined
 export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [stats, setStats] = useState<UserStats>(() => {
     const saved = localStorage.getItem('codepath_stats');
-    return saved ? JSON.parse(saved) : DEFAULT_STATS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return { ...DEFAULT_STATS, ...parsed };
+      } catch (e) {
+        return DEFAULT_STATS;
+      }
+    }
+    return DEFAULT_STATS;
   });
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('codepath_theme');
     return (saved as 'light' | 'dark') || 'dark';
   });
 
-  // Optimization: Use a Set for O(1) lookups of solved problem IDs
-  const solvedSet = useMemo(() => new Set(stats.solvedIds), [stats.solvedIds]);
-
-  const toggleTheme = useCallback(() => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  }, []);
+  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -49,12 +56,12 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('codepath_stats', JSON.stringify(stats));
   }, [stats]);
 
-  const toggleSolved = useCallback((id: string) => {
+  const toggleSolved = (id: string) => {
+    const alreadySolved = stats.solvedIds.includes(id);
+    const now = Date.now();
+    
     setStats(prev => {
-      const alreadySolved = prev.solvedIds.includes(id);
-      const now = Date.now();
       const newSolvedAt = { ...(prev.solvedAt || {}) };
-
       if (alreadySolved) {
         delete newSolvedAt[id];
       } else {
@@ -69,19 +76,20 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         solvedAt: newSolvedAt
       };
     });
-  }, []);
+  };
 
-  const isSolved = useCallback((id: string) => solvedSet.has(id), [solvedSet]);
+  const isSolved = (id: string) => stats.solvedIds.includes(id);
 
-  const updateVJudgeId = useCallback((vjudgeId: string) => {
+  const updateVJudgeId = (vjudgeId: string) => {
     setStats(prev => ({ ...prev, vjudgeId }));
-  }, []);
+  };
 
-  const requestCertificate = useCallback((topicSlug: string, vjudgeId: string) => {
+  const requestCertificate = (topicSlug: string, recipientName: string) => {
     const certInfo: CertificateInfo = {
-      status: 'pending',
-      vjudgeId,
-      topicSlug
+      status: 'issued',
+      recipientName,
+      topicSlug,
+      issuedAt: Date.now()
     };
     
     setStats(prev => ({
@@ -89,19 +97,29 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       certificates: {
         ...(prev.certificates || {}),
         [topicSlug]: certInfo
-      },
-      vjudgeId
+      }
     }));
-  }, []);
+  };
 
-  // Optimization: Memoize context value to prevent unnecessary re-renders of all consumers
-  const value = useMemo(() => ({
-    stats, loading, theme,
-    toggleSolved, isSolved, updateVJudgeId, requestCertificate, toggleTheme
-  }), [stats, loading, theme, toggleSolved, isSolved, updateVJudgeId, requestCertificate, toggleTheme]);
+  const completeLesson = (lessonId: string, xpReward: number) => {
+    const completed = stats.completedLessonIds || [];
+    if (completed.includes(lessonId)) return;
+    
+    setStats(prev => ({
+      ...prev,
+      completedLessonIds: [...(prev.completedLessonIds || []), lessonId],
+      xp: (prev.xp || 0) + xpReward
+    }));
+  };
+
+  const isLessonCompleted = (lessonId: string) => (stats.completedLessonIds || []).includes(lessonId);
 
   return (
-    <AppStateContext.Provider value={value}>
+    <AppStateContext.Provider value={{ 
+      stats, loading, theme, 
+      toggleSolved, isSolved, updateVJudgeId, requestCertificate, 
+      completeLesson, isLessonCompleted, toggleTheme
+    }}>
       {children}
     </AppStateContext.Provider>
   );
