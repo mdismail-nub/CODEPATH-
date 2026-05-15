@@ -1,0 +1,3 @@
+## 2025-05-14 - [Certificate Claim UX & Accessibility]
+**Learning:** Interactive modals that transition between a form and a success state should maintain accessibility context. Missing labels on form inputs and missing ARIA labels on close buttons are common pitfalls. Synthetic loading states for "generation" tasks (like certificates) improve perceived value and provide clear feedback.
+**Action:** Always use 'htmlFor' and 'id' to link labels with inputs. Add 'aria-label' to icon-only buttons. Implement 'isSubmitting' states for async-feeling actions and use 'aria-live' for dynamic success messages.
