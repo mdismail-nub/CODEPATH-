@@ -87,12 +87,29 @@ export const Dashboard = () => {
       onclone: (clonedDoc) => {
         const style = clonedDoc.createElement('style');
         style.innerHTML = `
-          * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; transition: none !important; animation: none !important; }
+          * { 
+            backdrop-filter: none !important; 
+            -webkit-backdrop-filter: none !important; 
+            transition: none !important; 
+            animation: none !important; 
+          }
+          :root {
+            --color-blue-600: #2563eb !important;
+            --color-primary-600: #2563eb !important;
+            --color-slate-900: #0f172a !important;
+            --color-slate-50: #f8fafc !important;
+          }
           .text-gray-500 { color: #6b7280 !important; }
+          .text-gray-400 { color: #9ca3af !important; }
           .text-gray-900 { color: #111827 !important; }
+          .text-slate-900 { color: #0f172a !important; }
+          .text-slate-500 { color: #64748b !important; }
           .bg-blue-600 { background-color: #2563eb !important; }
           .bg-gray-50 { background-color: #f9fafb !important; }
+          .bg-white { background-color: #ffffff !important; }
           .border-gray-100 { border-color: #f3f4f6 !important; }
+          .border-gray-200 { border-color: #e5e7eb !important; }
+          .text-blue-600 { color: #2563eb !important; }
         `;
         clonedDoc.head.appendChild(style);
       }
@@ -196,24 +213,26 @@ export const Dashboard = () => {
                  </div>
                </div>
 
-               <div className="flex flex-wrap gap-[3px]">
-                 {heatmapData.map((day, i) => (
-                   <div
-                     key={i}
-                     className={cn(
-                       "h-[13px] w-[13px] rounded-[2px] transition-all relative group cursor-help",
-                       !day.active ? "bg-gray-100 dark:bg-slate-800" :
-                       day.value === 1 ? "bg-blue-600/30 dark:bg-blue-400/30" :
-                       day.value === 2 ? "bg-blue-600/55 dark:bg-blue-400/55" :
-                       day.value === 3 ? "bg-blue-600/80 dark:bg-blue-400/80" :
-                       "bg-blue-600 dark:bg-blue-400"
-                     )}
-                   >
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-900 text-[10px] text-white opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-20 shadow-lg">
-                        {day.date}: {solvesByDate[day.date] || 0} solved
-                      </div>
-                   </div>
-                 ))}
+               <div className="overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                 <div className="flex flex-wrap gap-[3px] min-w-[300px]">
+                   {heatmapData.map((day, i) => (
+                     <div
+                       key={i}
+                       className={cn(
+                         "h-[13px] w-[13px] rounded-[2px] transition-all relative group cursor-help",
+                         !day.active ? "bg-gray-100 dark:bg-slate-800" :
+                         day.value === 1 ? "bg-blue-600/30 dark:bg-blue-400/30" :
+                         day.value === 2 ? "bg-blue-600/55 dark:bg-blue-400/55" :
+                         day.value === 3 ? "bg-blue-600/80 dark:bg-blue-400/80" :
+                         "bg-blue-600 dark:bg-blue-400"
+                       )}
+                     >
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-900 text-[10px] text-white opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-20 shadow-lg">
+                          {day.date}: {solvesByDate[day.date] || 0} solved
+                        </div>
+                     </div>
+                   ))}
+                 </div>
                </div>
                <p className="mt-8 text-xs text-gray-500 dark:text-gray-400">Practice consistency over the last six months.</p>
             </div>

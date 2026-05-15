@@ -68,14 +68,6 @@ Variables allow us to:
             testCases: [
               { input: '', output: 'score = 100' }
             ]
-          },
-          {
-            id: 'ex-py-5',
-            type: 'code-challenge',
-            question: 'Declare a string variable "city", an integer "population", and a boolean "is_capital". Print all three.',
-            inputTemplate: '# Declare your variables\n\n\n# Print them\n',
-            correctAnswer: 'city = "London"\npopulation = 9000000\nis_capital = True\nprint(city)\nprint(population)\nprint(is_capital)',
-            hint: 'Make sure your string is in quotes, and remember that booleans like True must be capitalized in Python.'
           }
         ]
       },
@@ -105,6 +97,122 @@ Python is "dynamically typed", which means you don't have to specify the type wh
             correctAnswer: 'True'
           }
         ]
+      },
+      {
+        id: 'py-cond-1',
+        title: 'Control Flow: If Statements',
+        slug: 'if-statements',
+        xpReward: 150,
+        content: `
+# Control Flow: If Statements
+
+Programs need to make decisions. In Python, we use \`if\`, \`elif\`, and \`else\` to control the flow of our code based on conditions.
+
+### Syntax
+\`\`\`python
+if condition:
+    # do something
+elif other_condition:
+    # do something else
+else:
+    # do if nothing else matches
+\`\`\`
+
+**Note:** Indentation is crucial in Python! It tells Python which code belongs inside the \`if\` block.
+        `,
+        codeExample: {
+          language: 'python',
+          code: `temperature = 25\n\nif temperature > 30:\n    print("It's hot!")\nelif temperature > 20:\n    print("It's nice.")\nelse:\n    print("It's cold!")`
+        },
+        exercises: [
+          {
+            id: 'ex-py-if-1',
+            type: 'multiple-choice',
+            question: 'What keyword do you use for additional conditions after an "if"?',
+            options: ['elseif', 'else if', 'elif', 'otherwise'],
+            correctAnswer: 'elif'
+          },
+          {
+            id: 'ex-py-if-2',
+            type: 'code-challenge',
+            question: 'Write an if statement that prints "Big" if "num" is greater than 10.',
+            inputTemplate: 'num = 15\n# Write your if statement below\n',
+            correctAnswer: 'if num > 10:\n    print("Big")',
+            hint: 'Don\'t forget the colon (:) at the end of the if line!'
+          }
+        ]
+      },
+      {
+        id: 'py-loop-1',
+        title: 'Loops: While and For',
+        slug: 'loops',
+        xpReward: 150,
+        content: `
+# Loops: While and For
+
+Loops allow you to repeat a block of code multiple times.
+
+### For Loops
+Use a \`for\` loop to iterate over a sequence (like a list or a range).
+\`\`\`python
+for i in range(5):
+    print(i) # Prints 0 to 4
+\`\`\`
+
+### While Loops
+Use a \`while\` loop to repeat code as long as a condition is true.
+\`\`\`python
+count = 0
+while count < 5:
+    print(count)
+    count += 1
+\`\`\`
+        `,
+        codeExample: {
+          language: 'python',
+          code: `fruits = ["apple", "banana", "cherry"]\n\nfor fruit in fruits:\n    print(f"I love {fruit}!")`
+        },
+        exercises: [
+          {
+            id: 'ex-py-loop-1',
+            type: 'fill-in-the-blank',
+            question: 'In Python, the \`range(5)\` function generates numbers from 0 up to (but not including) ____.',
+            correctAnswer: '5'
+          }
+        ]
+      },
+      {
+        id: 'py-func-1',
+        title: 'Functions',
+        slug: 'functions',
+        xpReward: 200,
+        content: `
+# Functions
+
+Functions are blocks of reusable code. You define them once and "call" them whenever you need them.
+
+### Defining a Function
+Use the \`def\` keyword:
+\`\`\`python
+def greet(name):
+    return "Hello, " + name
+\`\`\`
+
+### Calling a Function
+\`\`\`python
+message = greet("Alice")
+print(message)
+\`\`\`
+        `,
+        exercises: [
+          {
+            id: 'ex-py-func-1',
+            type: 'code-challenge',
+            question: 'Define a function called "add_five" that takes one parameter "n" and returns n + 5.',
+            inputTemplate: '# Define your function here\n',
+            correctAnswer: 'def add_five(n):\n    return n + 5'
+          }
+        ]
       }
     ]
   },
@@ -115,6 +223,120 @@ Python is "dynamically typed", which means you don't have to specify the type wh
     description: 'Learn the building blocks of the web.',
     icon: 'Globe',
     level: 'Beginner',
-    lessons: []
+    lessons: [
+      {
+        id: 'html-1',
+        title: 'HTML Structure',
+        slug: 'html-structure',
+        xpReward: 100,
+        content: `
+# HTML Structure
+
+HTML (HyperText Markup Language) is the skeleton of every website. It uses **tags** to define elements like headings, paragraphs, and links.
+
+### Basic Tags
+- \`<h1>\` to \`<h6>\`: Headings
+- \`<p>\`: Paragraph
+- \`<a>\`: Anchor (Link)
+- \`<div>\`: Container element
+
+### Tag Syntax
+Most tags have an opening tag and a closing tag:
+\`\`\`html
+<p>This is a paragraph.</p>
+\`\`\`
+        `,
+        exercises: [
+          {
+            id: 'ex-html-1',
+            type: 'multiple-choice',
+            question: 'Which tag is used for the main heading of a page?',
+            options: ['<head>', '<h1>', '<main>', '<header>'],
+            correctAnswer: '<h1>'
+          }
+        ]
+      },
+      {
+        id: 'css-1',
+        title: 'CSS Basics',
+        slug: 'css-basics',
+        xpReward: 100,
+        content: `
+# CSS Basics
+
+CSS (Cascading Style Sheets) is used to style and lay out web pages. You can change colors, fonts, spacing, and more.
+
+### Selectors
+A CSS selector points to the HTML element you want to style.
+\`\`\`css
+p {
+  color: blue;
+  font-size: 16px;
+}
+\`\`\`
+
+Here, \`p\` is the selector, and \`color: blue;\` is a declaration.
+        `,
+        exercises: [
+          {
+            id: 'ex-css-1',
+            type: 'multiple-choice',
+            question: 'What property is used to change the text color of an element?',
+            options: ['font-color', 'text-style', 'color', 'background'],
+            correctAnswer: 'color'
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'cpp-1',
+    title: 'C++ Masterclass',
+    slug: 'cpp-masterclass',
+    description: 'Master C++ for competitive programming and systems development.',
+    icon: 'Code2',
+    level: 'Intermediate',
+    lessons: [
+      {
+        id: 'cpp-io',
+        title: 'C++ Input/Output',
+        slug: 'cpp-io',
+        xpReward: 100,
+        content: `
+# C++ Input/Output
+
+C++ is known for its speed. In competitive programming, we often use \`cin\` and \`cout\` for efficiency.
+
+### Basic Syntax
+\`\`\`cpp
+#include <iostream>
+using namespace std;
+
+int main() {
+    int x;
+    cin >> x;
+    cout << "Value: " << x << endl;
+    return 0;
+}
+\`\`\`
+
+### Faster I/O
+To make \`cin\` and \`cout\` faster:
+\`\`\`cpp
+ios_base::sync_with_stdio(false);
+cin.tie(NULL);
+\`\`\`
+        `,
+        exercises: [
+          {
+            id: 'ex-cpp-1',
+            type: 'multiple-choice',
+            question: 'Which object is used for output in C++?',
+            options: ['cin', 'printf', 'cout', 'output'],
+            correctAnswer: 'cout'
+          }
+        ]
+      }
+    ]
   }
 ];

@@ -524,6 +524,85 @@ export const TOPICS: Topic[] = [
     ]
   },
   {
+    id: 'sz-math',
+    name: 'Sheet #6: Math - Geometry',
+    slug: 'math-geometry',
+    description: 'Master prime numbers, GCD, LCM, combinations, and geometrical calculations.',
+    icon: 'Calculator',
+    problems: [
+      { id: 'm6a', name: 'A. Power Of Two', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223338/problem/A' },
+      { id: 'm6b', name: 'B. Prime checking', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223338/problem/B' },
+      { id: 'm6c', name: 'C. Sum of Range', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223338/problem/C' },
+      { id: 'm6d', name: 'D. Xor', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223338/problem/D' },
+      { id: 'm6e', name: 'E. Maximum Distinct Numbers', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223338/problem/E' },
+      { id: 'm6h', name: 'H. GCD', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223338/problem/H' },
+      { id: 'm6k', name: 'K. Combination and Permutation', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223338/problem/K' },
+      { id: 'm6l', name: 'L. Pascal Triangle', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223338/problem/L' },
+      { id: 'm6r', name: 'R. Distance points', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223338/problem/R' },
+      { id: 'm6s', name: 'S. Is Triangle', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223338/problem/S' },
+      { id: 'm6x', name: 'X. Rectangle', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223338/problem/X' }
+    ]
+  },
+  {
+    id: 'sz-ge',
+    name: 'Sheet #8: General Easy',
+    slug: 'general-easy',
+    description: 'Comprehensive practice with easy mixed problems from previous concepts.',
+    icon: 'Target',
+    problems: [
+      { id: 'ge1', name: 'A. Palindrome Array', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223206/problem/A' },
+      { id: 'ge2', name: 'B. Searching', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223206/problem/B' },
+      { id: 'ge3', name: 'C. Replacement', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223206/problem/C' },
+      { id: 'ge4', name: 'D. Positions in array', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223206/problem/D' },
+      { id: 'ge5', name: 'E. Lowest Number', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223206/problem/E' },
+      { id: 'ge10', name: 'J. Lucky Array', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223206/problem/J' },
+      { id: 'ge11', name: 'K. Sum Digits', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223206/problem/K' }
+    ]
+  },
+  {
+    id: 'sz-gm',
+    name: 'Sheet #9: General Medium',
+    slug: 'general-medium',
+    description: 'Intermediate mixed problems to strengthen your problem-solving skills.',
+    icon: 'Shield',
+    problems: [
+      { id: 'gm1', name: 'A. Drawing Task', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223207/problem/A' },
+      { id: 'gm2', name: 'B. Arpa’s hard exam and Mehrdad’s naive cheat', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223207/problem/B' },
+      { id: 'gm3', name: 'C. Dragons', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223207/problem/C' },
+      { id: 'gm4', name: 'D. Juicer', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223207/problem/D' },
+      { id: 'gm7', name: 'G. Magnets', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223207/problem/G' }
+    ]
+  },
+  {
+    id: 'sz-gh',
+    name: 'Sheet #10: General Hard',
+    slug: 'general-hard',
+    description: 'Challenging mixed problems for advanced competitive programmers.',
+    icon: 'Trophy',
+    problems: [
+      { id: 'gh1', name: 'A. Palindrome Number', difficulty: 'Hard', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223340/problem/A' },
+      { id: 'gh2', name: 'B. Searching', difficulty: 'Hard', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223340/problem/B' },
+      { id: 'gh3', name: 'C. Replacement', difficulty: 'Hard', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223340/problem/C' },
+      { id: 'gh4', name: 'D. Positions in array', difficulty: 'Hard', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/223340/problem/D' }
+    ]
+  },
+  {
+    id: 'contests-newcomers',
+    name: 'Contest Challenges',
+    slug: 'contest-challenges',
+    description: 'Solve diverse problems from Assiut University mid-sheet contests.',
+    icon: 'Swords',
+    problems: [
+      { id: 'c1a', name: 'A. Winter Sale', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/219159/problem/A' },
+      { id: 'c1b', name: 'B. Memo and Momo', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/219159/problem/B' },
+      { id: 'c1c', name: 'C. Next Alphabet', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/219159/problem/C' },
+      { id: 'c1g', name: 'G. Katryoshka', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/219159/problem/G' },
+      { id: 'c2a', name: 'A. Timon and Pumbaa', difficulty: 'Easy', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/219434/problem/A' },
+      { id: 'c2b', name: 'B. Drawing X', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/219434/problem/B' },
+      { id: 'c2d', name: 'D. Range Sum', difficulty: 'Medium', platform: 'Codeforces', link: 'https://codeforces.com/group/MWSDmqGsZm/contest/219434/problem/D' }
+    ]
+  },
+  {
     id: 'daily',
     name: 'Daily Problems',
     slug: 'daily-problems',
@@ -542,7 +621,7 @@ export const TOPICS: Topic[] = [
 export const ROADMAP_STEPS = [
   { id: 'foundation', title: 'Phase 0: Fundamentals', description: 'Core building blocks: I/O, Conditions, and Loops.', topics: ['b1', 'b2', 'b3'] },
   { id: 'foundation-adv', title: 'Phase 1: Foundations', description: 'Functions, Arrays, and Strings mastery.', topics: ['p3', 'p1', 'p2'] },
-  { id: 'step1', title: 'Phase 2: Logic & Recursion', description: 'C++ Basics, Math, and Recursive thinking.', topics: ['sz1', 'sz2', 'sz3'] },
+  { id: 'step1', title: 'Phase 2: Logic & Recursion', description: 'C++ Basics, Math, and Recursive thinking.', topics: ['sz1', 'sz2', 'sz3', 'sz-math'] },
   { id: 'recursion-mastery', title: 'Phase 3: Advanced Logic', description: 'Mastering recursion and state exploration.', topics: ['adv-recursion'] },
   { id: 'step2', title: 'Phase 4: Intermediate Systems', description: 'Sorting algorithms and Array mastery.', topics: ['sz4', 'sz5', 'sz6'] },
   { id: 'prefix-mastery', title: 'Phase 5: Range Queries', description: 'Efficient range operations with Prefix Sum.', topics: ['prefix-sum'] },
@@ -550,5 +629,6 @@ export const ROADMAP_STEPS = [
   { id: 'step5', title: 'Phase 7: Structural Data', description: 'Linked Lists, Bitwise, and Linear Structures.', topics: ['sz8', 'sz9', 'sz12'] },
   { id: 'step6', title: 'Phase 8: Hierarchical Data', description: 'Binary Trees, BST, and Tries.', topics: ['sz10', 'sz16', 'sz19'] },
   { id: 'step7', title: 'Phase 9: System Optimization', description: 'Sliding Window, Heaps, and Greedy Strategies.', topics: ['sz13', 'sz14', 'sz15'] },
-  { id: 'step8', title: 'Phase 10: High-Level Concepts', description: 'Advanced Recursion, Graphs, and Dynamic Programming.', topics: ['sz11', 'sz17', 'sz18'] }
+  { id: 'step8', title: 'Phase 10: High-Level Concepts', description: 'Advanced Recursion, Graphs, and Dynamic Programming.', topics: ['sz11', 'sz17', 'sz18'] },
+  { id: 'final-practice', title: 'Phase 11: Comprehensive Practice', description: 'Mixed challenges to test your overall skills.', topics: ['sz-ge', 'sz-gm', 'sz-gh', 'contest-challenges'] }
 ];

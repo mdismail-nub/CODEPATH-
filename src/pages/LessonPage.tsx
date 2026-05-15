@@ -36,6 +36,8 @@ export const LessonPage = () => {
   const totalExercises = lesson.exercises.length;
   const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
 
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+
   const checkAnswer = () => {
     if (!currentExercise) return;
     
@@ -51,6 +53,8 @@ export const LessonPage = () => {
           setUserAnswer('');
           setShowFeedback(null);
           setShowHint(false);
+          // Auto switch to practice tab if it's a new exercise on mobile
+          if (width < 1024) setActiveTab('practice');
         }, 1500);
       }
     } else {
@@ -75,18 +79,47 @@ export const LessonPage = () => {
     <div className="relative flex flex-col h-screen bg-[#F8FAFC] dark:bg-[#020617] overflow-hidden pt-16">
       {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} colors={['#2563eb', '#3b82f6', '#60a5fa', '#fbbf24', '#10b981']} />}
       
-      {/* Top Progress Bar */}
-      <div className="absolute top-16 left-0 right-0 h-1.5 bg-slate-200 dark:bg-slate-800 z-50">
-        <motion.div 
-          initial={{ width: 0 }}
-          animate={{ width: isCompleted ? '100%' : `${progressPercent}%` }}
-          className="h-full bg-primary-600 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(37,99,235,0.5)]"
-        />
+      {/* Top Header & Progress Bar */}
+      <div className="absolute top-16 left-0 right-0 z-50 bg-white dark:bg-[#020617] border-b border-slate-200 dark:border-slate-800">
+        <div className="h-1.5 bg-slate-100 dark:bg-slate-800/50">
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: isCompleted ? '100%' : `${progressPercent}%` }}
+            className="h-full bg-primary-600 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(37,99,235,0.5)]"
+          />
+        </div>
+        
+        {/* Mobile Tab Switcher */}
+        {!isCompleted && (
+          <div className="flex lg:hidden h-12">
+            <button 
+              onClick={() => setActiveTab('content')}
+              className={cn(
+                "flex-1 text-xs font-bold uppercase tracking-widest transition-all",
+                activeTab === 'content' ? "text-primary-600 border-b-2 border-primary-600" : "text-slate-400"
+              )}
+            >
+              Lesson
+            </button>
+            <button 
+              onClick={() => setActiveTab('practice')}
+              className={cn(
+                "flex-1 text-xs font-bold uppercase tracking-widest transition-all",
+                activeTab === 'practice' ? "text-primary-600 border-b-2 border-primary-600" : "text-slate-400"
+              )}
+            >
+              Practice {totalExercises > 0 && `(${currentExerciseIdx + 1}/${totalExercises})`}
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden pt-12 lg:pt-1.5">
         {/* Left Column: Lesson Content */}
-        <div className="w-full lg:w-1/2 overflow-y-auto border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#020617] custom-scrollbar h-[50vh] lg:h-full">
+        <div className={cn(
+          "w-full lg:w-1/2 overflow-y-auto lg:border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#020617] custom-scrollbar transition-all duration-300",
+          !isCompleted && width < 1024 && activeTab !== 'content' ? 'hidden' : 'block'
+        )}>
           <div className="max-w-[700px] mx-auto px-6 py-10 md:px-8 md:py-12 lg:px-12">
             <Link to={`/learn/${courseSlug}`} className="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold text-slate-400 hover:text-slate-900 dark:hover:text-white mb-6 md:mb-10 uppercase tracking-widest transition-colors">
               <ArrowLeft className="h-4 w-4" />
@@ -126,10 +159,13 @@ export const LessonPage = () => {
         </div>
 
         {/* Right Column: Interaction Layer */}
-        <div className="w-full lg:w-1/2 flex flex-col bg-[#F8FAFC] dark:bg-[#020617] relative flex-1">
+        <div className={cn(
+          "w-full lg:w-1/2 flex flex-col bg-[#F8FAFC] dark:bg-[#020617] relative flex-1 transition-all duration-300",
+          !isCompleted && width < 1024 && activeTab !== 'practice' ? 'hidden' : 'block'
+        )}>
           <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-blue-grain pointer-events-none" />
           
-          <div className="flex-1 overflow-y-auto px-8 py-12 lg:px-16 relative z-10 flex flex-col items-center justify-center">
+          <div className="flex-1 overflow-y-auto px-6 py-8 md:px-12 md:py-12 lg:px-16 relative z-10 flex flex-col items-center justify-center">
             <AnimatePresence mode="wait">
               {isCompleted ? (
                 <motion.div

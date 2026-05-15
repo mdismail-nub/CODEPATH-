@@ -103,9 +103,10 @@ export const Navbar = () => {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={cn(
-                "p-2 rounded-lg transition-colors",
-                isLandingPage ? "text-slate-300 hover:bg-white/5" : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                "p-3 rounded-xl transition-colors",
+                isLandingPage ? "text-slate-300 hover:bg-white/10" : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
               )}
+              aria-label="Toggle Menu"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>

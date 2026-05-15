@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'motion/react';
 import { AppStateProvider } from './AppStateContext';
 import { Navbar } from './components/Navbar';
+import { LoadingScreen } from './components/LoadingScreen';
 import { LandingPage } from './pages/LandingPage';
 import { Topics } from './pages/Topics';
 import { TopicDetail } from './pages/TopicDetail';
@@ -17,9 +19,16 @@ import { cn } from './lib/utils';
 export default function App() {
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
+  const [isLoading, setIsLoading] = useState(true);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 selection:bg-primary-500/30 selection:text-primary-900 dark:selection:bg-sky-500/30 dark:selection:text-sky-200 transition-colors duration-500 relative">
+    <AppStateProvider>
+      <AnimatePresence mode="wait">
+        {isLoading && <LoadingScreen key="loader" onComplete={() => setIsLoading(false)} />}
+      </AnimatePresence>
+      
+      {!isLoading && (
+        <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 selection:bg-primary-500/30 selection:text-primary-900 dark:selection:bg-sky-500/30 dark:selection:text-sky-200 transition-colors duration-500 relative">
       {/* Subtle Grain Background */}
       <div className="fixed inset-0 -z-50 bg-blue-grain noise-overlay opacity-40" />
       <div className="fixed inset-0 -z-50 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.05),transparent_50%)]" />
@@ -88,5 +97,7 @@ export default function App() {
         </footer>
       )}
     </div>
+      )}
+    </AppStateProvider>
   );
 }

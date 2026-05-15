@@ -11,7 +11,11 @@ import {
   LayoutGrid,
   Search,
   BrainCircuit,
-  Target
+  Target,
+  Calculator,
+  Trophy,
+  Shield,
+  Swords
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { TOPICS } from '../data';
@@ -23,13 +27,25 @@ export const LandingPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#020617] text-slate-100 selection:bg-blue-500/30">
+      {/* Background Video Layer */}
+      <div className="fixed inset-0 -z-20 w-full h-full overflow-hidden">
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="input_file_0.mp4" type="video/mp4" />
+        </video>
+        {/* Overlays for readability */}
+        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/50 via-[#020617]/80 to-[#020617]" />
+        <div className="absolute inset-0 bg-blue-grain noise-overlay opacity-20 pointer-events-none" />
+      </div>
+
       {/* Hero Section */}
       <section className="relative pt-24 pb-20 md:pt-40 md:pb-32 overflow-hidden">
-        {/* Background Gradients */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
-          <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-blue-600/10 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[120px]" />
-        </div>
 
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-5xl mx-auto text-center">
@@ -43,7 +59,7 @@ export const LandingPage = () => {
                 Learn by doing. Not just watching.
               </div>
               
-              <h1 className="text-4xl sm:text-6xl md:text-8xl font-display font-black text-white tracking-tight mb-8 md:mb-10 leading-[1.05]">
+              <h1 className="text-4xl sm:text-6xl md:text-8xl font-display font-black text-white tracking-tight mb-8 md:mb-10 leading-[1.1] md:leading-[1.05]">
                 Learn programming <br className="hidden md:block" />
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-400">the right way.</span>
               </h1>
@@ -54,7 +70,7 @@ export const LandingPage = () => {
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <Link
-                  to="/topics"
+                  to="/learn"
                   className="group relative w-full sm:w-auto px-10 py-5 bg-blue-600 text-white rounded-2xl font-bold text-xl transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(37,99,235,0.3)] hover:shadow-[0_0_60px_rgba(37,99,235,0.5)] flex items-center justify-center gap-3 overflow-hidden"
                 >
                   Start Learning <ChevronRight className="h-6 w-6 transition-transform group-hover:translate-x-1" />
@@ -63,7 +79,7 @@ export const LandingPage = () => {
                   to="/topics"
                   className="w-full sm:w-auto px-10 py-5 bg-slate-900/50 backdrop-blur-md text-white border border-white/10 rounded-2xl font-bold text-xl hover:bg-white/5 transition-all flex items-center justify-center gap-3 hover:border-white/20"
                 >
-                  See What's Inside
+                  Start Practicing
                 </Link>
               </div>
 
@@ -71,6 +87,7 @@ export const LandingPage = () => {
               <div className="mt-20 pt-10 border-t border-white/5 flex flex-wrap justify-center items-center gap-x-12 gap-y-8 opacity-40 hover:opacity-100 transition-all duration-500">
                 <div className="text-lg font-bold tracking-widest text-slate-400">CODEFORCES</div>
                 <div className="text-lg font-bold tracking-widest text-slate-400">LEETCODE</div>
+                <div className="text-lg font-bold tracking-widest text-slate-400">VJUDGE</div>
                 <div className="text-lg font-bold tracking-widest text-slate-400">GEEKSFORGEEKS</div>
                 <div className="text-lg font-bold tracking-widest text-slate-400">ATCODER</div>
               </div>
@@ -144,6 +161,7 @@ export const LandingPage = () => {
                      Easy Downloads
                    </div>
                 </div>
+
                 <Link 
                   to="/certificates"
                   className="px-10 py-5 bg-white text-slate-950 rounded-2xl font-bold text-xl hover:bg-slate-100 transition-all inline-flex items-center gap-3 shadow-2xl shadow-white/10"
@@ -206,6 +224,10 @@ const getIcon = (iconName: string) => {
     case 'LayoutGrid': return <LayoutGrid className="h-6 w-6 text-blue-400" />;
     case 'Type': return <Search className="h-6 w-6 text-blue-400" />;
     case 'Target': return <Target className="h-6 w-6 text-blue-400" />;
+    case 'Calculator': return <Calculator className="h-6 w-6 text-blue-400" />;
+    case 'Trophy': return <Trophy className="h-6 w-6 text-blue-400" />;
+    case 'Shield': return <Shield className="h-6 w-6 text-blue-400" />;
+    case 'Swords': return <Swords className="h-6 w-6 text-blue-400" />;
     case 'Award': return <Award className="h-6 w-6 text-blue-400" />;
     case 'BookOpen': return <BookOpen className="h-6 w-6 text-blue-400" />;
     default: return <Terminal className="h-6 w-6 text-blue-400" />;

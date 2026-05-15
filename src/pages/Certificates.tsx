@@ -46,12 +46,12 @@ export const Certificates = () => {
           {/* Main Area */}
           <div className="lg:col-span-2 space-y-16">
             <div>
-              <div className="flex items-center justify-between mb-10 pb-6 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-10 pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
                   <Award className="h-5 w-5 text-primary-600 dark:text-sky-400" />
                   My Certificates
                 </h2>
-                <span className="px-3 py-1 rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                <span className="w-fit px-3 py-1 rounded-md bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                   Count: {issuedCerts.length}
                 </span>
               </div>
