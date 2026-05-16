@@ -75,7 +75,7 @@ export const RoadmapPage = () => {
                   <div className="w-full md:w-1/2 pl-20 md:pl-0">
                     <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
                        <div className="flex items-center gap-3 mb-6">
-                         <span className="text-[10px] font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400">Phase 0{idx + 1}</span>
+                         <span className="text-[10px] font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400">Phase {(idx + 1).toString().padStart(2, '0')}</span>
                          <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
                        </div>
                        

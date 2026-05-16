@@ -12,13 +12,13 @@ interface GetCertificateModalProps {
 
 export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen, onClose, topicSlug, topicName }) => {
   const { stats, requestCertificate } = useAppState();
-  const [vjudgeId, setVjudgeId] = useState(stats.vjudgeId || '');
+  const [recipientName, setRecipientName] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!vjudgeId.trim()) return;
-    await requestCertificate(topicSlug, vjudgeId);
+    if (!recipientName.trim()) return;
+    requestCertificate(topicSlug, recipientName);
     setSubmitted(true);
     setTimeout(() => {
       onClose();
@@ -53,14 +53,14 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
                 <div className="mb-10 h-24 w-24 rounded-3xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm dark:shadow-2xl dark:shadow-emerald-500/10">
                   <CheckCircle2 className="h-12 w-12" />
                 </div>
-                <h3 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-6">Request Logs.</h3>
+                <h3 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight leading-none mb-6">Credential Issued.</h3>
                 <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-medium max-w-xs">
-                  Your audit request for <span className="text-slate-900 dark:text-white">{topicName}</span> has been queued for verification.
+                  Your certificate for <span className="text-slate-900 dark:text-white">{topicName}</span> has been generated successfully.
                 </p>
                 
                 <div className="mt-12 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600">
                    <div className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-                   Processing Node
+                   Redirecting to Dashboard
                 </div>
               </div>
             ) : (
@@ -79,27 +79,27 @@ export const GetCertificateModal: React.FC<GetCertificateModalProps> = ({ isOpen
                 </header>
 
                 <p className="text-slate-600 dark:text-slate-400 mb-10 text-lg leading-relaxed max-w-sm">
-                  Module curriculum completed. Provide your <span className="text-slate-900 dark:text-white font-bold">VJudge Identity</span> to finalize technical verification.
+                  Module curriculum completed. Enter your full <span className="text-slate-900 dark:text-white font-bold">Legal Name</span> to finalize your certificate.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="group">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-3 block group-focus-within:text-primary-600 dark:group-focus-within:text-sky-400 transition-colors">VJudge Identification</label>
+                    <label className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-3 block group-focus-within:text-primary-600 dark:group-focus-within:text-sky-400 transition-colors">Recipient Name</label>
                     <input
                       type="text"
                       required
-                      value={vjudgeId}
-                      onChange={(e) => setVjudgeId(e.target.value)}
-                      placeholder="Enter VJudge Handle..."
+                      value={recipientName}
+                      onChange={(e) => setRecipientName(e.target.value)}
+                      placeholder="e.g. John Doe"
                       className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 p-5 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-800 focus:border-primary-600 dark:focus:border-sky-400 focus:outline-none transition-all shadow-inner"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="flex w-full items-center justify-center gap-4 rounded-2xl bg-primary-600 dark:bg-sky-400 p-5 text-xs font-bold uppercase tracking-widest text-white dark:text-slate-950 shadow-xl shadow-primary-600/20 dark:shadow-sky-500/20 transition-all hover:bg-primary-700 dark:hover:bg-sky-300 active:scale-[0.98]"
+                    className="flex w-full items-center justify-center gap-4 rounded-2xl bg-emerald-600 p-5 text-xs font-bold uppercase tracking-widest text-white shadow-xl shadow-emerald-600/20 transition-all hover:bg-emerald-700 active:scale-[0.98]"
                   >
-                    Transmit Request <Send className="h-4 w-4" />
+                    Generate Certificate <CheckCircle2 className="h-4 w-4" />
                   </button>
                 </form>
 

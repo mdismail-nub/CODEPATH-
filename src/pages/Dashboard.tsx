@@ -17,10 +17,8 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export const Dashboard = () => {
-  const { stats, user } = useAppState();
+  const { stats } = useAppState();
   const reportRef = useRef<HTMLDivElement>(null);
-
-  if (!user) return null;
 
   const totalSolved = stats.solvedIds.length;
   const totalProblems = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
@@ -89,12 +87,29 @@ export const Dashboard = () => {
       onclone: (clonedDoc) => {
         const style = clonedDoc.createElement('style');
         style.innerHTML = `
-          * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; transition: none !important; animation: none !important; }
+          * { 
+            backdrop-filter: none !important; 
+            -webkit-backdrop-filter: none !important; 
+            transition: none !important; 
+            animation: none !important; 
+          }
+          :root {
+            --color-blue-600: #2563eb !important;
+            --color-primary-600: #2563eb !important;
+            --color-slate-900: #0f172a !important;
+            --color-slate-50: #f8fafc !important;
+          }
           .text-gray-500 { color: #6b7280 !important; }
+          .text-gray-400 { color: #9ca3af !important; }
           .text-gray-900 { color: #111827 !important; }
+          .text-slate-900 { color: #0f172a !important; }
+          .text-slate-500 { color: #64748b !important; }
           .bg-blue-600 { background-color: #2563eb !important; }
           .bg-gray-50 { background-color: #f9fafb !important; }
+          .bg-white { background-color: #ffffff !important; }
           .border-gray-100 { border-color: #f3f4f6 !important; }
+          .border-gray-200 { border-color: #e5e7eb !important; }
+          .text-blue-600 { color: #2563eb !important; }
         `;
         clonedDoc.head.appendChild(style);
       }
@@ -106,7 +121,7 @@ export const Dashboard = () => {
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`${user.displayName || 'User'}_Progress_Report.pdf`);
+    pdf.save(`CodePath_Progress_Report.pdf`);
   };
 
   const topicsCompleted = TOPICS.filter(t => 
@@ -121,11 +136,11 @@ export const Dashboard = () => {
         <header className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-8 pt-12">
           <div>
             <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/20 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-400/20 mb-6">
-              User Dashboard
+              Local Dashboard
             </span>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900 dark:text-white mb-4 font-outfit">My Progress</h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-xl">
-              Track your learning journey, view your stats, and monitor your consistency.
+              Track your learning journey, view your stats, and monitor your consistency locally in this browser.
             </p>
           </div>
           <button
@@ -198,24 +213,26 @@ export const Dashboard = () => {
                  </div>
                </div>
 
-               <div className="flex flex-wrap gap-[3px]">
-                 {heatmapData.map((day, i) => (
-                   <div
-                     key={i}
-                     className={cn(
-                       "h-[13px] w-[13px] rounded-[2px] transition-all relative group cursor-help",
-                       !day.active ? "bg-gray-100 dark:bg-slate-800" :
-                       day.value === 1 ? "bg-blue-600/30 dark:bg-blue-400/30" :
-                       day.value === 2 ? "bg-blue-600/55 dark:bg-blue-400/55" :
-                       day.value === 3 ? "bg-blue-600/80 dark:bg-blue-400/80" :
-                       "bg-blue-600 dark:bg-blue-400"
-                     )}
-                   >
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-900 text-[10px] text-white opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-20 shadow-lg">
-                        {day.date}: {solvesByDate[day.date] || 0} solved
-                      </div>
-                   </div>
-                 ))}
+               <div className="overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+                 <div className="flex flex-wrap gap-[3px] min-w-[300px]">
+                   {heatmapData.map((day, i) => (
+                     <div
+                       key={i}
+                       className={cn(
+                         "h-[13px] w-[13px] rounded-[2px] transition-all relative group cursor-help",
+                         !day.active ? "bg-gray-100 dark:bg-slate-800" :
+                         day.value === 1 ? "bg-blue-600/30 dark:bg-blue-400/30" :
+                         day.value === 2 ? "bg-blue-600/55 dark:bg-blue-400/55" :
+                         day.value === 3 ? "bg-blue-600/80 dark:bg-blue-400/80" :
+                         "bg-blue-600 dark:bg-blue-400"
+                       )}
+                     >
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-900 text-[10px] text-white opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-20 shadow-lg">
+                          {day.date}: {solvesByDate[day.date] || 0} solved
+                        </div>
+                     </div>
+                   ))}
+                 </div>
                </div>
                <p className="mt-8 text-xs text-gray-500 dark:text-gray-400">Practice consistency over the last six months.</p>
             </div>
@@ -279,7 +296,7 @@ export const Dashboard = () => {
               <h1 className="text-5xl font-bold tracking-tight text-gray-900 mb-8 font-outfit">My Progress.</h1>
               <div className="text-sm text-gray-500 uppercase tracking-widest font-semibold flex items-center gap-2">
                 <div className="h-2 w-2 bg-blue-600 rounded-full" />
-                Authenticated Record: {new Date().toLocaleDateString()}
+                Local Record: {new Date().toLocaleDateString()}
               </div>
             </div>
             <div className="h-20 w-20 bg-gray-900 rounded-3xl flex items-center justify-center">
@@ -289,7 +306,7 @@ export const Dashboard = () => {
 
           <div className="mb-16">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Participant</p>
-            <h2 className="text-4xl font-bold text-gray-900">{user.displayName}</h2>
+            <h2 className="text-4xl font-bold text-gray-900">Guest User</h2>
           </div>
 
           <div className="grid grid-cols-3 gap-6 mb-20">
@@ -335,12 +352,12 @@ export const Dashboard = () => {
               </div>
               <div>
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Verification ID</p>
-                <p className="text-sm font-mono text-gray-900">CP-AUTH-{user.uid.slice(0, 8).toUpperCase()}</p>
+                <p className="text-sm font-mono text-gray-900">CP-LOCAL-{Date.now().toString(36).toUpperCase()}</p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Platform Verification</p>
-              <div className="text-2xl font-bold text-gray-900">CodePath Archive</div>
+              <div className="text-2xl font-bold text-gray-900">CodePath Local Archive</div>
             </div>
           </div>
         </div>

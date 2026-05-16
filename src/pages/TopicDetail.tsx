@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import * as Icons from 'lucide-react';
 import { TOPICS } from '../data';
@@ -11,7 +11,7 @@ import { BackButton } from '../components/BackButton';
 
 export const TopicDetail = () => {
   const { slug } = useParams();
-  const { isSolved, toggleSolved, user, login, stats } = useAppState();
+  const { isSolved, toggleSolved, stats } = useAppState();
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'All'>('All');
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
 
@@ -88,21 +88,16 @@ export const TopicDetail = () => {
 
                {isAllSolved && (
                   <div className="pt-8 border-t border-slate-100 dark:border-slate-800">
-                     {!user ? (
-                      <button 
-                        onClick={login}
-                        className="w-full py-4 rounded-xl bg-amber-500 text-white text-xs font-bold uppercase tracking-widest hover:bg-amber-600 transition-all flex items-center justify-center gap-2"
-                      >
-                        Log in to get certificate
-                      </button>
-                    ) : existingCert ? (
-                      <div className={cn(
+                     {existingCert ? (
+                      <Link 
+                        to={`/certificate/${topic.slug}`}
+                        className={cn(
                         "w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3",
-                        existingCert.status === 'issued' ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30" : "bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-800/30"
+                        "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30 hover:bg-emerald-100 transition-colors"
                       )}>
-                        {existingCert.status === 'issued' ? <Icons.Award className="h-4 w-4" /> : <Icons.Clock className="h-4 w-4" />}
-                        {existingCert.status === 'issued' ? 'Certificate Earned' : 'Checking...'}
-                      </div>
+                        <Icons.Award className="h-4 w-4" />
+                        View Certificate
+                      </Link>
                     ) : (
                       <button 
                         onClick={() => setIsCertModalOpen(true)}
@@ -120,14 +115,14 @@ export const TopicDetail = () => {
         {/* Content Section */}
         <section>
           {/* Filters */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
-            <div className="flex p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-8 mb-12">
+            <div className="flex p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
               {(['All', 'Easy', 'Medium', 'Hard'] as const).map((diff) => (
                 <button
                   key={diff}
                   onClick={() => setDifficultyFilter(diff)}
                   className={cn(
-                    "px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all",
+                    "px-4 md:px-6 py-2.5 rounded-lg text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all inline-flex items-center justify-center min-w-[70px] md:min-w-[80px]",
                     difficultyFilter === diff 
                       ? "bg-white dark:bg-slate-800 text-primary-600 dark:text-primary-400 shadow-sm" 
                       : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
@@ -152,20 +147,20 @@ export const TopicDetail = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
                 className={cn(
-                  "group p-4 md:px-8 md:py-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all flex items-center gap-6",
+                  "group p-4 md:px-8 md:py-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all flex items-center gap-4 md:gap-6",
                   isSolved(problem.id) ? "border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/20 dark:bg-emerald-900/10" : "hover:border-primary-200 dark:hover:border-primary-400/30 hover:shadow-sm"
                 )}
               >
                 <button
                   onClick={() => toggleSolved(problem.id)}
                   className={cn(
-                    "flex-shrink-0 h-10 w-10 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
+                    "flex-shrink-0 h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
                     isSolved(problem.id)
                       ? "bg-emerald-500 dark:bg-emerald-400 border-emerald-500 dark:border-emerald-400 text-white"
-                      : "border-slate-200 dark:border-slate-800 text-transparent group-hover:border-primary-300 dark:group-hover:border-primary-700"
+                      : "border-slate-200 dark:border-slate-800 text-transparent group-hover:border-primary-300 dark:group-hover:border-primary-700 font-bold"
                   )}
                 >
-                  <Icons.Check className={cn("h-5 w-5 stroke-[2.5px]", isSolved(problem.id) ? "opacity-100" : "opacity-0")} />
+                  <Icons.Check className={cn("h-5 w-5 md:h-6 md:w-6 stroke-[2.5px]", isSolved(problem.id) ? "opacity-100" : "opacity-0")} />
                 </button>
 
                 <div className="flex-1 min-w-0">
