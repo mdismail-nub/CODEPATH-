@@ -32,16 +32,16 @@ export const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
         <motion.div
           initial={{ y: -500, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ 
-            type: "spring", 
-            damping: 15, 
+          transition={{
+            type: "spring",
+            damping: 15,
             stiffness: 100,
             duration: 1.2
           }}
           className="mb-8"
         >
           <motion.div
-            animate={{ 
+            animate={{
               borderRadius: ["50% 50% 50% 50%", "50% 50% 20% 80%", "12px 12px 12px 12px"],
               scale: [1, 1.1, 1]
             }}
@@ -81,8 +81,8 @@ export const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
             className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 to-indigo-600"
           />
         </div>
-        
-        <motion.div 
+
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.8 }}

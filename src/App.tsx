@@ -27,7 +27,7 @@ export default function App() {
       <AnimatePresence mode="wait">
         {isLoading && <LoadingScreen key="loader" onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
-      
+
       {!isLoading && (
         <div className="min-h-screen bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 selection:bg-primary-500/30 selection:text-primary-900 dark:selection:bg-sky-500/30 dark:selection:text-sky-200 transition-colors duration-500 relative">
       {/* Subtle Grain Background */}
@@ -62,13 +62,13 @@ export default function App() {
                  <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-primary-600 dark:bg-sky-400 text-white dark:text-slate-950 font-bold shadow-lg shadow-primary-600/20 dark:shadow-sky-500/20">CP</div>
                  <span className="text-xl font-bold tracking-tighter text-slate-900 dark:text-white">CodePath.</span>
               </div>
-              
+
               <p className="text-slate-500 dark:text-slate-400 text-sm max-w-md mx-auto leading-relaxed font-medium">
                 Practice coding problems and follow learning paths to become a better software engineer.
               </p>
 
               <div className="h-px w-20 bg-slate-200 dark:bg-slate-800 my-12" />
-              
+
               <div className="flex flex-wrap justify-center gap-12">
                 <div className="text-left">
                   <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 mb-6 font-mono">Learning</h4>

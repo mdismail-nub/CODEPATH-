@@ -87,11 +87,11 @@ export const Dashboard = () => {
       onclone: (clonedDoc) => {
         const style = clonedDoc.createElement('style');
         style.innerHTML = `
-          * { 
-            backdrop-filter: none !important; 
-            -webkit-backdrop-filter: none !important; 
-            transition: none !important; 
-            animation: none !important; 
+          * {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            transition: none !important;
+            animation: none !important;
           }
           :root {
             --color-blue-600: #2563eb !important;

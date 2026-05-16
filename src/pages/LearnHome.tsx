@@ -22,7 +22,7 @@ export const LearnHome = () => {
   return (
     <div className="relative pt-24 pb-32 bg-white dark:bg-[#020617] transition-colors duration-300 min-h-screen">
       <div className="absolute inset-0 -z-10 opacity-[0.03] dark:opacity-[0.05] bg-blue-grain pointer-events-none" />
-      
+
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
         <header className="mb-16">
           <motion.div
@@ -43,9 +43,9 @@ export const LearnHome = () => {
               Step-by-step interactive lessons designed to take you from absolute beginner to advanced problem solver. Earn XP, unlock badges, and master new skills.
             </p>
           </motion.div>
-          
+
           {/* User Stats Bar */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
@@ -60,7 +60,7 @@ export const LearnHome = () => {
                 <p className="text-xl font-bold text-slate-900 dark:text-white leading-none mt-1">{stats.xp || 0}</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-4 sm:px-8 sm:border-r border-slate-200 dark:border-slate-800">
               <div className="h-10 w-10 flex items-center justify-center bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-xl flex-shrink-0">
                 <BookOpen className="h-6 w-6" />
@@ -70,7 +70,7 @@ export const LearnHome = () => {
                 <p className="text-xl font-bold text-slate-900 dark:text-white leading-none mt-1">{stats.completedLessonIds?.length || 0}</p>
               </div>
             </div>
- 
+
             <div className="flex items-center gap-4 sm:px-8">
               <div className="h-10 w-10 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl flex-shrink-0">
                 <Trophy className="h-6 w-6" />
@@ -105,7 +105,7 @@ export const LearnHome = () => {
                 <div className="h-14 w-14 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 transform group-hover:rotate-6">
                   <IconComponent name={course.icon} className="h-7 w-7" />
                 </div>
-                
+
                 <div className="mb-4">
                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400 px-2.5 py-1 bg-primary-50 dark:bg-primary-900/20 rounded-md">
                      {course.level}
@@ -115,7 +115,7 @@ export const LearnHome = () => {
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                   {course.title}
                 </h3>
-                
+
                 <p className="text-slate-600 dark:text-slate-400 text-sm mb-8 flex-grow leading-relaxed">
                   {course.description}
                 </p>

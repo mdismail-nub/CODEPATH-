@@ -59,7 +59,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const toggleSolved = (id: string) => {
     const alreadySolved = stats.solvedIds.includes(id);
     const now = Date.now();
-    
+
     setStats(prev => {
       const newSolvedAt = { ...(prev.solvedAt || {}) };
       if (alreadySolved) {
@@ -104,7 +104,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const completeLesson = (lessonId: string, xpReward: number) => {
     const completed = stats.completedLessonIds || [];
     if (completed.includes(lessonId)) return;
-    
+
     setStats(prev => ({
       ...prev,
       completedLessonIds: [...(prev.completedLessonIds || []), lessonId],
@@ -115,9 +115,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const isLessonCompleted = (lessonId: string) => (stats.completedLessonIds || []).includes(lessonId);
 
   return (
-    <AppStateContext.Provider value={{ 
-      stats, loading, theme, 
-      toggleSolved, isSolved, updateVJudgeId, requestCertificate, 
+    <AppStateContext.Provider value={{
+      stats, loading, theme,
+      toggleSolved, isSolved, updateVJudgeId, requestCertificate,
       completeLesson, isLessonCompleted, toggleTheme
     }}>
       {children}

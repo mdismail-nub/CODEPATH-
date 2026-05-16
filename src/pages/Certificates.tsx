@@ -95,13 +95,13 @@ export const Certificates = () => {
                           </div>
                           
                           <div className="flex gap-3">
-                            <Link 
+                            <Link
                               to={`/certificate/${cert.topicSlug}`}
                               className="flex-1 px-6 py-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-700 dark:hover:bg-slate-200 transition-all flex items-center justify-center gap-3 shadow-lg shadow-slate-900/10"
                             >
                               <ExternalLink className="h-4 w-4" /> View Certificate
                             </Link>
-                            <Link 
+                            <Link
                                 to={`/certificate/${cert.topicSlug}`}
                                 className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-white/5 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
                                 title="Share"

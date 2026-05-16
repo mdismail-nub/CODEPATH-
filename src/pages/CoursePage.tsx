@@ -30,7 +30,7 @@ export const CoursePage = () => {
   return (
     <div className="relative pt-24 pb-32 bg-white dark:bg-[#020617] min-h-screen">
       <div className="absolute inset-0 -z-10 opacity-[0.03] dark:opacity-[0.05] bg-blue-grain pointer-events-none" />
-      
+
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <Link to="/learn" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white mb-8 transition-colors group">
           <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
@@ -55,7 +55,7 @@ export const CoursePage = () => {
                 {course.description}
               </p>
             </div>
-            
+
             <div className="flex-shrink-0 bg-slate-50 dark:bg-slate-900/50 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 text-center min-w-[240px] shadow-sm">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Overall Progress</p>
                 <div className="flex items-baseline justify-center gap-1">
@@ -63,7 +63,7 @@ export const CoursePage = () => {
                    <p className="text-xl font-bold text-slate-400">%</p>
                 </div>
                 <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full mt-6 overflow-hidden">
-                  <motion.div 
+                  <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
                     className="h-full bg-primary-600 shadow-[0_0_10px_rgba(37,99,235,0.4)]"
@@ -80,7 +80,7 @@ export const CoursePage = () => {
           {course.lessons.map((lesson, idx) => {
             const isCompleted = isLessonCompleted(lesson.id);
             const isLocked = idx > 0 && !isLessonCompleted(course.lessons[idx - 1].id);
-            
+
             return (
               <motion.div
                 key={lesson.id}
@@ -92,8 +92,8 @@ export const CoursePage = () => {
                   to={isLocked ? '#' : `/learn/${course.slug}/${lesson.slug}`}
                   className={cn(
                     "group relative flex items-center justify-between p-5 sm:p-6 rounded-[2rem] border transition-all duration-300",
-                    isCompleted 
-                      ? "bg-emerald-50/30 dark:bg-emerald-900/5 border-emerald-100 dark:border-emerald-800/20" 
+                    isCompleted
+                      ? "bg-emerald-50/30 dark:bg-emerald-900/5 border-emerald-100 dark:border-emerald-800/20"
                       : isLocked
                         ? "bg-slate-50/30 dark:bg-slate-900/30 border-slate-100 dark:border-slate-800/50 opacity-60 cursor-not-allowed"
                         : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-primary-500/50 hover:shadow-xl hover:-translate-x-1"
@@ -103,15 +103,15 @@ export const CoursePage = () => {
                   <div className="flex items-center gap-4 sm:gap-6">
                     <div className={cn(
                       "h-10 w-10 sm:h-12 sm:w-12 rounded-2xl flex items-center justify-center text-sm font-bold transition-all",
-                      isCompleted 
-                        ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600" 
+                      isCompleted
+                        ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600"
                         : isLocked
                           ? "bg-slate-100 dark:bg-slate-800 text-slate-400"
                           : "bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white group-hover:bg-primary-600 group-hover:text-white shadow-sm"
                     )}>
                       {isCompleted ? <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6" /> : isLocked ? <Lock className="h-4 w-4 sm:h-5 sm:w-5" /> : idx + 1}
                     </div>
-                    
+
                     <div>
                       <h3 className={cn(
                         "text-base sm:text-lg font-bold transition-colors leading-tight",

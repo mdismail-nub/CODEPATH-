@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { 
-  BookOpen, 
-  ShieldCheck, 
-  Award, 
-  ChevronRight, 
+import {
+  BookOpen,
+  ShieldCheck,
+  Award,
+  ChevronRight,
   Download,
   Terminal,
   Code,
@@ -29,10 +29,10 @@ export const LandingPage = () => {
     <div className="flex flex-col min-h-screen bg-[#020617] text-slate-100 selection:bg-blue-500/30">
       {/* Background Video Layer */}
       <div className="fixed inset-0 -z-20 w-full h-full overflow-hidden">
-        <video 
-          autoPlay 
-          loop 
-          muted 
+        <video
+          autoPlay
+          loop
+          muted
           playsInline
           className="w-full h-full object-cover"
         >
@@ -58,16 +58,16 @@ export const LandingPage = () => {
                 <span className="flex h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
                 Learn by doing. Not just watching.
               </div>
-              
+
               <h1 className="text-4xl sm:text-6xl md:text-8xl font-display font-black text-white tracking-tight mb-8 md:mb-10 leading-[1.1] md:leading-[1.05]">
                 Learn programming <br className="hidden md:block" />
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-sky-300 to-indigo-400">the right way.</span>
               </h1>
-              
+
               <p className="text-lg md:text-2xl text-slate-400 mb-10 md:mb-12 leading-relaxed max-w-3xl mx-auto font-medium">
                 CodePath gives you a structured path to master everything from basic loops to complex algorithms. Practice with {totalProblems}+ problems and earn certificates along the way.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <Link
                   to="/learn"
@@ -113,7 +113,7 @@ export const LandingPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sampleTopics.map((topic) => (
-              <Link 
+              <Link
                 key={topic.id}
                 to={`/topic/${topic.slug}`}
                 className="group p-8 rounded-3xl border border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-300 hover:border-blue-500/30 hover:shadow-[0_0_50px_rgba(59,130,246,0.1)]"
@@ -138,7 +138,7 @@ export const LandingPage = () => {
         <div className="container mx-auto px-6 relative z-10">
           <div className="bg-slate-900/40 border border-white/10 rounded-[2.5rem] p-10 md:p-20 overflow-hidden relative backdrop-blur-xl">
             <div className="absolute inset-0 -z-10 opacity-20 bg-blue-grain pointer-events-none" />
-            
+
             <div className="flex flex-col items-center text-center">
               <div className="max-w-3xl">
                 <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-blue-500/10 text-blue-400 text-sm font-black mb-8 border border-blue-500/20">
@@ -162,7 +162,7 @@ export const LandingPage = () => {
                    </div>
                 </div>
 
-                <Link 
+                <Link
                   to="/certificates"
                   className="px-10 py-5 bg-white text-slate-950 rounded-2xl font-bold text-xl hover:bg-slate-100 transition-all inline-flex items-center gap-3 shadow-2xl shadow-white/10"
                 >
@@ -182,7 +182,7 @@ export const LandingPage = () => {
           <p className="text-blue-100 text-lg md:text-2xl mb-12 md:mb-16 max-w-3xl mx-auto font-medium leading-relaxed">
             Jump in and start solving your first problem. No account needed to get started. Just pick a topic and go.
           </p>
-          <Link 
+          <Link
             to="/topics"
             className="px-10 py-5 md:px-14 md:py-7 bg-white text-blue-600 rounded-[2rem] font-black text-xl md:text-3xl hover:bg-blue-50 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)] inline-flex items-center gap-4 group"
           >

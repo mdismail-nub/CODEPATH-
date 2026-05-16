@@ -18,13 +18,13 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
   id
 }) => {
   return (
-    <div 
+    <div
       id={id}
       className={cn(
         "relative aspect-[1.41/1] w-full max-w-[1100px] mx-auto overflow-hidden shadow-2xl bg-[#f0f9ff] @container",
         className
       )}
-      style={{ 
+      style={{
         fontFamily: "'Inter', sans-serif",
         background: 'linear-gradient(135deg, #e0f2fe 0%, #ffffff 50%, #eff6ff 100%)'
       }}
@@ -33,18 +33,18 @@ export const CertificateCanvas: React.FC<CertificateCanvasProps> = ({
       {/* Top Left Gradient Sphere */}
       <div className="absolute -top-[10cqw] -left-[10cqw] w-[40cqw] h-[40cqw] rounded-full bg-gradient-to-br from-blue-600 via-blue-400 to-transparent opacity-60 blur-[4cqw]" />
       <div className="absolute top-[2cqw] -left-[5cqw] w-[30cqw] h-[30cqw] rounded-full bg-blue-500 opacity-80 blur-[6cqw]" />
-      
+
       {/* Bottom Right Abstract Shape */}
       <div className="absolute -bottom-[10cqw] -right-[10cqw] w-[50cqw] h-[50cqw] rounded-full bg-gradient-to-tl from-blue-700 via-blue-500 to-transparent opacity-90 blur-[4cqw]" />
       <div className="absolute bottom-[5cqw] right-0 w-[40cqw] h-[40cqw] bg-blue-600 opacity-70 blur-[6cqw] transform rotate-45 rounded-full" />
 
       {/* Main Certificate White Body */}
       <div className="absolute inset-[4cqw] bg-white shadow-xl flex flex-col items-center justify-between py-[4cqw] px-[6cqw] z-10"
-        style={{ 
+        style={{
           clipPath: 'polygon(2% 0, 100% 0, 98% 100%, 0% 100%)'
         }}
       >
-        
+
         {/* Certificate Title */}
         <div className="text-center flex flex-col items-center">
           <h1 className="text-[8cqw] font-gothic text-black leading-none mb-[1cqw]">Certificate</h1>

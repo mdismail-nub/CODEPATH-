@@ -34,8 +34,8 @@ export const Navbar = () => {
   return (
     <nav className={cn(
       "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
-      isLandingPage 
-        ? "bg-transparent border-transparent py-4" 
+      isLandingPage
+        ? "bg-transparent border-transparent py-4"
         : "bg-white/80 dark:bg-[#020617]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 py-0"
     )}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -79,8 +79,8 @@ export const Navbar = () => {
                 onClick={toggleTheme}
                 className={cn(
                   "p-2 rounded-lg transition-all",
-                  isLandingPage 
-                    ? "text-slate-300 hover:text-white hover:bg-white/5" 
+                  isLandingPage
+                    ? "text-slate-300 hover:text-white hover:bg-white/5"
                     : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                 )}
                 title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
@@ -126,7 +126,7 @@ export const Navbar = () => {
               onClick={() => setIsOpen(false)}
               className="md:hidden fixed inset-0 top-16 bg-slate-900/60 backdrop-blur-sm z-40"
             />
-            
+
             <motion.div
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -168,7 +168,7 @@ export const Navbar = () => {
                     {link.name}
                   </Link>
                 ))}
-                
+
                 <div className="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
                   <button
                     onClick={() => { toggleTheme(); setIsOpen(false); }}

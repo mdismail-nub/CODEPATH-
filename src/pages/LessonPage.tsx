@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
+import {
+  ChevronLeft, CheckCircle2, ChevronRight, X, Play,
   Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -40,9 +40,9 @@ export const LessonPage = () => {
 
   const checkAnswer = () => {
     if (!currentExercise) return;
-    
+
     const isCorrect = userAnswer.trim().toLowerCase() === currentExercise.correctAnswer.trim().toLowerCase();
-    
+
     if (isCorrect) {
       setShowFeedback('correct');
       if (currentExerciseIdx === totalExercises - 1) {
@@ -78,21 +78,21 @@ export const LessonPage = () => {
   return (
     <div className="relative flex flex-col h-screen bg-[#F8FAFC] dark:bg-[#020617] overflow-hidden pt-16">
       {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} colors={['#2563eb', '#3b82f6', '#60a5fa', '#fbbf24', '#10b981']} />}
-      
+
       {/* Top Header & Progress Bar */}
       <div className="absolute top-16 left-0 right-0 z-50 bg-white dark:bg-[#020617] border-b border-slate-200 dark:border-slate-800">
         <div className="h-1.5 bg-slate-100 dark:bg-slate-800/50">
-          <motion.div 
+          <motion.div
             initial={{ width: 0 }}
             animate={{ width: isCompleted ? '100%' : `${progressPercent}%` }}
             className="h-full bg-primary-600 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(37,99,235,0.5)]"
           />
         </div>
-        
+
         {/* Mobile Tab Switcher */}
         {!isCompleted && (
           <div className="flex lg:hidden h-12">
-            <button 
+            <button
               onClick={() => setActiveTab('content')}
               className={cn(
                 "flex-1 text-xs font-bold uppercase tracking-widest transition-all",
@@ -101,7 +101,7 @@ export const LessonPage = () => {
             >
               Lesson
             </button>
-            <button 
+            <button
               onClick={() => setActiveTab('practice')}
               className={cn(
                 "flex-1 text-xs font-bold uppercase tracking-widest transition-all",
@@ -148,7 +148,7 @@ export const LessonPage = () => {
                 </pre>
               </div>
             )}
-            
+
             <div className="mt-20 pt-10 border-t border-slate-100 dark:border-slate-800">
                <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
                   <Lightbulb className="h-5 w-5 text-amber-500" />
@@ -164,7 +164,7 @@ export const LessonPage = () => {
           !isCompleted && width < 1024 && activeTab !== 'practice' ? 'hidden' : 'block'
         )}>
           <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-blue-grain pointer-events-none" />
-          
+
           <div className="flex-1 overflow-y-auto px-6 py-8 md:px-12 md:py-12 lg:px-16 relative z-10 flex flex-col items-center justify-center">
             <AnimatePresence mode="wait">
               {isCompleted ? (
@@ -178,7 +178,7 @@ export const LessonPage = () => {
                     <div className="h-24 w-24 bg-emerald-100 dark:bg-emerald-900/30 rounded-3xl flex items-center justify-center mx-auto relative z-10">
                       <Trophy className="h-12 w-12 text-emerald-600" />
                     </div>
-                    <motion.div 
+                    <motion.div
                       animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
                       transition={{ duration: 2, repeat: Infinity }}
                       className="absolute -top-4 -right-4 h-12 w-12 bg-amber-400 rounded-full flex items-center justify-center text-white"
@@ -186,12 +186,12 @@ export const LessonPage = () => {
                       <Sparkles className="h-6 w-6" />
                     </motion.div>
                   </div>
-                  
+
                   <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4 font-outfit">Lesson Complete!</h2>
                   <p className="text-slate-600 dark:text-slate-400 mb-10 leading-relaxed font-medium">
                     You've mastered the basics of {lesson.title}. Congratulations on earning <span className="text-primary-600 dark:text-primary-400 font-bold">{lesson.xpReward} XP</span> toward your goal!
                   </p>
-                  
+
                   <div className="flex flex-col gap-4">
                     {nextLesson ? (
                       <button
@@ -243,8 +243,8 @@ export const LessonPage = () => {
                             onClick={() => setUserAnswer(option)}
                             className={cn(
                               "w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 font-medium text-sm flex items-center gap-4",
-                              userAnswer === option 
-                                ? "bg-primary-600 text-white border-primary-600" 
+                              userAnswer === option
+                                ? "bg-primary-600 text-white border-primary-600"
                                 : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-primary-400"
                             )}
                           >
@@ -300,8 +300,8 @@ export const LessonPage = () => {
                       disabled={!userAnswer}
                       className={cn(
                         "flex-1 py-5 rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2",
-                        !userAnswer 
-                          ? "bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed" 
+                        !userAnswer
+                          ? "bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
                           : "bg-primary-600 text-white shadow-lg shadow-primary-600/20 hover:bg-primary-700 hover:scale-[1.01] active:scale-[0.99]"
                       )}
                     >
@@ -322,8 +322,8 @@ export const LessonPage = () => {
                         </>
                       )}
                     </button>
-                    
-                    <button 
+
+                    <button
                        onClick={() => setShowHint(!showHint)}
                        className="h-16 w-16 flex items-center justify-center bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-2 border-amber-100 dark:border-amber-900/30 rounded-2xl hover:bg-amber-100 transition-colors"
                        title="Get a hint"

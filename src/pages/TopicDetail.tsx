@@ -89,7 +89,7 @@ export const TopicDetail = () => {
                {isAllSolved && (
                   <div className="pt-8 border-t border-slate-100 dark:border-slate-800">
                      {existingCert ? (
-                      <Link 
+                      <Link
                         to={`/certificate/${topic.slug}`}
                         className={cn(
                         "w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3",

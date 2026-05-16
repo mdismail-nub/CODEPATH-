@@ -8,7 +8,7 @@ import { BackButton } from '../components/BackButton';
 export const Topics = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredTopics = TOPICS.filter(t => 
+  const filteredTopics = TOPICS.filter(t =>
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.problems.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
