@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
+import { Analytics } from '@vercel/analytics/react';
 import { AppStateProvider } from './AppStateContext';
 import { Navbar } from './components/Navbar';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -93,11 +94,12 @@ export default function App() {
                  </div>
               </div>
             </div>
-          </div>
-        </footer>
+           </div>
+         </footer>
+       )}
+     </div>
       )}
-    </div>
-      )}
+      <Analytics />
     </AppStateProvider>
   );
 }
