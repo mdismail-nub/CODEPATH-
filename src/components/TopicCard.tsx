@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import * as Icons from 'lucide-react';
@@ -11,24 +11,14 @@ interface TopicCardProps {
   index: number;
 }
 
-// Optimization: Memoize the component to prevent re-renders when other topics change or when search query in parent changes
-export const TopicCard: React.FC<TopicCardProps> = React.memo(({ topic, index }) => {
-  const { isSolved } = useAppState();
+export const TopicCard: React.FC<TopicCardProps> = ({ topic, index }) => {
+  const { stats } = useAppState();
   const Icon = (Icons as any)[topic.icon] || Icons.HelpCircle;
   
-  // Optimization: Memoize progress calculations to avoid redundant O(Problems) work on every render
-  const { solvedCount, progressPercent, isCompleted } = useMemo(() => {
-    const solved = topic.problems.filter(p => isSolved(p.id)).length;
-    const total = topic.problems.length;
-    const percent = Math.round((solved / total) * 100) || 0;
-    return {
-      solvedCount: solved,
-      progressPercent: percent,
-      isCompleted: percent === 100
-    };
-  }, [topic.problems, isSolved]);
-
+  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
   const totalCount = topic.problems.length;
+  const progressPercent = Math.round((solvedCount / totalCount) * 100) || 0;
+  const isCompleted = progressPercent === 100;
 
   return (
     <motion.div
@@ -38,14 +28,14 @@ export const TopicCard: React.FC<TopicCardProps> = React.memo(({ topic, index })
     >
       <Link
         to={`/topic/${topic.slug}`}
-        className="group relative block p-6 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-900 shadow-sm transition-all duration-300 hover:shadow-md dark:shadow-none hover:border-primary-200 dark:hover:border-primary-400/50 hover:-translate-y-1 hover:scale-[1.02]"
+        className="group relative block p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:shadow-md dark:shadow-none hover:border-primary-200 dark:hover:border-sky-400/50 hover:-translate-y-1"
       >
         <div className="flex items-start justify-between mb-8">
           <div className={cn(
             "flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-300",
             isCompleted 
               ? "bg-emerald-50 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-400" 
-              : "bg-primary-50 dark:bg-slate-900 text-primary-600 dark:text-slate-400 group-hover:bg-primary-600 dark:group-hover:bg-primary-400 group-hover:text-white dark:group-hover:text-slate-950 shadow-sm"
+              : "bg-primary-50 dark:bg-slate-800 text-primary-600 dark:text-slate-400 group-hover:bg-primary-600 dark:group-hover:bg-sky-400 group-hover:text-white dark:group-hover:text-slate-950"
           )}>
             <Icon className={cn("h-5 w-5", isCompleted ? "stroke-[2.5px]" : "stroke-[2px]")} />
           </div>
@@ -82,7 +72,7 @@ export const TopicCard: React.FC<TopicCardProps> = React.memo(({ topic, index })
             <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
               {solvedCount} / {totalCount} Solved
             </span>
-            <div className="h-6 w-6 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-slate-300 dark:text-slate-500 group-hover:bg-primary-50 dark:group-hover:bg-primary-400/20 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-all">
+            <div className="h-6 w-6 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-300 dark:text-slate-500 group-hover:bg-primary-50 dark:group-hover:bg-sky-400/20 group-hover:text-primary-600 dark:group-hover:text-sky-400 transition-all">
               <Icons.ChevronRight className="h-4 w-4" />
             </div>
           </div>
@@ -90,4 +80,4 @@ export const TopicCard: React.FC<TopicCardProps> = React.memo(({ topic, index })
       </Link>
     </motion.div>
   );
-});
+};

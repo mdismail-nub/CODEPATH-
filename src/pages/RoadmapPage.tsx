@@ -45,7 +45,7 @@ export const RoadmapPage = () => {
 
         <div className="relative space-y-20">
           {/* Central Line */}
-          <div className="absolute left-[31px] md:left-1/2 top-4 bottom-4 w-px bg-slate-200 dark:bg-slate-800 -translate-x-1/2" />
+          <div className="absolute left-[27.5px] md:left-1/2 top-4 bottom-4 w-px bg-slate-200 dark:bg-slate-800 -translate-x-1/2" />
 
           {ROADMAP_STEPS.map((step, idx) => {
             const stepTopics = step.topics.map(slug => TOPICS.find(t => t.slug === slug)).filter(Boolean);
@@ -62,7 +62,7 @@ export const RoadmapPage = () => {
               >
                 {/* Milestone Node */}
                 <div className={cn(
-                  "absolute left-[31px] md:left-1/2 -translate-x-1/2 h-16 w-16 md:h-14 md:w-14 rounded-2xl border-4 border-slate-50 dark:border-slate-950 flex items-center justify-center z-10 transition-all duration-500 shadow-sm",
+                  "absolute left-[27.5px] md:left-1/2 -translate-x-1/2 h-14 w-14 rounded-2xl border-4 border-slate-50 dark:border-slate-950 flex items-center justify-center z-10 transition-all duration-500 shadow-sm",
                   isLatestUnlocked ? "bg-primary-600 dark:bg-primary-500 text-white" : "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600"
                 )}>
                   <PhaseIcon className="h-6 w-6" />
@@ -75,7 +75,7 @@ export const RoadmapPage = () => {
                   <div className="w-full md:w-1/2 pl-20 md:pl-0">
                     <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
                        <div className="flex items-center gap-3 mb-6">
-                         <span className="text-[10px] font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400">Phase 0{idx + 1}</span>
+                         <span className="text-[10px] font-bold uppercase tracking-widest text-primary-600 dark:text-primary-400">Phase {(idx + 1).toString().padStart(2, '0')}</span>
                          <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
                        </div>
                        

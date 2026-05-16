@@ -9,7 +9,14 @@ export const DailyChallenge = () => {
   const { isSolved, toggleSolved } = useAppState();
 
   const unsolvedProblems = React.useMemo(() => {
-    return TOPICS.flatMap(t => t.problems).filter(p => !isSolved(p.id));
+    const allProblems = TOPICS.flatMap(t => t.problems);
+    const dailyTopic = TOPICS.find(t => t.id === 'daily');
+    const dailyProblems = dailyTopic ? dailyTopic.problems : [];
+    
+    const unsolvedDaily = dailyProblems.filter(p => !isSolved(p.id));
+    
+    if (unsolvedDaily.length > 0) return unsolvedDaily;
+    return allProblems.filter(p => !isSolved(p.id));
   }, [isSolved]);
 
   const dailyProblem = React.useMemo(() => {
