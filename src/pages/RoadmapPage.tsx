@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : High
+ * File          : src/pages/RoadmapPage.tsx
+ * Line(s)       : 13, 16, 54
+ * Root Cause    : Topic lookup logic used slugs while source data used IDs, causing most roadmap steps to be empty.
+ * Fix Applied   : Updated lookup to check both ID and slug for robustness.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React from 'react';
 import { motion } from 'motion/react';
 import { Map as MapIcon, Flag, ChevronRight, CheckCircle2, Circle, Trophy, Rocket, Target, Award, Star, BookOpen } from 'lucide-react';
@@ -10,8 +23,11 @@ import { BackButton } from '../components/BackButton';
 export const RoadmapPage = () => {
   const { stats } = useAppState();
 
-  const getTopicProgress = (topicSlug: string) => {
-    const topic = TOPICS.find(t => t.slug === topicSlug);
+  const findTopic = (idOrSlug: string) =>
+    TOPICS.find(t => t.id === idOrSlug || t.slug === idOrSlug);
+
+  const getTopicProgress = (idOrSlug: string) => {
+    const topic = findTopic(idOrSlug);
     if (!topic) return 0;
     const solved = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
     return Math.round((solved / topic.problems.length) * 100);
@@ -48,7 +64,7 @@ export const RoadmapPage = () => {
           <div className="absolute left-[27.5px] md:left-1/2 top-4 bottom-4 w-px bg-slate-200 dark:bg-slate-800 -translate-x-1/2" />
 
           {ROADMAP_STEPS.map((step, idx) => {
-            const stepTopics = step.topics.map(slug => TOPICS.find(t => t.slug === slug)).filter(Boolean);
+            const stepTopics = step.topics.map(idOrSlug => findTopic(idOrSlug)).filter(Boolean);
             const isLatestUnlocked = idx === 0 || getTopicProgress(ROADMAP_STEPS[idx-1].topics[0]) > 0;
             const PhaseIcon = icons[idx % icons.length];
 
