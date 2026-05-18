@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { useAppState } from '../AppStateContext';
 import { TOPICS } from '../data';
@@ -17,63 +17,74 @@ import { cn } from '../lib/utils';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+const TOTAL_PROBLEMS = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
+const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
 export const Dashboard = () => {
   const { stats } = useAppState();
   const reportRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // Performance Optimization: Use a Set for O(1) lookups of solved problem IDs
+  const solvedSet = useMemo(() => new Set(stats.solvedIds), [stats.solvedIds]);
+
   const totalSolved = stats.solvedIds.length;
-  const totalProblems = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
-  const totalProgress = Math.round((totalSolved / totalProblems) * 100);
+  const totalProgress = Math.round((totalSolved / TOTAL_PROBLEMS) * 100);
 
-  const formatDate = (date: Date) => date.toISOString().split('T')[0];
+  // Performance Optimization: Memoize activity data to avoid recalculation on every render
+  const solvesByDate = useMemo(() => {
+    const history = stats.solvedAt || {};
+    const data: Record<string, number> = {};
+    Object.values(history).forEach((timestamp: any) => {
+      if (timestamp) {
+        const dateStr = formatDate(new Date(timestamp));
+        data[dateStr] = (data[dateStr] || 0) + 1;
+      }
+    });
+    return data;
+  }, [stats.solvedAt]);
 
-  const history = stats.solvedAt || {};
-  const solvesByDate: Record<string, number> = {};
-  Object.values(history).forEach((timestamp: any) => {
-    if (timestamp) {
-      const dateStr = formatDate(new Date(timestamp));
-      solvesByDate[dateStr] = (solvesByDate[dateStr] || 0) + 1;
-    }
-  });
-
-  const calculateStreak = () => {
-    let streak = 0;
+  // Performance Optimization: Memoize streak calculation
+  const streak = useMemo(() => {
+    let currentStreak = 0;
     let current = new Date();
     
-    if (solvesByDate[formatDate(current)]) {
-      streak++;
+    const isSolvedOnDate = (date: Date) => !!solvesByDate[formatDate(date)];
+
+    if (isSolvedOnDate(current)) {
+      currentStreak++;
     } else {
       current.setDate(current.getDate() - 1);
-      if (!solvesByDate[formatDate(current)]) return 0;
-      streak++;
+      if (!isSolvedOnDate(current)) return 0;
+      currentStreak++;
     }
 
     while (true) {
       current.setDate(current.getDate() - 1);
-      if (solvesByDate[formatDate(current)]) {
-        streak++;
+      if (isSolvedOnDate(current)) {
+        currentStreak++;
       } else {
         break;
       }
-      if (streak > 365) break;
+      if (currentStreak > 365) break;
     }
-    return streak;
-  };
+    return currentStreak;
+  }, [solvesByDate]);
 
-  const streak = calculateStreak();
-
-  const heatmapData = Array.from({ length: 154 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (153 - i));
-    const dateStr = formatDate(d);
-    const count = solvesByDate[dateStr] || 0;
-    return {
-      active: count > 0,
-      value: Math.min(count, 4),
-      date: dateStr
-    };
-  });
+  // Performance Optimization: Memoize heatmap data for the Activity Graph
+  const heatmapData = useMemo(() => {
+    return Array.from({ length: 154 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (153 - i));
+      const dateStr = formatDate(d);
+      const count = solvesByDate[dateStr] || 0;
+      return {
+        active: count > 0,
+        value: Math.min(count, 4),
+        date: dateStr
+      };
+    });
+  }, [solvesByDate]);
 
   const downloadProgress = async () => {
     if (!reportRef.current) return;
@@ -126,14 +137,27 @@ export const Dashboard = () => {
 
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`CodePath_Progress_Report.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
     } finally {
       setIsDownloading(false);
     }
   };
 
-  const topicsCompleted = TOPICS.filter(t => 
-    t.problems.every(p => stats.solvedIds.includes(p.id))
-  ).length;
+  // Performance Optimization: Memoize course mastery and topic progress
+  const topicsCompleted = useMemo(() => {
+    return TOPICS.filter(t =>
+      t.problems.every(p => solvedSet.has(p.id))
+    ).length;
+  }, [solvedSet]);
+
+  const topicsWithProgress = useMemo(() => {
+    return TOPICS.map(topic => {
+      const solvedCount = topic.problems.filter(p => solvedSet.has(p.id)).length;
+      const percent = Math.round((solvedCount / topic.problems.length) * 100);
+      return { ...topic, percent };
+    });
+  }, [solvedSet]);
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
@@ -153,8 +177,7 @@ export const Dashboard = () => {
           <button
             onClick={downloadProgress}
             disabled={isDownloading}
-            aria-busy={isDownloading}
-            className="inline-flex items-center gap-2 rounded-xl bg-gray-900 dark:bg-white px-6 py-4 text-sm font-semibold text-white dark:text-slate-900 shadow-sm hover:bg-gray-700 dark:hover:bg-slate-100 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 rounded-xl bg-gray-900 dark:bg-white px-6 py-4 text-sm font-semibold text-white dark:text-slate-900 shadow-sm hover:bg-gray-700 dark:hover:bg-slate-100 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDownloading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -265,30 +288,25 @@ export const Dashboard = () => {
               </div>
 
               <div className="space-y-6">
-                {TOPICS.slice(0, 6).map((topic) => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
-                  const percent = Math.round((solvedCount / topic.problems.length) * 100);
-                  
-                  return (
-                    <div key={topic.id}>
-                       <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{topic.name}</span>
-                          <span className="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">{percent}%</span>
-                       </div>
-                       <div className="h-2 w-full bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${percent}%` }}
-                            transition={{ duration: 1 }}
-                            className={cn(
-                              "h-full rounded-full bg-blue-600 dark:bg-blue-400",
-                              percent === 100 && "bg-green-500 dark:bg-green-500"
-                            )} 
-                          />
-                       </div>
-                    </div>
-                  );
-                })}
+                {topicsWithProgress.slice(0, 6).map((topic) => (
+                  <div key={topic.id}>
+                     <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{topic.name}</span>
+                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400 font-mono">{topic.percent}%</span>
+                     </div>
+                     <div className="h-2 w-full bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${topic.percent}%` }}
+                          transition={{ duration: 1 }}
+                          className={cn(
+                            "h-full rounded-full bg-blue-600 dark:bg-blue-400",
+                            topic.percent === 100 && "bg-green-500 dark:bg-green-500"
+                          )}
+                        />
+                     </div>
+                  </div>
+                ))}
               </div>
 
               <div className="mt-10 p-5 rounded-2xl bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-800 text-center">
@@ -340,21 +358,17 @@ export const Dashboard = () => {
           <div>
              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-8 pb-4 border-b border-gray-100">Top Module Performance</h3>
              <div className="grid grid-cols-2 gap-x-12 gap-y-8">
-                {TOPICS.slice(0, 10).map(topic => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
-                  const percent = Math.round((solvedCount / topic.problems.length) * 100);
-                  return (
-                    <div key={topic.id} className="flex items-center justify-between">
-                      <div className="flex flex-col gap-2">
-                        <span className="text-sm font-bold text-gray-800 uppercase tracking-tight">{topic.name}</span>
-                        <div className="h-1.5 w-32 bg-gray-100 rounded-full">
-                          <div className="h-full bg-blue-600 rounded-full" style={{ width: `${percent}%` }} />
-                        </div>
+                {topicsWithProgress.slice(0, 10).map(topic => (
+                  <div key={topic.id} className="flex items-center justify-between">
+                    <div className="flex flex-col gap-2">
+                      <span className="text-sm font-bold text-gray-800 uppercase tracking-tight">{topic.name}</span>
+                      <div className="h-1.5 w-32 bg-gray-100 rounded-full">
+                        <div className="h-full bg-blue-600 rounded-full" style={{ width: `${topic.percent}%` }} />
                       </div>
-                      <span className="text-xl font-bold text-blue-600 font-mono">{percent}%</span>
                     </div>
-                  );
-                })}
+                    <span className="text-xl font-bold text-blue-600 font-mono">{topic.percent}%</span>
+                  </div>
+                ))}
              </div>
           </div>
 
