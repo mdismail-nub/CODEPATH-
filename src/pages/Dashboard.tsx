@@ -137,6 +137,8 @@ export const Dashboard = () => {
 
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       pdf.save(`CodePath_Progress_Report.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
     } finally {
       setIsDownloading(false);
     }
@@ -175,8 +177,7 @@ export const Dashboard = () => {
           <button
             onClick={downloadProgress}
             disabled={isDownloading}
-            aria-busy={isDownloading}
-            className="inline-flex items-center gap-2 rounded-xl bg-gray-900 dark:bg-white px-6 py-4 text-sm font-semibold text-white dark:text-slate-900 shadow-sm hover:bg-gray-700 dark:hover:bg-slate-100 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-2 rounded-xl bg-gray-900 dark:bg-white px-6 py-4 text-sm font-semibold text-white dark:text-slate-900 shadow-sm hover:bg-gray-700 dark:hover:bg-slate-100 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDownloading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
