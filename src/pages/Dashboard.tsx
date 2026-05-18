@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { useAppState } from '../AppStateContext';
 import { TOPICS } from '../data';
@@ -10,7 +10,8 @@ import {
   ShieldCheck,
   Calendar,
   Award,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import jsPDF from 'jspdf';
@@ -22,6 +23,7 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
 export const Dashboard = () => {
   const { stats } = useAppState();
   const reportRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Performance Optimization: Use a Set for O(1) lookups of solved problem IDs
   const solvedSet = useMemo(() => new Set(stats.solvedIds), [stats.solvedIds]);
@@ -86,53 +88,58 @@ export const Dashboard = () => {
 
   const downloadProgress = async () => {
     if (!reportRef.current) return;
+    setIsDownloading(true);
 
-    const element = reportRef.current;
-    const canvas = await html2canvas(element, {
-      backgroundColor: '#ffffff',
-      scale: 3,
-      logging: false,
-      useCORS: true,
-      allowTaint: true,
-      ignoreElements: (element) => element.classList.contains('no-export'),
-      onclone: (clonedDoc) => {
-        const style = clonedDoc.createElement('style');
-        style.innerHTML = `
-          * { 
-            backdrop-filter: none !important; 
-            -webkit-backdrop-filter: none !important; 
-            transition: none !important; 
-            animation: none !important; 
-          }
-          :root {
-            --color-blue-600: #2563eb !important;
-            --color-primary-600: #2563eb !important;
-            --color-slate-900: #0f172a !important;
-            --color-slate-50: #f8fafc !important;
-          }
-          .text-gray-500 { color: #6b7280 !important; }
-          .text-gray-400 { color: #9ca3af !important; }
-          .text-gray-900 { color: #111827 !important; }
-          .text-slate-900 { color: #0f172a !important; }
-          .text-slate-500 { color: #64748b !important; }
-          .bg-blue-600 { background-color: #2563eb !important; }
-          .bg-gray-50 { background-color: #f9fafb !important; }
-          .bg-white { background-color: #ffffff !important; }
-          .border-gray-100 { border-color: #f3f4f6 !important; }
-          .border-gray-200 { border-color: #e5e7eb !important; }
-          .text-blue-600 { color: #2563eb !important; }
-        `;
-        clonedDoc.head.appendChild(style);
-      }
-    });
+    try {
+      const element = reportRef.current;
+      const canvas = await html2canvas(element, {
+        backgroundColor: '#ffffff',
+        scale: 3,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        ignoreElements: (element) => element.classList.contains('no-export'),
+        onclone: (clonedDoc) => {
+          const style = clonedDoc.createElement('style');
+          style.innerHTML = `
+            * {
+              backdrop-filter: none !important;
+              -webkit-backdrop-filter: none !important;
+              transition: none !important;
+              animation: none !important;
+            }
+            :root {
+              --color-blue-600: #2563eb !important;
+              --color-primary-600: #2563eb !important;
+              --color-slate-900: #0f172a !important;
+              --color-slate-50: #f8fafc !important;
+            }
+            .text-gray-500 { color: #6b7280 !important; }
+            .text-gray-400 { color: #9ca3af !important; }
+            .text-gray-900 { color: #111827 !important; }
+            .text-slate-900 { color: #0f172a !important; }
+            .text-slate-500 { color: #64748b !important; }
+            .bg-blue-600 { background-color: #2563eb !important; }
+            .bg-gray-50 { background-color: #f9fafb !important; }
+            .bg-white { background-color: #ffffff !important; }
+            .border-gray-100 { border-color: #f3f4f6 !important; }
+            .border-gray-200 { border-color: #e5e7eb !important; }
+            .text-blue-600 { color: #2563eb !important; }
+          `;
+          clonedDoc.head.appendChild(style);
+        }
+      });
 
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`CodePath_Progress_Report.pdf`);
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`CodePath_Progress_Report.pdf`);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   // Performance Optimization: Memoize course mastery and topic progress
@@ -167,10 +174,16 @@ export const Dashboard = () => {
           </div>
           <button
             onClick={downloadProgress}
-            className="inline-flex items-center gap-2 rounded-xl bg-gray-900 dark:bg-white px-6 py-4 text-sm font-semibold text-white dark:text-slate-900 shadow-sm hover:bg-gray-700 dark:hover:bg-slate-100 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+            disabled={isDownloading}
+            aria-busy={isDownloading}
+            className="inline-flex items-center gap-2 rounded-xl bg-gray-900 dark:bg-white px-6 py-4 text-sm font-semibold text-white dark:text-slate-900 shadow-sm hover:bg-gray-700 dark:hover:bg-slate-100 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            <Download className="h-4 w-4" />
-            Download Report
+            {isDownloading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {isDownloading ? 'Generating...' : 'Download Report'}
           </button>
         </header>
 
