@@ -8,14 +8,14 @@ import { cn } from '../lib/utils';
 import { BackButton } from '../components/BackButton';
 
 export const RoadmapPage = () => {
-  const { stats } = useAppState();
+  const { stats, isSolved } = useAppState();
 
-  const getTopicProgress = (topicSlug: string) => {
+  const getTopicProgress = React.useCallback((topicSlug: string) => {
     const topic = TOPICS.find(t => t.slug === topicSlug);
-    if (!topic) return 0;
-    const solved = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+    if (!topic || topic.problems.length === 0) return 0;
+    const solved = topic.problems.filter(p => isSolved(p.id)).length;
     return Math.round((solved / topic.problems.length) * 100);
-  };
+  }, [isSolved]);
 
   const icons = [Rocket, Target, Award, Star];
 
@@ -48,8 +48,12 @@ export const RoadmapPage = () => {
           <div className="absolute left-[27.5px] md:left-1/2 top-4 bottom-4 w-px bg-slate-200 dark:bg-slate-800 -translate-x-1/2" />
 
           {ROADMAP_STEPS.map((step, idx) => {
-            const stepTopics = step.topics.map(slug => TOPICS.find(t => t.slug === slug)).filter(Boolean);
-            const isLatestUnlocked = idx === 0 || getTopicProgress(ROADMAP_STEPS[idx-1].topics[0]) > 0;
+            const stepTopics = step.topics.map(topicIdOrSlug =>
+              TOPICS.find(t => t.id === topicIdOrSlug || t.slug === topicIdOrSlug)
+            ).filter(Boolean);
+
+            const prevStepFirstTopic = idx > 0 ? TOPICS.find(t => t.id === ROADMAP_STEPS[idx-1].topics[0] || t.slug === ROADMAP_STEPS[idx-1].topics[0]) : null;
+            const isLatestUnlocked = idx === 0 || (prevStepFirstTopic && getTopicProgress(prevStepFirstTopic.slug) > 0);
             const PhaseIcon = icons[idx % icons.length];
 
             return (
