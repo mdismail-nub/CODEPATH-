@@ -3,7 +3,8 @@ import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft,
+  Copy, Check
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -29,6 +30,7 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
@@ -70,6 +72,14 @@ export const LessonPage = () => {
     setTimeout(() => {
       setShowConfetti(false);
     }, 5000);
+  };
+
+  const handleCopy = () => {
+    if (lesson.codeExample) {
+      navigator.clipboard.writeText(lesson.codeExample.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const isLastLesson = lessonIndex === course.lessons.length - 1;
@@ -141,7 +151,23 @@ export const LessonPage = () => {
                     </div>
                     <span className="text-[10px] font-bold text-slate-500 ml-2 uppercase tracking-widest">Example: {lesson.codeExample.language}</span>
                   </div>
-                  <Play className="h-3 w-3 text-slate-600" />
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleCopy}
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-slate-800 transition-colors text-slate-400 hover:text-white"
+                      aria-label={copied ? "Code copied" : "Copy code"}
+                    >
+                      {copied ? (
+                        <Check className="h-3 w-3 text-emerald-400" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                      <span className="text-[10px] font-bold uppercase tracking-widest">
+                        {copied ? 'Copied' : 'Copy'}
+                      </span>
+                    </button>
+                    <Play className="h-3 w-3 text-slate-600" />
+                  </div>
                 </div>
                 <pre className="p-6 text-sm font-mono text-slate-300 leading-relaxed overflow-x-auto">
                   <code>{lesson.codeExample.code}</code>
