@@ -618,6 +618,10 @@ export const TOPICS: Topic[] = [
   }
 ];
 
+// Performance Optimization: Hash maps for O(1) topic lookups by ID or Slug
+export const TOPICS_BY_ID = Object.fromEntries(TOPICS.map(t => [t.id, t]));
+export const TOPICS_BY_SLUG = Object.fromEntries(TOPICS.map(t => [t.slug, t]));
+
 export const ROADMAP_STEPS = [
   { id: 'foundation', title: 'Phase 0: Fundamentals', description: 'Core building blocks: I/O, Conditions, and Loops.', topics: ['b1', 'b2', 'b3'] },
   { id: 'foundation-adv', title: 'Phase 1: Foundations', description: 'Functions, Arrays, and Strings mastery.', topics: ['p3', 'p1', 'p2'] },
