@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import * as Icons from 'lucide-react';
-import { TOPICS } from '../data';
+import { TOPICS_BY_SLUG } from '../data';
 import { useAppState } from '../AppStateContext';
 import { Difficulty } from '../types';
 import { cn } from '../lib/utils';
@@ -11,11 +11,12 @@ import { BackButton } from '../components/BackButton';
 
 export const TopicDetail = () => {
   const { slug } = useParams();
-  const { isSolved, toggleSolved, stats } = useAppState();
+  const { isSolved, toggleSolved, stats, solvedSet } = useAppState();
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'All'>('All');
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
 
-  const topic = TOPICS.find(t => t.slug === slug);
+  // Performance Optimization: O(1) lookup using hash map
+  const topic = slug ? TOPICS_BY_SLUG[slug] : undefined;
   if (!topic) return <Navigate to="/topics" />;
 
   const Icon = (Icons as any)[topic.icon] || Icons.HelpCircle;
@@ -24,7 +25,8 @@ export const TopicDetail = () => {
     ? topic.problems
     : topic.problems.filter(p => p.difficulty === difficultyFilter);
 
-  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
+  // Performance Optimization: O(1) lookup using solvedSet
+  const solvedCount = topic.problems.filter(p => solvedSet.has(p.id)).length;
   const totalCount = topic.problems.length;
   const progressPercent = Math.round((solvedCount / totalCount) * 100) || 0;
   const isAllSolved = solvedCount === totalCount && totalCount > 0;

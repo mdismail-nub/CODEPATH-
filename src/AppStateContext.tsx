@@ -3,6 +3,7 @@ import { UserStats, CertificateInfo } from './types';
 
 interface AppStateContextType {
   stats: UserStats;
+  solvedSet: Set<string>;
   loading: boolean;
   theme: 'light' | 'dark';
   toggleSolved: (id: string) => void;
@@ -56,12 +57,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('codepath_stats', JSON.stringify(stats));
   }, [stats]);
 
+  // Performance Optimization: Use a Set for O(1) lookups instead of O(N) array includes
+  const solvedSet = React.useMemo(() => new Set(stats.solvedIds), [stats.solvedIds]);
+
   const toggleSolved = (id: string) => {
-    const alreadySolved = stats.solvedIds.includes(id);
     const now = Date.now();
     
     setStats(prev => {
+      const alreadySolved = prev.solvedIds.includes(id);
       const newSolvedAt = { ...(prev.solvedAt || {}) };
+
       if (alreadySolved) {
         delete newSolvedAt[id];
       } else {
@@ -78,7 +83,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
-  const isSolved = (id: string) => stats.solvedIds.includes(id);
+  const isSolved = (id: string) => solvedSet.has(id);
 
   const updateVJudgeId = (vjudgeId: string) => {
     setStats(prev => ({ ...prev, vjudgeId }));
@@ -116,7 +121,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   return (
     <AppStateContext.Provider value={{ 
-      stats, loading, theme, 
+      stats, solvedSet, loading, theme,
       toggleSolved, isSolved, updateVJudgeId, requestCertificate, 
       completeLesson, isLessonCompleted, toggleTheme
     }}>

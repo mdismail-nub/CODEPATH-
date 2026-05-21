@@ -1,19 +1,20 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Map as MapIcon, Flag, ChevronRight, CheckCircle2, Circle, Trophy, Rocket, Target, Award, Star, BookOpen } from 'lucide-react';
-import { ROADMAP_STEPS, TOPICS } from '../data';
+import { ROADMAP_STEPS, TOPICS_BY_ID, TOPICS_BY_SLUG } from '../data';
 import { Link } from 'react-router-dom';
 import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 import { BackButton } from '../components/BackButton';
 
 export const RoadmapPage = () => {
-  const { stats } = useAppState();
+  const { stats, solvedSet } = useAppState();
 
-  const getTopicProgress = (topicSlug: string) => {
-    const topic = TOPICS.find(t => t.slug === topicSlug);
+  const getTopicProgress = (topicIdOrSlug: string) => {
+    // Performance Optimization: O(1) lookup using hash maps
+    const topic = TOPICS_BY_SLUG[topicIdOrSlug] || TOPICS_BY_ID[topicIdOrSlug];
     if (!topic) return 0;
-    const solved = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+    const solved = topic.problems.filter(p => solvedSet.has(p.id)).length;
     return Math.round((solved / topic.problems.length) * 100);
   };
 
@@ -48,7 +49,8 @@ export const RoadmapPage = () => {
           <div className="absolute left-[27.5px] md:left-1/2 top-4 bottom-4 w-px bg-slate-200 dark:bg-slate-800 -translate-x-1/2" />
 
           {ROADMAP_STEPS.map((step, idx) => {
-            const stepTopics = step.topics.map(slug => TOPICS.find(t => t.slug === slug)).filter(Boolean);
+            // Performance Optimization: O(1) lookup using hash maps
+            const stepTopics = step.topics.map(idOrSlug => TOPICS_BY_SLUG[idOrSlug] || TOPICS_BY_ID[idOrSlug]).filter(Boolean);
             const isLatestUnlocked = idx === 0 || getTopicProgress(ROADMAP_STEPS[idx-1].topics[0]) > 0;
             const PhaseIcon = icons[idx % icons.length];
 
