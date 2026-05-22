@@ -3,7 +3,8 @@ import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft,
+  Copy, Check
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -29,8 +30,16 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
+
+  const handleCopyCode = () => {
+    if (!lesson.codeExample) return;
+    navigator.clipboard.writeText(lesson.codeExample.code);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
@@ -141,7 +150,37 @@ export const LessonPage = () => {
                     </div>
                     <span className="text-[10px] font-bold text-slate-500 ml-2 uppercase tracking-widest">Example: {lesson.codeExample.language}</span>
                   </div>
-                  <Play className="h-3 w-3 text-slate-600" />
+                  <button
+                    onClick={handleCopyCode}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white transition-all active:scale-95"
+                    aria-label="Copy code example"
+                  >
+                    <AnimatePresence mode="wait" initial={false}>
+                      {isCopied ? (
+                        <motion.div
+                          key="copied"
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.5 }}
+                          className="flex items-center gap-1.5 text-emerald-400"
+                        >
+                          <Check className="h-3 w-3" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest">Copied</span>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="copy"
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.5 }}
+                          className="flex items-center gap-1.5"
+                        >
+                          <Copy className="h-3 w-3" />
+                          <span className="text-[10px] font-bold uppercase tracking-widest">Copy</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </button>
                 </div>
                 <pre className="p-6 text-sm font-mono text-slate-300 leading-relaxed overflow-x-auto">
                   <code>{lesson.codeExample.code}</code>
@@ -267,6 +306,7 @@ export const LessonPage = () => {
                           placeholder="Type the answer here..."
                           className="w-full p-6 text-xl font-bold rounded-2xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-700 focus:outline-none focus:border-primary-600 transition-all font-outfit"
                           onKeyDown={(e) => e.key === 'Enter' && checkAnswer()}
+                          aria-label="Your answer"
                         />
                          <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
                              <HelpCircle className="h-5 w-5 text-slate-300" />
@@ -284,6 +324,7 @@ export const LessonPage = () => {
                             className="w-full h-40 p-6 font-mono text-sm bg-transparent border-none text-slate-200 focus:outline-none resize-none"
                             placeholder={currentExercise.inputTemplate}
                             onKeyDown={(e) => e.ctrlKey && e.key === 'Enter' && checkAnswer()}
+                            aria-label="Code editor"
                           />
                         </div>
                         <div className="flex justify-between items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -327,6 +368,8 @@ export const LessonPage = () => {
                        onClick={() => setShowHint(!showHint)}
                        className="h-16 w-16 flex items-center justify-center bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-2 border-amber-100 dark:border-amber-900/30 rounded-2xl hover:bg-amber-100 transition-colors"
                        title="Get a hint"
+                       aria-label="Get a hint"
+                       aria-expanded={showHint}
                     >
                        <Lightbulb className="h-6 w-6" />
                     </button>
