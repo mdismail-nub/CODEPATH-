@@ -3,6 +3,8 @@ import { UserStats, CertificateInfo } from './types';
 
 interface AppStateContextType {
   stats: UserStats;
+  solvedSet: Set<string>;
+  completedLessonsSet: Set<string>;
   loading: boolean;
   theme: 'light' | 'dark';
   toggleSolved: (id: string) => void;
@@ -43,7 +45,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return (saved as 'light' | 'dark') || 'dark';
   });
 
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  const toggleTheme = React.useCallback(() => setTheme(prev => prev === 'light' ? 'dark' : 'light'), []);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -56,12 +58,20 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('codepath_stats', JSON.stringify(stats));
   }, [stats]);
 
-  const toggleSolved = (id: string) => {
-    const alreadySolved = stats.solvedIds.includes(id);
+  // Performance Optimization: Use Sets for O(1) lookups instead of O(N) array includes
+  const solvedSet = React.useMemo(() => new Set(stats.solvedIds), [stats.solvedIds]);
+  const completedLessonsSet = React.useMemo(() =>
+    new Set(stats.completedLessonIds || []),
+    [stats.completedLessonIds]
+  );
+
+  const toggleSolved = React.useCallback((id: string) => {
     const now = Date.now();
     
     setStats(prev => {
+      const alreadySolved = prev.solvedIds.includes(id);
       const newSolvedAt = { ...(prev.solvedAt || {}) };
+
       if (alreadySolved) {
         delete newSolvedAt[id];
       } else {
@@ -76,15 +86,15 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         solvedAt: newSolvedAt
       };
     });
-  };
+  }, []);
 
-  const isSolved = (id: string) => stats.solvedIds.includes(id);
+  const isSolved = React.useCallback((id: string) => solvedSet.has(id), [solvedSet]);
 
-  const updateVJudgeId = (vjudgeId: string) => {
+  const updateVJudgeId = React.useCallback((vjudgeId: string) => {
     setStats(prev => ({ ...prev, vjudgeId }));
-  };
+  }, []);
 
-  const requestCertificate = (topicSlug: string, recipientName: string) => {
+  const requestCertificate = React.useCallback((topicSlug: string, recipientName: string) => {
     const certInfo: CertificateInfo = {
       status: 'issued',
       recipientName,
@@ -99,27 +109,38 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         [topicSlug]: certInfo
       }
     }));
-  };
+  }, []);
 
-  const completeLesson = (lessonId: string, xpReward: number) => {
-    const completed = stats.completedLessonIds || [];
-    if (completed.includes(lessonId)) return;
-    
-    setStats(prev => ({
-      ...prev,
-      completedLessonIds: [...(prev.completedLessonIds || []), lessonId],
-      xp: (prev.xp || 0) + xpReward
-    }));
-  };
+  const completeLesson = React.useCallback((lessonId: string, xpReward: number) => {
+    setStats(prev => {
+      const completed = prev.completedLessonIds || [];
+      if (completed.includes(lessonId)) return prev;
 
-  const isLessonCompleted = (lessonId: string) => (stats.completedLessonIds || []).includes(lessonId);
+      return {
+        ...prev,
+        completedLessonIds: [...completed, lessonId],
+        xp: (prev.xp || 0) + xpReward
+      };
+    });
+  }, []);
+
+  const isLessonCompleted = React.useCallback((lessonId: string) =>
+    completedLessonsSet.has(lessonId),
+    [completedLessonsSet]
+  );
+
+  const providerValue = React.useMemo(() => ({
+    stats, solvedSet, completedLessonsSet, loading, theme,
+    toggleSolved, isSolved, updateVJudgeId, requestCertificate,
+    completeLesson, isLessonCompleted, toggleTheme
+  }), [
+    stats, solvedSet, completedLessonsSet, loading, theme,
+    toggleSolved, isSolved, updateVJudgeId, requestCertificate,
+    completeLesson, isLessonCompleted, toggleTheme
+  ]);
 
   return (
-    <AppStateContext.Provider value={{ 
-      stats, loading, theme, 
-      toggleSolved, isSolved, updateVJudgeId, requestCertificate, 
-      completeLesson, isLessonCompleted, toggleTheme
-    }}>
+    <AppStateContext.Provider value={providerValue}>
       {children}
     </AppStateContext.Provider>
   );
