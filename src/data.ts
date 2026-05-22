@@ -630,5 +630,5 @@ export const ROADMAP_STEPS = [
   { id: 'step6', title: 'Phase 8: Hierarchical Data', description: 'Binary Trees, BST, and Tries.', topics: ['sz10', 'sz16', 'sz19'] },
   { id: 'step7', title: 'Phase 9: System Optimization', description: 'Sliding Window, Heaps, and Greedy Strategies.', topics: ['sz13', 'sz14', 'sz15'] },
   { id: 'step8', title: 'Phase 10: High-Level Concepts', description: 'Advanced Recursion, Graphs, and Dynamic Programming.', topics: ['sz11', 'sz17', 'sz18'] },
-  { id: 'final-practice', title: 'Phase 11: Comprehensive Practice', description: 'Mixed challenges to test your overall skills.', topics: ['sz-ge', 'sz-gm', 'sz-gh', 'contest-challenges'] }
+  { id: 'final-practice', title: 'Phase 11: Comprehensive Practice', description: 'Mixed challenges to test your overall skills.', topics: ['sz-ge', 'sz-gm', 'sz-gh', 'contests-newcomers'] }
 ];
