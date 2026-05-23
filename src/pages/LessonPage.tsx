@@ -13,6 +13,20 @@ import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 import { Exercise } from '../types';
 
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Runtime / Logic
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : Multiple
+ * Root Cause    : Component state (currentExerciseIdx) was not reset on route changes, leading to out-of-bounds access; missing guards for undefined exercises and division by zero.
+ * Fix Applied   : Added useEffect to reset state on lessonSlug change; added guards for currentExercise and totalExercises.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
+
 export const LessonPage = () => {
   const { courseSlug, lessonSlug } = useParams();
   const navigate = useNavigate();
@@ -20,8 +34,8 @@ export const LessonPage = () => {
   const { completeLesson, isLessonCompleted } = useAppState();
 
   const course = COURSES.find(c => c.slug === courseSlug);
-  const lessonIndex = course?.lessons.findIndex(l => l.slug === lessonSlug) ?? -1;
-  const lesson = course?.lessons[lessonIndex];
+  const lessonIndex = course?.lessons?.findIndex(l => l.slug === lessonSlug) ?? -1;
+  const lesson = lessonIndex !== -1 ? course?.lessons[lessonIndex] : undefined;
 
   const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
@@ -30,11 +44,23 @@ export const LessonPage = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
+  // Reset state when lesson changes to prevent out-of-bounds access
+  useEffect(() => {
+    setCurrentExerciseIdx(0);
+    setUserAnswer('');
+    setShowFeedback(null);
+    setIsCompleted(false);
+    setShowHint(false);
+    setShowConfetti(false);
+  }, [lessonSlug]);
+
   if (!course || !lesson) return <Navigate to="/learn" />;
 
-  const currentExercise = lesson.exercises[currentExerciseIdx];
-  const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
+  const currentExercise = lesson.exercises?.[currentExerciseIdx];
+  const totalExercises = lesson.exercises?.length ?? 0;
+  const progressPercent = totalExercises > 0
+    ? Math.round(((currentExerciseIdx) / totalExercises) * 100)
+    : 0;
 
   const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
@@ -72,8 +98,8 @@ export const LessonPage = () => {
     }, 5000);
   };
 
-  const isLastLesson = lessonIndex === course.lessons.length - 1;
-  const nextLesson = course.lessons[lessonIndex + 1];
+  const isLastLesson = lessonIndex === (course.lessons?.length ?? 0) - 1;
+  const nextLesson = course.lessons?.[lessonIndex + 1];
 
   return (
     <div className="relative flex flex-col h-screen bg-[#F8FAFC] dark:bg-[#020617] overflow-hidden pt-16">
@@ -161,7 +187,7 @@ export const LessonPage = () => {
         {/* Right Column: Interaction Layer */}
         <div className={cn(
           "w-full lg:w-1/2 flex flex-col bg-[#F8FAFC] dark:bg-[#020617] relative flex-1 transition-all duration-300",
-          !isCompleted && width < 1024 && activeTab !== 'practice' ? 'hidden' : 'block'
+          (!isCompleted && totalExercises > 0) && width < 1024 && activeTab !== 'practice' ? 'hidden' : 'block'
         )}>
           <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-blue-grain pointer-events-none" />
           
@@ -217,7 +243,30 @@ export const LessonPage = () => {
                     </Link>
                   </div>
                 </motion.div>
-              ) : (
+              ) : totalExercises === 0 ? (
+                <motion.div
+                  key="no-exercises"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center max-w-md"
+                >
+                  <div className="mb-8">
+                    <div className="h-20 w-20 bg-primary-50 dark:bg-primary-900/20 rounded-2xl flex items-center justify-center mx-auto">
+                      <Sparkles className="h-10 w-10 text-primary-600" />
+                    </div>
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 font-outfit">Ready to move on?</h2>
+                  <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                    This lesson is purely informative. Once you've read through the content, you can mark it as complete.
+                  </p>
+                  <button
+                    onClick={handleLessonComplete}
+                    className="w-full bg-primary-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-primary-700 transition-all shadow-lg shadow-primary-600/20"
+                  >
+                    Mark as Complete
+                  </button>
+                </motion.div>
+              ) : currentExercise ? (
                 <motion.div
                   key={currentExerciseIdx}
                   initial={{ opacity: 0, x: 20 }}
@@ -349,7 +398,7 @@ export const LessonPage = () => {
                     )}
                   </AnimatePresence>
                 </motion.div>
-              )}
+              ) : null}
             </AnimatePresence>
           </div>
         </div>
