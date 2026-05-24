@@ -1,3 +1,7 @@
-## 2026-05-17 - [Micro-UX: Async Button Feedback]
-**Learning:** Users can be confused by slow, silent client-side operations (like PDF generation with html2canvas). Providing immediate visual feedback via loading states and disabling the button prevents duplicate actions and improves perceived performance.
-**Action:** Always implement loading states for any action that might take more than 200ms, especially complex DOM-to-Canvas operations.
+## 2025-05-15 - Dynamic Feedback for Clipboard Operations
+**Learning:** For micro-interactions like clipboard copying, updating the `aria-label` dynamically (e.g., from "Copy code" to "Copied to clipboard") is crucial. Sighted users see the icon/text change, but without the ARIA update, screen reader users miss the confirmation of the action's success.
+**Action:** Always implement state-driven ARIA labels for "Switch & Revert" UI patterns to maintain accessibility parity.
+
+## 2025-05-15 - Testability of New UI Components
+**Learning:** When adding new interactive elements, including a stable and descriptive CSS class (like `.copy-code-button`) is a best practice for automated verification. Relying on generic selectors or text content makes tests fragile to copy changes or layout shifts.
+**Action:** Add dedicated `test-id` or descriptive classes to new micro-interactions.
