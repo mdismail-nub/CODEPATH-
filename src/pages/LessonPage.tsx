@@ -3,7 +3,8 @@ import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft,
+  Copy, Check
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -29,8 +30,17 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
+
+  const handleCopyCode = () => {
+    if (lesson.codeExample) {
+      navigator.clipboard.writeText(lesson.codeExample.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
@@ -141,7 +151,38 @@ export const LessonPage = () => {
                     </div>
                     <span className="text-[10px] font-bold text-slate-500 ml-2 uppercase tracking-widest">Example: {lesson.codeExample.language}</span>
                   </div>
-                  <Play className="h-3 w-3 text-slate-600" />
+                  <button
+                    onClick={handleCopyCode}
+                    className="copy-code-button flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-slate-800 transition-colors group/copy"
+                    title="Copy code"
+                    aria-label={copied ? "Copied to clipboard" : "Copy code to clipboard"}
+                  >
+                    <AnimatePresence mode="wait">
+                      {copied ? (
+                        <motion.div
+                          key="check"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          className="flex items-center gap-1.5"
+                        >
+                          <Check className="h-3 w-3 text-emerald-400" />
+                          <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Copied!</span>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="copy"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          className="flex items-center gap-1.5"
+                        >
+                          <Copy className="h-3 w-3 text-slate-500 group-hover/copy:text-slate-300 transition-colors" />
+                          <span className="text-[10px] font-bold text-slate-500 group-hover/copy:text-slate-300 uppercase tracking-widest transition-colors">Copy</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </button>
                 </div>
                 <pre className="p-6 text-sm font-mono text-slate-300 leading-relaxed overflow-x-auto">
                   <code>{lesson.codeExample.code}</code>
@@ -298,6 +339,7 @@ export const LessonPage = () => {
                     <button
                       onClick={checkAnswer}
                       disabled={!userAnswer}
+                      aria-live="polite"
                       className={cn(
                         "flex-1 py-5 rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2",
                         !userAnswer 
@@ -327,6 +369,8 @@ export const LessonPage = () => {
                        onClick={() => setShowHint(!showHint)}
                        className="h-16 w-16 flex items-center justify-center bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-2 border-amber-100 dark:border-amber-900/30 rounded-2xl hover:bg-amber-100 transition-colors"
                        title="Get a hint"
+                       aria-expanded={showHint}
+                       aria-label="Show hint"
                     >
                        <Lightbulb className="h-6 w-6" />
                     </button>
