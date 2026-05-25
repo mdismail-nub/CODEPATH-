@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { UserStats, CertificateInfo } from './types';
 
 interface AppStateContextType {
@@ -37,13 +37,15 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     return DEFAULT_STATS;
   });
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('codepath_theme');
     return (saved as 'light' | 'dark') || 'dark';
   });
 
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  }, []);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -56,11 +58,13 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('codepath_stats', JSON.stringify(stats));
   }, [stats]);
 
-  const toggleSolved = (id: string) => {
-    const alreadySolved = stats.solvedIds.includes(id);
+  const solvedIdsSet = useMemo(() => new Set(stats.solvedIds), [stats.solvedIds]);
+  const completedLessonIdsSet = useMemo(() => new Set(stats.completedLessonIds || []), [stats.completedLessonIds]);
+
+  const toggleSolved = useCallback((id: string) => {
     const now = Date.now();
-    
     setStats(prev => {
+      const alreadySolved = prev.solvedIds.includes(id);
       const newSolvedAt = { ...(prev.solvedAt || {}) };
       if (alreadySolved) {
         delete newSolvedAt[id];
@@ -76,50 +80,60 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         solvedAt: newSolvedAt
       };
     });
-  };
+  }, []);
 
-  const isSolved = (id: string) => stats.solvedIds.includes(id);
+  const isSolved = useCallback((id: string) => solvedIdsSet.has(id), [solvedIdsSet]);
 
-  const updateVJudgeId = (vjudgeId: string) => {
+  const updateVJudgeId = useCallback((vjudgeId: string) => {
     setStats(prev => ({ ...prev, vjudgeId }));
-  };
+  }, []);
 
-  const requestCertificate = (topicSlug: string, recipientName: string) => {
-    const certInfo: CertificateInfo = {
-      status: 'issued',
-      recipientName,
-      topicSlug,
-      issuedAt: Date.now()
-    };
-    
-    setStats(prev => ({
-      ...prev,
-      certificates: {
-        ...(prev.certificates || {}),
-        [topicSlug]: certInfo
-      }
-    }));
-  };
+  const requestCertificate = useCallback((topicSlug: string, recipientName: string) => {
+    const now = Date.now();
+    setStats(prev => {
+      const certInfo: CertificateInfo = {
+        status: 'issued',
+        recipientName,
+        topicSlug,
+        issuedAt: now
+      };
+      return {
+        ...prev,
+        certificates: {
+          ...(prev.certificates || {}),
+          [topicSlug]: certInfo
+        }
+      };
+    });
+  }, []);
 
-  const completeLesson = (lessonId: string, xpReward: number) => {
-    const completed = stats.completedLessonIds || [];
-    if (completed.includes(lessonId)) return;
-    
-    setStats(prev => ({
-      ...prev,
-      completedLessonIds: [...(prev.completedLessonIds || []), lessonId],
-      xp: (prev.xp || 0) + xpReward
-    }));
-  };
+  const completeLesson = useCallback((lessonId: string, xpReward: number) => {
+    setStats(prev => {
+      const completed = prev.completedLessonIds || [];
+      if (completed.includes(lessonId)) return prev;
 
-  const isLessonCompleted = (lessonId: string) => (stats.completedLessonIds || []).includes(lessonId);
+      return {
+        ...prev,
+        completedLessonIds: [...completed, lessonId],
+        xp: (prev.xp || 0) + xpReward
+      };
+    });
+  }, []);
+
+  const isLessonCompleted = useCallback((lessonId: string) => completedLessonIdsSet.has(lessonId), [completedLessonIdsSet]);
+
+  const value = useMemo(() => ({
+    stats, loading, theme,
+    toggleSolved, isSolved, updateVJudgeId, requestCertificate,
+    completeLesson, isLessonCompleted, toggleTheme
+  }), [
+    stats, loading, theme,
+    toggleSolved, isSolved, updateVJudgeId, requestCertificate,
+    completeLesson, isLessonCompleted, toggleTheme
+  ]);
 
   return (
-    <AppStateContext.Provider value={{ 
-      stats, loading, theme, 
-      toggleSolved, isSolved, updateVJudgeId, requestCertificate, 
-      completeLesson, isLessonCompleted, toggleTheme
-    }}>
+    <AppStateContext.Provider value={value}>
       {children}
     </AppStateContext.Provider>
   );
