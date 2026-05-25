@@ -7,12 +7,26 @@ import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 import { BackButton } from '../components/BackButton';
 
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : High
+ * File          : src/pages/RoadmapPage.tsx
+ * Line(s)       : 14-19, 51
+ * Root Cause    : Topic lookup in RoadmapPage incorrectly assumed identifiers were always slugs, while data uses a mix of IDs and slugs.
+ * Fix Applied   : Updated lookup logic to check both ID and slug, and added defensive check for division by zero in progress calculation.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
+
 export const RoadmapPage = () => {
   const { stats } = useAppState();
 
-  const getTopicProgress = (topicSlug: string) => {
-    const topic = TOPICS.find(t => t.slug === topicSlug);
-    if (!topic) return 0;
+  const getTopicProgress = (idOrSlug: string) => {
+    const topic = TOPICS.find(t => t.id === idOrSlug || t.slug === idOrSlug);
+    if (!topic || topic.problems.length === 0) return 0;
     const solved = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
     return Math.round((solved / topic.problems.length) * 100);
   };
@@ -48,7 +62,7 @@ export const RoadmapPage = () => {
           <div className="absolute left-[27.5px] md:left-1/2 top-4 bottom-4 w-px bg-slate-200 dark:bg-slate-800 -translate-x-1/2" />
 
           {ROADMAP_STEPS.map((step, idx) => {
-            const stepTopics = step.topics.map(slug => TOPICS.find(t => t.slug === slug)).filter(Boolean);
+            const stepTopics = step.topics.map(idOrSlug => TOPICS.find(t => t.id === idOrSlug || t.slug === idOrSlug)).filter(Boolean) as typeof TOPICS;
             const isLatestUnlocked = idx === 0 || getTopicProgress(ROADMAP_STEPS[idx-1].topics[0]) > 0;
             const PhaseIcon = icons[idx % icons.length];
 
