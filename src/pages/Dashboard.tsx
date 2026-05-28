@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : High
+ * File          : src/pages/Dashboard.tsx
+ * Line(s)       : 24
+ * Root Cause    : Timezone mismatch between local system time and UTC-based date formatting (toISOString) in calculateStreak.
+ * Fix Applied   : Updated formatDate to use local date components (getFullYear, getMonth, getDate) to ensure consistency with current local date.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { useAppState } from '../AppStateContext';
@@ -26,7 +39,12 @@ export const Dashboard = () => {
   const totalProblems = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
   const totalProgress = Math.round((totalSolved / totalProblems) * 100);
 
-  const formatDate = (date: Date) => date.toISOString().split('T')[0];
+  const formatDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   const history = stats.solvedAt || {};
   const solvesByDate: Record<string, number> = {};
