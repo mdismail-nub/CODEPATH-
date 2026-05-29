@@ -1,3 +1,17 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : High
+ * File          : src/pages/RoadmapPage.tsx
+ * Line(s)       : 13, 50, 83
+ * Root Cause    : ROADMAP_STEPS uses mixed IDs and slugs for topic lookups, but only slugs were supported.
+ * Fix Applied   : Updated lookup logic to check both id and slug; added defensive check for empty problem lists.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
+
 import React from 'react';
 import { motion } from 'motion/react';
 import { Map as MapIcon, Flag, ChevronRight, CheckCircle2, Circle, Trophy, Rocket, Target, Award, Star, BookOpen } from 'lucide-react';
@@ -6,13 +20,14 @@ import { Link } from 'react-router-dom';
 import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 import { BackButton } from '../components/BackButton';
+import { Topic } from '../types';
 
 export const RoadmapPage = () => {
   const { stats } = useAppState();
 
-  const getTopicProgress = (topicSlug: string) => {
-    const topic = TOPICS.find(t => t.slug === topicSlug);
-    if (!topic) return 0;
+  const getTopicProgress = (idOrSlug: string) => {
+    const topic = TOPICS.find(t => t.id === idOrSlug || t.slug === idOrSlug);
+    if (!topic || !topic.problems || topic.problems.length === 0) return 0;
     const solved = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
     return Math.round((solved / topic.problems.length) * 100);
   };
@@ -48,7 +63,7 @@ export const RoadmapPage = () => {
           <div className="absolute left-[27.5px] md:left-1/2 top-4 bottom-4 w-px bg-slate-200 dark:bg-slate-800 -translate-x-1/2" />
 
           {ROADMAP_STEPS.map((step, idx) => {
-            const stepTopics = step.topics.map(slug => TOPICS.find(t => t.slug === slug)).filter(Boolean);
+            const stepTopics = step.topics.map(idOrSlug => TOPICS.find(t => t.id === idOrSlug || t.slug === idOrSlug)).filter(Boolean) as Topic[];
             const isLatestUnlocked = idx === 0 || getTopicProgress(ROADMAP_STEPS[idx-1].topics[0]) > 0;
             const PhaseIcon = icons[idx % icons.length];
 
@@ -83,8 +98,8 @@ export const RoadmapPage = () => {
                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">{step.description}</p>
                        
                        <div className="space-y-2">
-                         {stepTopics.map((topic: any) => {
-                           const progress = getTopicProgress(topic.slug);
+                         {stepTopics.map((topic) => {
+                           const progress = getTopicProgress(topic.id);
                            const isDone = progress === 100;
                            return (
                              <Link
