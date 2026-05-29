@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useAppState } from '../AppStateContext';
 import { TOPICS } from '../data';
@@ -18,13 +18,13 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export const Dashboard = () => {
-  const { stats } = useAppState();
+  const { stats, isSolved } = useAppState();
   const reportRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
   const totalSolved = stats.solvedIds.length;
   const totalProblems = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
-  const totalProgress = Math.round((totalSolved / totalProblems) * 100);
+  const totalProgress = Math.round((totalSolved / totalProblems) * 100) || 0;
 
   const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
@@ -131,9 +131,10 @@ export const Dashboard = () => {
     }
   };
 
-  const topicsCompleted = TOPICS.filter(t => 
-    t.problems.every(p => stats.solvedIds.includes(p.id))
-  ).length;
+  // ⚡ BOLT: Optimized topics completion check using O(1) isSolved lookup
+  const topicsCompleted = useMemo(() => TOPICS.filter(t =>
+    t.problems.every(p => isSolved(p.id))
+  ).length, [isSolved]);
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
@@ -266,7 +267,8 @@ export const Dashboard = () => {
 
               <div className="space-y-6">
                 {TOPICS.slice(0, 6).map((topic) => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+                  // ⚡ BOLT: O(1) membership check
+                  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
                   const percent = Math.round((solvedCount / topic.problems.length) * 100);
                   
                   return (
@@ -341,7 +343,8 @@ export const Dashboard = () => {
              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-8 pb-4 border-b border-gray-100">Top Module Performance</h3>
              <div className="grid grid-cols-2 gap-x-12 gap-y-8">
                 {TOPICS.slice(0, 10).map(topic => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+                  // ⚡ BOLT: O(1) membership check
+                  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
                   const percent = Math.round((solvedCount / topic.problems.length) * 100);
                   return (
                     <div key={topic.id} className="flex items-center justify-between">
