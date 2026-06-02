@@ -1,7 +1,22 @@
-import React from 'react';
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : High
+ * File          : src/pages/RoadmapPage.tsx
+ * Line(s)       : 16-21, 62, 101
+ * Root Cause    : Roadmap topics failed to render because the lookup logic only matched by 'slug', while many roadmap entries in 'data.ts' used IDs.
+ * Fix Applied   : Implemented dual lookup (Slug/ID) for topics, added zero-length guards, and improved type safety by replacing 'any'. Optimized rendering by passing topic objects directly to progress helper.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
+
+import React, { useCallback } from 'react';
 import { motion } from 'motion/react';
 import { Map as MapIcon, Flag, ChevronRight, CheckCircle2, Circle, Trophy, Rocket, Target, Award, Star, BookOpen } from 'lucide-react';
 import { ROADMAP_STEPS, TOPICS } from '../data';
+import { Topic } from '../types';
 import { Link } from 'react-router-dom';
 import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
@@ -10,12 +25,15 @@ import { BackButton } from '../components/BackButton';
 export const RoadmapPage = () => {
   const { stats } = useAppState();
 
-  const getTopicProgress = (topicSlug: string) => {
-    const topic = TOPICS.find(t => t.slug === topicSlug);
-    if (!topic) return 0;
+  const getTopicProgress = useCallback((topic: Topic) => {
+    if (!topic || topic.problems.length === 0) return 0;
     const solved = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
     return Math.round((solved / topic.problems.length) * 100);
-  };
+  }, [stats.solvedIds]);
+
+  const findTopic = useCallback((slugOrId: string) => {
+    return TOPICS.find(t => t.slug === slugOrId || t.id === slugOrId);
+  }, []);
 
   const icons = [Rocket, Target, Award, Star];
 
@@ -48,8 +66,15 @@ export const RoadmapPage = () => {
           <div className="absolute left-[27.5px] md:left-1/2 top-4 bottom-4 w-px bg-slate-200 dark:bg-slate-800 -translate-x-1/2" />
 
           {ROADMAP_STEPS.map((step, idx) => {
-            const stepTopics = step.topics.map(slug => TOPICS.find(t => t.slug === slug)).filter(Boolean);
-            const isLatestUnlocked = idx === 0 || getTopicProgress(ROADMAP_STEPS[idx-1].topics[0]) > 0;
+            const stepTopics = step.topics.map(val => findTopic(val)).filter(Boolean) as Topic[];
+
+            // Check if previous phase has some progress to unlock current phase
+            let isLatestUnlocked = idx === 0;
+            if (idx > 0) {
+              const prevPhaseFirstTopic = findTopic(ROADMAP_STEPS[idx-1].topics[0]);
+              isLatestUnlocked = prevPhaseFirstTopic ? getTopicProgress(prevPhaseFirstTopic) > 0 : false;
+            }
+
             const PhaseIcon = icons[idx % icons.length];
 
             return (
@@ -83,8 +108,8 @@ export const RoadmapPage = () => {
                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">{step.description}</p>
                        
                        <div className="space-y-2">
-                         {stepTopics.map((topic: any) => {
-                           const progress = getTopicProgress(topic.slug);
+                         {stepTopics.map((topic) => {
+                           const progress = getTopicProgress(topic);
                            const isDone = progress === 100;
                            return (
                              <Link
