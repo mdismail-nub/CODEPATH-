@@ -3,7 +3,8 @@ import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft,
+  Copy, Check
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -18,6 +19,19 @@ export const LessonPage = () => {
   const navigate = useNavigate();
   const { width, height } = useWindowSize();
   const { completeLesson, isLessonCompleted } = useAppState();
+
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (text: string) => {
+    if (!navigator?.clipboard) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
+  };
 
   const course = COURSES.find(c => c.slug === courseSlug);
   const lessonIndex = course?.lessons.findIndex(l => l.slug === lessonSlug) ?? -1;
@@ -141,7 +155,33 @@ export const LessonPage = () => {
                     </div>
                     <span className="text-[10px] font-bold text-slate-500 ml-2 uppercase tracking-widest">Example: {lesson.codeExample.language}</span>
                   </div>
-                  <Play className="h-3 w-3 text-slate-600" />
+                  <button
+                    onClick={() => handleCopy(lesson.codeExample!.code)}
+                    className="p-1.5 rounded-md hover:bg-slate-800 text-slate-500 hover:text-slate-300 transition-colors focus-visible:ring-2 focus-visible:ring-primary-500 outline-none"
+                    aria-label={copied ? "Copied code!" : "Copy code"}
+                  >
+                    <AnimatePresence mode="wait">
+                      {copied ? (
+                        <motion.div
+                          key="check"
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.5, opacity: 0 }}
+                        >
+                          <Check className="h-3.5 w-3.5 text-emerald-500" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="copy"
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.5, opacity: 0 }}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </button>
                 </div>
                 <pre className="p-6 text-sm font-mono text-slate-300 leading-relaxed overflow-x-auto">
                   <code>{lesson.codeExample.code}</code>
