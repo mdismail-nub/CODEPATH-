@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useAppState } from '../AppStateContext';
 import { TOPICS } from '../data';
@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Calendar,
   Award,
-  ChevronRight,
   Loader2
 } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -18,62 +17,69 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export const Dashboard = () => {
-  const { stats } = useAppState();
+  const { stats, isSolved } = useAppState();
   const reportRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // ⚡ BOLT: Memoize total solved and problems count to avoid recalculation on every render
   const totalSolved = stats.solvedIds.length;
-  const totalProblems = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
-  const totalProgress = Math.round((totalSolved / totalProblems) * 100);
+  const totalProblems = useMemo(() => TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0), []);
+  const totalProgress = useMemo(() => Math.round((totalSolved / totalProblems) * 100), [totalSolved, totalProblems]);
 
   const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
-  const history = stats.solvedAt || {};
-  const solvesByDate: Record<string, number> = {};
-  Object.values(history).forEach((timestamp: any) => {
-    if (timestamp) {
-      const dateStr = formatDate(new Date(timestamp));
-      solvesByDate[dateStr] = (solvesByDate[dateStr] || 0) + 1;
-    }
-  });
+  // ⚡ BOLT: Memoize date-based solved history calculation
+  const solvesByDate = useMemo(() => {
+    const history = stats.solvedAt || {};
+    const result: Record<string, number> = {};
+    Object.values(history).forEach((timestamp: any) => {
+      if (timestamp) {
+        const dateStr = formatDate(new Date(timestamp));
+        result[dateStr] = (result[dateStr] || 0) + 1;
+      }
+    });
+    return result;
+  }, [stats.solvedAt]);
 
-  const calculateStreak = () => {
-    let streak = 0;
+  // ⚡ BOLT: Memoize streak calculation
+  const streak = useMemo(() => {
+    let s = 0;
     let current = new Date();
     
     if (solvesByDate[formatDate(current)]) {
-      streak++;
+      s++;
     } else {
       current.setDate(current.getDate() - 1);
       if (!solvesByDate[formatDate(current)]) return 0;
-      streak++;
+      s++;
     }
 
     while (true) {
       current.setDate(current.getDate() - 1);
       if (solvesByDate[formatDate(current)]) {
-        streak++;
+        s++;
       } else {
         break;
       }
-      if (streak > 365) break;
+      if (s > 365) break;
     }
-    return streak;
-  };
+    return s;
+  }, [solvesByDate]);
 
-  const streak = calculateStreak();
-
-  const heatmapData = Array.from({ length: 154 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (153 - i));
-    const dateStr = formatDate(d);
-    const count = solvesByDate[dateStr] || 0;
-    return {
-      active: count > 0,
-      value: Math.min(count, 4),
-      date: dateStr
-    };
-  });
+  // ⚡ BOLT: Memoize heatmap data preparation
+  const heatmapData = useMemo(() => {
+    return Array.from({ length: 154 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (153 - i));
+      const dateStr = formatDate(d);
+      const count = solvesByDate[dateStr] || 0;
+      return {
+        active: count > 0,
+        value: Math.min(count, 4),
+        date: dateStr
+      };
+    });
+  }, [solvesByDate]);
 
   const downloadProgress = async () => {
     if (!reportRef.current) return;
@@ -131,9 +137,12 @@ export const Dashboard = () => {
     }
   };
 
-  const topicsCompleted = TOPICS.filter(t => 
-    t.problems.every(p => stats.solvedIds.includes(p.id))
-  ).length;
+  // ⚡ BOLT: Memoize topics completed calculation using O(1) isSolved helper
+  const topicsCompleted = useMemo(() => {
+    return TOPICS.filter(t =>
+      t.problems.every(p => isSolved(p.id))
+    ).length;
+  }, [isSolved]);
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
@@ -266,7 +275,7 @@ export const Dashboard = () => {
 
               <div className="space-y-6">
                 {TOPICS.slice(0, 6).map((topic) => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+                  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
                   const percent = Math.round((solvedCount / topic.problems.length) * 100);
                   
                   return (
@@ -341,7 +350,7 @@ export const Dashboard = () => {
              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-8 pb-4 border-b border-gray-100">Top Module Performance</h3>
              <div className="grid grid-cols-2 gap-x-12 gap-y-8">
                 {TOPICS.slice(0, 10).map(topic => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+                  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
                   const percent = Math.round((solvedCount / topic.problems.length) * 100);
                   return (
                     <div key={topic.id} className="flex items-center justify-between">

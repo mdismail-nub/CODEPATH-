@@ -8,12 +8,13 @@ import { cn } from '../lib/utils';
 import { BackButton } from '../components/BackButton';
 
 export const RoadmapPage = () => {
-  const { stats } = useAppState();
+  const { isSolved } = useAppState();
 
+  // ⚡ BOLT: Use optimized O(1) isSolved helper for progress calculation
   const getTopicProgress = (topicSlug: string) => {
     const topic = TOPICS.find(t => t.slug === topicSlug);
     if (!topic) return 0;
-    const solved = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+    const solved = topic.problems.filter(p => isSolved(p.id)).length;
     return Math.round((solved / topic.problems.length) * 100);
   };
 
