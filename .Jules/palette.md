@@ -1,3 +1,5 @@
-## 2026-05-17 - [Micro-UX: Async Button Feedback]
-**Learning:** Users can be confused by slow, silent client-side operations (like PDF generation with html2canvas). Providing immediate visual feedback via loading states and disabling the button prevents duplicate actions and improves perceived performance.
-**Action:** Always implement loading states for any action that might take more than 200ms, especially complex DOM-to-Canvas operations.
+## 2025-05-15 - Enhancing Static Code Examples with Functional Utility
+
+**Learning:** Static decorative icons (like a 'Play' button on non-interactive code blocks) create false affordances that frustrate users. Replacing these with functional utilities like 'Copy Code' improves both utility and user trust.
+
+**Action:** When encountering code blocks, always evaluate if a 'Copy' action is available. If missing or replaced by misleading icons, implement a functional 'Copy Code' button with immediate visual feedback (icon swap) and proper ARIA labels.
