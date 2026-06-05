@@ -8,14 +8,16 @@ import { cn } from '../lib/utils';
 import { BackButton } from '../components/BackButton';
 
 export const RoadmapPage = () => {
-  const { stats } = useAppState();
+  const { isSolved } = useAppState();
 
-  const getTopicProgress = (topicSlug: string) => {
+  // ⚡ BOLT: Memoize helper to avoid O(N^2) complexity in rendering loop
+  const getTopicProgress = React.useCallback((topicSlug: string) => {
     const topic = TOPICS.find(t => t.slug === topicSlug);
-    if (!topic) return 0;
-    const solved = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+    if (!topic || topic.problems.length === 0) return 0;
+    // ⚡ BOLT: Use optimized isSolved helper (O(1) Set lookup)
+    const solved = topic.problems.filter(p => isSolved(p.id)).length;
     return Math.round((solved / topic.problems.length) * 100);
-  };
+  }, [isSolved]);
 
   const icons = [Rocket, Target, Award, Star];
 
