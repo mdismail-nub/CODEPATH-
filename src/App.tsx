@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
-import { Analytics } from '@vercel/analytics/react';
 import { AppStateProvider } from './AppStateContext';
 import { Navbar } from './components/Navbar';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -15,6 +14,7 @@ import { LearnHome } from './pages/LearnHome';
 import { CoursePage } from './pages/CoursePage';
 import { LessonPage } from './pages/LessonPage';
 import { CertificateView } from './pages/CertificateView';
+import { VerifyCertificate } from './pages/VerifyCertificate';
 import { cn } from './lib/utils';
 
 export default function App() {
@@ -48,7 +48,8 @@ export default function App() {
           <Route path="/topic/:slug" element={<TopicDetail />} />
           <Route path="/roadmap" element={<RoadmapPage />} />
           <Route path="/certificates" element={<Certificates />} />
-          <Route path="/certificate/:topicSlug" element={<CertificateView />} />
+          <Route path="/certificate/:id" element={<VerifyCertificate />} />
+          <Route path="/certificates/:topicSlug" element={<CertificateView />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </main>
@@ -94,12 +95,11 @@ export default function App() {
                  </div>
               </div>
             </div>
-           </div>
-         </footer>
-       )}
-     </div>
+          </div>
+        </footer>
       )}
-      <Analytics />
+    </div>
+      )}
     </AppStateProvider>
   );
 }

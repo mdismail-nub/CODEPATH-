@@ -2,6 +2,9 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import { Resend } from 'resend';
 import path from "path";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const PORT = 3000;
@@ -21,6 +24,156 @@ const getResend = () => {
 };
 
 app.use(express.json());
+
+// --- GitHub Star Gate Logic ---
+
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
+const GITHUB_OWNER = process.env.GITHUB_REPO_OWNER;
+const GITHUB_REPO = process.env.GITHUB_REPO_NAME;
+
+console.log("GitHub Config Check:", {
+  hasClientId: !!GITHUB_CLIENT_ID,
+  hasClientSecret: !!GITHUB_CLIENT_SECRET,
+  owner: GITHUB_OWNER,
+  repo: GITHUB_REPO
+});
+
+// 1. Get GitHub Auth URL
+app.get('/api/auth/github/url', (req, res) => {
+  if (!GITHUB_CLIENT_ID) {
+    console.error("GITHUB_CLIENT_ID is missing from environment");
+    return res.status(500).json({ error: "GITHUB_CLIENT_ID not configured" });
+  }
+  
+  const callbackUrl = `${req.protocol}://${req.get('host')}/api/auth/github/callback`;
+  console.log("Generating GitHub Auth URL with callback:", callbackUrl);
+  
+  const params = new URLSearchParams({
+    client_id: GITHUB_CLIENT_ID,
+    scope: 'user,public_repo',
+    redirect_uri: callbackUrl
+  });
+  
+  res.json({ url: `https://github.com/login/oauth/authorize?${params.toString()}` });
+});
+
+// 2. GitHub OAuth Callback
+app.get('/api/auth/github/callback', async (req, res) => {
+  const { code } = req.query;
+  console.log("GitHub Callback received. Code present:", !!code);
+  
+  if (!code) {
+    return res.status(400).send("Code missing");
+  }
+
+  if (!GITHUB_CLIENT_SECRET) {
+    console.error("GITHUB_CLIENT_SECRET is missing from environment");
+    return res.status(500).send("Server configuration error: missing secret");
+  }
+
+  try {
+    console.log("Exchanging code for access token...");
+    // Exchange code for token
+    const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        client_id: GITHUB_CLIENT_ID,
+        client_secret: GITHUB_CLIENT_SECRET,
+        code
+      })
+    });
+
+    const tokenData = await tokenResponse.json() as { access_token?: string; error?: string; error_description?: string };
+    
+    if (tokenData.error || !tokenData.access_token) {
+      console.error("GitHub token exchange failed:", tokenData);
+      return res.status(400).send(tokenData.error_description || tokenData.error || "Failed to get access token");
+    }
+
+    console.log("Token received. Fetching user info...");
+
+    // Get User Info
+    const userResponse = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `token ${tokenData.access_token}`,
+        'User-Agent': 'CodePath-App'
+      }
+    });
+
+    if (!userResponse.ok) {
+      const errorText = await userResponse.text();
+      console.error("Failed to fetch GitHub user:", errorText);
+      return res.status(userResponse.status).send("Failed to fetch GitHub user info");
+    }
+
+    const userData = await userResponse.json() as { login: string; name: string; avatar_url: string };
+    console.log("GitHub user authenticated:", userData.login);
+
+    // Send success message to parent window and close popup
+    res.send(`
+      <html>
+        <body>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage({ 
+                type: 'GITHUB_AUTH_SUCCESS', 
+                data: ${JSON.stringify({
+                  token: tokenData.access_token,
+                  username: userData.login,
+                  name: userData.name || userData.login,
+                  avatar: userData.avatar_url
+                })} 
+              }, '*');
+              window.close();
+            } else {
+              window.location.href = '/';
+            }
+          </script>
+          <p>Authentication successful. You can close this window now.</p>
+        </body>
+      </html>
+    `);
+
+  } catch (error) {
+    console.error("GitHub Auth catch block error:", error);
+    res.status(500).send("Authentication failed");
+  }
+});
+
+// 3. Check if user has starred the repo
+app.post('/api/github/check-star', async (req, res) => {
+  const { token, username } = req.body;
+
+  if (!token || !username) {
+    return res.status(400).json({ error: "Missing identity info" });
+  }
+
+  try {
+    const starStatus = await fetch(`https://api.github.com/user/starred/${GITHUB_OWNER}/${GITHUB_REPO}`, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'User-Agent': 'CodePath-App',
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (starStatus.status === 204) {
+      return res.json({ starred: true });
+    } else {
+      return res.json({ starred: false, message: `Please star ${GITHUB_OWNER}/${GITHUB_REPO} to continue.` });
+    }
+  } catch (error) {
+    console.error("Star check error:", error);
+    res.status(500).json({ error: "Failed to verify star status" });
+  }
+});
+
+// --- Existing Email Route ---
 
 // API route for email notifications
 app.post("/api/notify-status-change", async (req, res) => {

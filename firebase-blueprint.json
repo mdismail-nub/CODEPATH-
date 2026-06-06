@@ -1,0 +1,31 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and learning progress",
+      "type": "object",
+      "properties": {
+        "solvedIds": { "type": "array", "items": { "type": "string" } },
+        "xp": { "type": "integer" },
+        "completedLessonIds": { "type": "array", "items": { "type": "string" } },
+        "github": {
+          "type": "object",
+          "properties": {
+            "username": { "type": "string" },
+            "name": { "type": "string" },
+            "avatar": { "type": "string" },
+            "token": { "type": "string" }
+          }
+        },
+        "certificates": { "type": "object" }
+      },
+      "required": ["solvedIds", "xp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Private user data synced via GitHub Auth"
+    }
+  }
+}

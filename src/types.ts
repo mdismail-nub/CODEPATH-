@@ -19,18 +19,30 @@ export interface Topic {
   problems: Problem[];
 }
 
+export interface GitHubInfo {
+  token: string;
+  username: string;
+  name: string;
+  avatar: string;
+  isStarred?: boolean;
+}
+
 export interface CertificateInfo {
+  id: string; // Unique certificate ID
   status: 'pending' | 'issued';
   recipientName: string;
-  vjudgeId?: string;
-  issuedAt?: number;
   topicSlug: string;
+  topicName: string;
+  issuedAt: number;
+  githubUsername?: string;
+  verificationUrl?: string;
 }
 
 export interface UserStats {
   solvedIds: string[];
   solvedAt?: Record<string, number>; // problemId -> timestamp
   vjudgeId?: string;
+  github?: GitHubInfo;
   certificates: Record<string, CertificateInfo>;
   isAdmin?: boolean;
   xp: number;

@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Menu, X, LayoutGrid, BookOpen, BarChart3, Settings, LogOut, User, Award, Home as HomeIcon, Sun, Moon, Calendar, Target, ChevronRight } from 'lucide-react';
+import { Menu, X, LayoutGrid, BookOpen, BarChart3, Settings, LogOut, User, Award, Home as HomeIcon, Sun, Moon, Calendar, Target, ChevronRight, Github } from 'lucide-react';
 import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 
 export const Navbar = () => {
-  const { stats, theme, toggleTheme } = useAppState();
+  const { stats, theme, toggleTheme, loginWithGitHub, logout } = useAppState();
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -87,6 +96,38 @@ export const Navbar = () => {
               >
                 {theme === 'dark' || isLandingPage ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </button>
+
+              {stats.github ? (
+                <div className="flex items-center gap-3 ml-2 pl-4 border-l border-slate-200 dark:border-slate-800">
+                   <div className="flex flex-col items-end">
+                      <span className={cn("text-[10px] font-bold uppercase tracking-widest", isLandingPage ? "text-slate-400" : "text-slate-500")}>@{stats.github.username}</span>
+                      <button 
+                        onClick={logout}
+                        className={cn("text-[9px] font-bold uppercase tracking-tighter hover:underline", isLandingPage ? "text-white/60" : "text-slate-400 hover:text-red-500")}
+                      >
+                        Sign Out
+                      </button>
+                   </div>
+                   <img 
+                    src={stats.github.avatar} 
+                    alt="Profile" 
+                    className="h-8 w-8 rounded-lg border border-slate-200 dark:border-white/10 ring-2 ring-primary-500/20"
+                   />
+                </div>
+              ) : (
+                <button
+                  onClick={loginWithGitHub}
+                  className={cn(
+                    "ml-2 flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all",
+                    isLandingPage 
+                      ? "bg-white text-slate-900 hover:bg-slate-100" 
+                      : "bg-slate-900 dark:bg-white text-white dark:text-slate-950 hover:opacity-90 shadow-lg shadow-slate-900/10"
+                  )}
+                >
+                  <Github className="h-4 w-4" />
+                  Sign In
+                </button>
+              )}
             </div>
           </div>
 
@@ -169,7 +210,33 @@ export const Navbar = () => {
                   </Link>
                 ))}
                 
-                <div className="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
+                <div className="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                  {stats.github ? (
+                    <div className="flex items-center justify-between px-5 py-4 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                      <div className="flex items-center gap-3">
+                        <img src={stats.github.avatar} alt="Avatar" className="h-10 w-10 rounded-xl" />
+                        <div>
+                          <p className="text-xs font-bold text-slate-900 dark:text-white">@{stats.github.username}</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Logged in</p>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => { logout(); setIsOpen(false); }}
+                        className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      >
+                        <LogOut className="h-5 w-5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => { loginWithGitHub(); setIsOpen(false); }}
+                      className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-bold"
+                    >
+                      <Github className="h-5 w-5" />
+                      Sign In with GitHub
+                    </button>
+                  )}
+
                   <button
                     onClick={() => { toggleTheme(); setIsOpen(false); }}
                     className="w-full flex items-center justify-between px-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold"

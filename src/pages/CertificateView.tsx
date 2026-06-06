@@ -144,9 +144,19 @@ export const CertificateView = () => {
                     <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 block mb-1">Issue Date</label>
                     <p className="text-slate-900 dark:text-slate-100 font-bold">{new Date(cert.issuedAt || Date.now()).toLocaleDateString()}</p>
                  </div>
+                 <div>
+                    <label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 block mb-1">Credential ID</label>
+                    <p className="text-[10px] font-mono text-slate-900 dark:text-slate-100 font-bold break-all">{cert.id}</p>
+                 </div>
               </div>
 
               <div className="grid gap-4">
+                 <Link
+                   to={`/certificate/${cert.id}`}
+                   className="w-full mb-2 h-14 rounded-2xl border-2 border-primary-600/20 dark:border-sky-400/20 text-primary-600 dark:text-sky-400 font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-primary-50 dark:hover:bg-sky-400/5 transition-all text-center"
+                 >
+                   Public Verify Page
+                 </Link>
                  <button 
                    onClick={handleDownload}
                    disabled={isDownloading}
@@ -203,7 +213,7 @@ export const CertificateView = () => {
                   </div>
                   <div>
                      <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-400 mb-1">Permanent Record</h4>
-                     <p className="text-xs text-emerald-600/80 leading-relaxed font-medium">This certificate is stored in your local session. Export it now to keep a permanent copy.</p>
+                     <p className="text-xs text-emerald-600/80 leading-relaxed font-medium">This certificate is verified by GitHub and support-checked.</p>
                   </div>
                </div>
             </div>

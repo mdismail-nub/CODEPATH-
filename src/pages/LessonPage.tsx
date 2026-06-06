@@ -91,25 +91,31 @@ export const LessonPage = () => {
         
         {/* Mobile Tab Switcher */}
         {!isCompleted && (
-          <div className="flex lg:hidden h-12">
-            <button 
-              onClick={() => setActiveTab('content')}
-              className={cn(
-                "flex-1 text-xs font-bold uppercase tracking-widest transition-all",
-                activeTab === 'content' ? "text-primary-600 border-b-2 border-primary-600" : "text-slate-400"
-              )}
-            >
-              Lesson
-            </button>
-            <button 
-              onClick={() => setActiveTab('practice')}
-              className={cn(
-                "flex-1 text-xs font-bold uppercase tracking-widest transition-all",
-                activeTab === 'practice' ? "text-primary-600 border-b-2 border-primary-600" : "text-slate-400"
-              )}
-            >
-              Practice {totalExercises > 0 && `(${currentExerciseIdx + 1}/${totalExercises})`}
-            </button>
+          <div className="flex lg:hidden p-2 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800">
+             <div className="flex w-full bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+               <button 
+                 onClick={() => setActiveTab('content')}
+                 className={cn(
+                   "flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all",
+                   activeTab === 'content' 
+                     ? "bg-white dark:bg-slate-900 text-primary-600 dark:text-sky-400 shadow-sm" 
+                     : "text-slate-500 hover:text-slate-950 dark:text-slate-400"
+                 )}
+               >
+                 Lesson
+               </button>
+               <button 
+                 onClick={() => setActiveTab('practice')}
+                 className={cn(
+                   "flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all",
+                   activeTab === 'practice' 
+                     ? "bg-white dark:bg-slate-900 text-primary-600 dark:text-sky-400 shadow-sm" 
+                     : "text-slate-500 hover:text-slate-950 dark:text-slate-400"
+                 )}
+               >
+                 Practice {totalExercises > 0 && `(${currentExerciseIdx + 1}/${totalExercises})`}
+               </button>
+            </div>
           </div>
         )}
       </div>
@@ -121,9 +127,12 @@ export const LessonPage = () => {
           !isCompleted && width < 1024 && activeTab !== 'content' ? 'hidden' : 'block'
         )}>
           <div className="max-w-[700px] mx-auto px-6 py-10 md:px-8 md:py-12 lg:px-12">
-            <Link to={`/learn/${courseSlug}`} className="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold text-slate-400 hover:text-slate-900 dark:hover:text-white mb-6 md:mb-10 uppercase tracking-widest transition-colors">
+            <Link 
+              to={`/learn/${courseSlug}`} 
+              className="inline-flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] w-fit mb-8"
+            >
               <ArrowLeft className="h-4 w-4" />
-              {course.title}
+              <span>Back to {course.title}</span>
             </Link>
 
             <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:font-outfit prose-headings:tracking-tight prose-p:leading-relaxed prose-code:text-primary-600 dark:prose-code:text-primary-400 prose-code:bg-primary-50 dark:prose-code:bg-primary-900/20 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none font-sans">
@@ -242,19 +251,21 @@ export const LessonPage = () => {
                             key={i}
                             onClick={() => setUserAnswer(option)}
                             className={cn(
-                              "w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 font-medium text-sm flex items-center gap-4",
+                              "w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 font-medium text-sm flex items-center gap-4 shadow-sm",
                               userAnswer === option 
-                                ? "bg-primary-600 text-white border-primary-600" 
-                                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-primary-400"
+                                ? "border-primary-600 dark:border-sky-500 bg-primary-50/50 dark:bg-primary-950/20 text-slate-950 dark:text-[#38bdf8] ring-1 ring-primary-500/20 dark:ring-sky-500/10 font-bold" 
+                                : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-primary-400 dark:hover:border-sky-500/50 hover:bg-slate-50/50 dark:hover:bg-slate-900/45"
                             )}
                           >
                             <div className={cn(
-                              "h-6 w-6 rounded-lg flex items-center justify-center text-xs border font-bold flex-shrink-0",
-                              userAnswer === option ? "bg-white/20 border-white/20" : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                              "h-6 w-6 rounded-lg flex items-center justify-center text-xs border font-bold flex-shrink-0 transition-colors duration-200",
+                              userAnswer === option 
+                                ? "bg-primary-600 dark:bg-sky-500 border-primary-600 dark:border-sky-500 text-white" 
+                                : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400"
                             )}>
                               {String.fromCharCode(65 + i)}
                             </div>
-                            {option}
+                            <span>{option}</span>
                           </button>
                         ))}
                       </div>
@@ -299,10 +310,14 @@ export const LessonPage = () => {
                       onClick={checkAnswer}
                       disabled={!userAnswer}
                       className={cn(
-                        "flex-1 py-5 rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2",
+                        "flex-1 py-5 rounded-2xl font-bold text-base transition-all duration-250 flex items-center justify-center gap-2 border shadow-sm",
                         !userAnswer 
-                          ? "bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed" 
-                          : "bg-primary-600 text-white shadow-lg shadow-primary-600/20 hover:bg-primary-700 hover:scale-[1.01] active:scale-[0.99]"
+                          ? "bg-slate-100 dark:bg-slate-900/60 text-slate-400 dark:text-slate-600 border-slate-200/60 dark:border-slate-800/60 cursor-not-allowed" 
+                          : showFeedback === 'correct'
+                            ? "bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 border-transparent text-white shadow-lg shadow-emerald-600/10"
+                            : showFeedback === 'incorrect'
+                              ? "bg-rose-600 dark:bg-rose-500 hover:bg-rose-700 border-transparent text-white shadow-lg shadow-rose-600/10"
+                              : "bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 border-transparent text-white shadow-md shadow-primary-600/15 dark:shadow-primary-500/10 hover:scale-[1.01] active:scale-[0.99]"
                       )}
                     >
                       {showFeedback === 'correct' ? (
@@ -312,9 +327,11 @@ export const LessonPage = () => {
                         </>
                       ) : showFeedback === 'incorrect' ? (
                         <>
-                          <X className="h-5 w-5" />
+                          <X className="h-5 w-5 animate-pulse" />
                           Try Again
                         </>
+                      ) : !userAnswer ? (
+                        "Select an Option"
                       ) : (
                         <>
                           Check Answer
@@ -325,7 +342,12 @@ export const LessonPage = () => {
                     
                     <button 
                        onClick={() => setShowHint(!showHint)}
-                       className="h-16 w-16 flex items-center justify-center bg-amber-50 dark:bg-amber-900/20 text-amber-600 border-2 border-amber-100 dark:border-amber-900/30 rounded-2xl hover:bg-amber-100 transition-colors"
+                       className={cn(
+                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm",
+                          showHint
+                            ? "bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-450 border-amber-300 dark:border-amber-800 shadow-inner"
+                            : "bg-amber-50/50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-100/80 dark:border-amber-900/20 hover:bg-amber-150/80 dark:hover:bg-amber-900/40 hover:border-amber-250 dark:hover:border-amber-800"
+                       )}
                        title="Get a hint"
                     >
                        <Lightbulb className="h-6 w-6" />
