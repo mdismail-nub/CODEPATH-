@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Runtime / Logic
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 26-39
+ * Root Cause    : Lesson-specific state was not reset upon navigation between lessons, potentially causing out-of-bounds access. Additionally, activeTab state was declared after an early return, violating React Hook rules.
+ * Fix Applied   : Moved activeTab declaration above early return and added a useEffect to reset all exercise-related state when URL parameters change.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -29,14 +42,23 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+
+  useEffect(() => {
+    setCurrentExerciseIdx(0);
+    setUserAnswer('');
+    setShowFeedback(null);
+    setIsCompleted(false);
+    setShowConfetti(false);
+    setShowHint(false);
+    setActiveTab('content');
+  }, [courseSlug, lessonSlug]);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
   const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
   const checkAnswer = () => {
     if (!currentExercise) return;
