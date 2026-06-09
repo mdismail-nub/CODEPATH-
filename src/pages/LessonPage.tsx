@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 25-40
+ * Root Cause    : Navigation between lessons did not reset exercise-specific states, causing completed state to persist.
+ * Fix Applied   : Added useEffect to reset all interactive states when courseSlug or lessonSlug changes, and moved all hooks above early return.
+ * Auto-Fixed    : Yes
+ * Behavior Change: Yes (correctly resets lesson progress in UI upon navigation)
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -29,14 +42,24 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+
+  // Reset state when navigating to a different lesson
+  useEffect(() => {
+    setCurrentExerciseIdx(0);
+    setUserAnswer('');
+    setShowFeedback(null);
+    setIsCompleted(false);
+    setShowConfetti(false);
+    setShowHint(false);
+    setActiveTab('content');
+  }, [courseSlug, lessonSlug]);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
   const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
   const checkAnswer = () => {
     if (!currentExercise) return;
