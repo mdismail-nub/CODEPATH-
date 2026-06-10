@@ -1026,10 +1026,33 @@ export const RoadmapPage = () => {
                       <div className="relative">
                          <button 
                             onClick={() => handleCopy('git config --global user.name "Your Name"\ngit config --global user.email "you@email.com"\n\nmkdir competitive-programming && cd competitive-programming\ngit init\ngit remote add origin https://github.com/USERNAME/cp-solutions.git', 'git_setup')}
-                            className="absolute right-2 top-2 p-1.5 rounded bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                            className="absolute right-2 top-2 p-1.5 rounded bg-slate-800 text-slate-400 hover:text-white transition-all active:scale-95"
                             title="Copy code"
+                            aria-label="Copy code"
                          >
-                            {copiedText === 'git_setup' ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                            <AnimatePresence mode="wait">
+                               {copiedText === 'git_setup' ? (
+                                 <motion.div
+                                    key="check"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    transition={{ duration: 0.1 }}
+                                 >
+                                    <Check className="h-4 w-4 text-emerald-400" />
+                                 </motion.div>
+                               ) : (
+                                 <motion.div
+                                    key="copy"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    transition={{ duration: 0.1 }}
+                                 >
+                                    <Copy className="h-4 w-4" />
+                                 </motion.div>
+                               )}
+                            </AnimatePresence>
                          </button>
                          <pre className="p-4 rounded-xl bg-slate-950 text-sky-400 font-mono text-[11px] leading-relaxed overflow-x-auto">
                             <code>
@@ -1075,10 +1098,33 @@ git remote add origin https://github.com/USERNAME/cp-solutions.git`}
                       <div className="relative">
                          <button 
                             onClick={() => handleCopy('git add codeforces/div2/1900A.cpp\ngit commit -m "CF 1900A: prefix sum, O(n)"\ngit push origin main\n\ngit checkout -b feature/segment-tree', 'git_commit')}
-                            className="absolute right-2 top-2 p-1.5 rounded bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                            className="absolute right-2 top-2 p-1.5 rounded bg-slate-800 text-slate-400 hover:text-white transition-all active:scale-95"
                             title="Copy code"
+                            aria-label="Copy code"
                          >
-                            {copiedText === 'git_commit' ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                            <AnimatePresence mode="wait">
+                               {copiedText === 'git_commit' ? (
+                                 <motion.div
+                                    key="check"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    transition={{ duration: 0.1 }}
+                                 >
+                                    <Check className="h-4 w-4 text-emerald-400" />
+                                 </motion.div>
+                               ) : (
+                                 <motion.div
+                                    key="copy"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.8 }}
+                                    transition={{ duration: 0.1 }}
+                                 >
+                                    <Copy className="h-4 w-4" />
+                                 </motion.div>
+                               )}
+                            </AnimatePresence>
                          </button>
                          <pre className="p-4 rounded-xl bg-slate-950 text-emerald-400 font-mono text-[11px] leading-relaxed overflow-x-auto">
                             <code>
