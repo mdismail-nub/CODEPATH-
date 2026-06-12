@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Runtime
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 29-45, 254-383
+ * Root Cause    : Component state (currentExerciseIdx) persisted across navigation between different lessons, leading to out-of-bounds access when the new lesson had fewer exercises.
+ * Fix Applied   : Implemented a useEffect hook to reset exercise state on navigation and added optional chaining guards for currentExercise access.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -29,14 +42,29 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+
+  // Reset state when navigating between lessons
+  useEffect(() => {
+    setCurrentExerciseIdx(0);
+    setUserAnswer('');
+    setShowFeedback(null);
+    setShowConfetti(false);
+    setShowHint(false);
+    setActiveTab('content');
+
+    if (lesson) {
+      setIsCompleted(isLessonCompleted(lesson.id));
+    }
+  }, [courseSlug, lessonSlug, lesson?.id, isLessonCompleted]);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+  const progressPercent = totalExercises > 0
+    ? Math.round((currentExerciseIdx / totalExercises) * 100)
+    : 0;
 
   const checkAnswer = () => {
     if (!currentExercise) return;
@@ -239,12 +267,12 @@ export const LessonPage = () => {
                       Exercise {currentExerciseIdx + 1} of {totalExercises}
                     </span>
                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-outfit leading-snug">
-                      {currentExercise.question}
+                      {currentExercise?.question}
                     </h3>
                   </div>
 
                   <div className="space-y-4 mb-12">
-                    {currentExercise.type === 'multiple-choice' ? (
+                    {currentExercise?.type === 'multiple-choice' ? (
                       <div className="grid gap-3">
                         {currentExercise.options?.map((option, i) => (
                           <button
@@ -298,7 +326,7 @@ export const LessonPage = () => {
                           />
                         </div>
                         <div className="flex justify-between items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
-                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected: {currentExercise.correctAnswer}</p>
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected: {currentExercise?.correctAnswer}</p>
                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Press Ctrl + Enter to run</p>
                         </div>
                       </div>
@@ -365,7 +393,7 @@ export const LessonPage = () => {
                          <MessageCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                          <div>
                             <p className="font-bold mb-1">Hint</p>
-                            {currentExercise.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
+                            {currentExercise?.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
                          </div>
                       </motion.div>
                     )}
