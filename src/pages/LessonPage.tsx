@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Runtime / Console
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 31-40
+ * Root Cause    : React Hook 'setActiveTab' was called conditionally after an early return, and lack of defensive guards on 'lesson.exercises' could lead to crashes.
+ * Fix Applied   : Moved 'setActiveTab' state declaration to the top level and added optional chaining/fallback values for exercise-related calculations.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -29,14 +42,13 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
-  const currentExercise = lesson.exercises[currentExerciseIdx];
-  const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+  const currentExercise = lesson.exercises?.[currentExerciseIdx];
+  const totalExercises = lesson.exercises?.length ?? 0;
+  const progressPercent = totalExercises > 0 ? Math.round(((currentExerciseIdx) / totalExercises) * 100) : 0;
 
   const checkAnswer = () => {
     if (!currentExercise) return;
