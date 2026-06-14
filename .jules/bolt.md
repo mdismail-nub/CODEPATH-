@@ -1,0 +1,3 @@
+## 2026-06-14 - Dashboard Performance Optimization
+**Learning:** The `Dashboard.tsx` component was performing O(N) data transformations and O(T*P) (where T is number of topics and P is number of problems) calculations on every render. This becomes increasingly expensive as more problems are solved and more topics are added.
+**Action:** Use `useMemo` to cache expensive derived statistics and data transformations, ensuring they only recalculate when their specific dependencies (like `stats.solvedIds` or `stats.solvedAt`) change. Move static calculations like `totalProblems` outside the component scope to avoid redundant execution.
