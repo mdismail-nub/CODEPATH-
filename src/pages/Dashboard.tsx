@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useAppState } from '../AppStateContext';
 import { TOPICS } from '../data';
@@ -21,57 +21,77 @@ export const Dashboard = () => {
   const reportRef = useRef<HTMLDivElement>(null);
 
   const totalSolved = stats.solvedIds.length;
-  const totalProblems = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
+
+  // Memoize total problems count - constant from TOPICS
+  const totalProblems = useMemo(() =>
+    TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0),
+    []
+  );
+
   const totalProgress = Math.round((totalSolved / totalProblems) * 100);
 
   const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
-  const history = stats.solvedAt || {};
-  const solvesByDate: Record<string, number> = {};
-  Object.values(history).forEach((timestamp: any) => {
-    if (timestamp) {
-      const dateStr = formatDate(new Date(timestamp));
-      solvesByDate[dateStr] = (solvesByDate[dateStr] || 0) + 1;
-    }
-  });
-
-  const calculateStreak = () => {
-    let streak = 0;
-    let current = new Date();
+  /**
+   * Performance Optimization: Memoize complex date-based statistics.
+   * Prevents redundant O(N) history parsing and O(365) streak calculations on re-renders.
+   * Impact: Eliminates UI lag during theme toggles or unrelated state updates.
+   */
+  const { solvesByDate, streak, heatmapData } = useMemo(() => {
+    const history = stats.solvedAt || {};
+    const solvesByDateMap: Record<string, number> = {};
     
-    if (solvesByDate[formatDate(current)]) {
-      streak++;
-    } else {
-      current.setDate(current.getDate() - 1);
-      if (!solvesByDate[formatDate(current)]) return 0;
-      streak++;
-    }
-
-    while (true) {
-      current.setDate(current.getDate() - 1);
-      if (solvesByDate[formatDate(current)]) {
-        streak++;
-      } else {
-        break;
+    Object.values(history).forEach((timestamp: any) => {
+      if (timestamp) {
+        const dateStr = formatDate(new Date(timestamp));
+        solvesByDateMap[dateStr] = (solvesByDateMap[dateStr] || 0) + 1;
       }
-      if (streak > 365) break;
-    }
-    return streak;
-  };
+    });
 
-  const streak = calculateStreak();
+    const calculateStreak = () => {
+      let currentStreak = 0;
+      let current = new Date();
 
-  const heatmapData = Array.from({ length: 154 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (153 - i));
-    const dateStr = formatDate(d);
-    const count = solvesByDate[dateStr] || 0;
-    return {
-      active: count > 0,
-      value: Math.min(count, 4),
-      date: dateStr
+      if (solvesByDateMap[formatDate(current)]) {
+        currentStreak++;
+      } else {
+        current.setDate(current.getDate() - 1);
+        if (!solvesByDateMap[formatDate(current)]) return 0;
+        currentStreak++;
+      }
+
+      while (true) {
+        current.setDate(current.getDate() - 1);
+        if (solvesByDateMap[formatDate(current)]) {
+          currentStreak++;
+        } else {
+          break;
+        }
+        if (currentStreak > 365) break;
+      }
+      return currentStreak;
     };
-  });
+
+    const currentStreak = calculateStreak();
+
+    const heatmap = Array.from({ length: 154 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (153 - i));
+      const dateStr = formatDate(d);
+      const count = solvesByDateMap[dateStr] || 0;
+      return {
+        active: count > 0,
+        value: Math.min(count, 4),
+        date: dateStr
+      };
+    });
+
+    return {
+      solvesByDate: solvesByDateMap,
+      streak: currentStreak,
+      heatmapData: heatmap
+    };
+  }, [stats.solvedAt]);
 
   const downloadProgress = async () => {
     if (!reportRef.current) return;
@@ -124,9 +144,12 @@ export const Dashboard = () => {
     pdf.save(`CodePath_Progress_Report.pdf`);
   };
 
-  const topicsCompleted = TOPICS.filter(t => 
-    t.problems.every(p => stats.solvedIds.includes(p.id))
-  ).length;
+  const topicsCompleted = useMemo(() =>
+    TOPICS.filter(t =>
+      t.problems.every(p => stats.solvedIds.includes(p.id))
+    ).length,
+    [stats.solvedIds]
+  );
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
