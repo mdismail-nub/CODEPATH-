@@ -1,0 +1,3 @@
+## 2025-05-15 - Context Lookup Optimization
+**Learning:** In applications with large data collections (like problem lists), performing O(N) array scans (`includes`) inside frequently rendered components (like cards) leads to significant UI lag. Moving this logic to a central Context and using a memoized `Set` reduces lookup complexity to O(1). Additionally, memoizing the Context provider value is critical to ensure that stable reference checks in child components (like those using `React.memo` or stable hooks) are not broken.
+**Action:** Always prefer `Set` for membership checks in state-derived collections and ensure Context providers export memoized values to maintain performance across the component tree.
