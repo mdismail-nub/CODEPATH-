@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Runtime
+ * Severity      : Critical
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 37, 231-390
+ * Root Cause    : Division by zero and accessing properties of undefined when a lesson has no exercises.
+ * Fix Applied   : Added check for totalExercises in progress calculation and conditional rendering for empty exercises.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -34,7 +47,9 @@ export const LessonPage = () => {
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
+  const progressPercent = totalExercises > 0
+    ? Math.round(((currentExerciseIdx) / totalExercises) * 100)
+    : 0;
 
   const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
@@ -225,6 +240,28 @@ export const LessonPage = () => {
                       Back to Overview
                     </Link>
                   </div>
+                </motion.div>
+              ) : !currentExercise ? (
+                <motion.div
+                  key="no-exercises"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center max-w-md"
+                >
+                  <div className="h-20 w-20 bg-slate-100 dark:bg-slate-800/50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <MessageCircle className="h-10 w-10 text-slate-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 font-outfit">Reading mode only</h3>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">
+                    No exercises available for this lesson yet. Read the content on the left to learn about {lesson.title}.
+                  </p>
+                  <button
+                    onClick={handleLessonComplete}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                  >
+                    Mark as Read
+                    <CheckCircle2 className="h-4 w-4" />
+                  </button>
                 </motion.div>
               ) : (
                 <motion.div
