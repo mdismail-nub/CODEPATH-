@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Runtime
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 22-40
+ * Root Cause    : Local state in LessonPage is not reset when navigating between lessons via client-side routing, causing the next lesson to inherit the completion state and exercise index of the previous one, potentially leading to out-of-bounds access.
+ * Fix Applied   : Refactored LessonPage to use a unique 'key' based on course and lesson slugs, forcing React to remount the component and reset all local state naturally upon navigation. Added defensive check for currentExercise.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -13,7 +26,7 @@ import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 import { Exercise } from '../types';
 
-export const LessonPage = () => {
+const LessonPageContent = () => {
   const { courseSlug, lessonSlug } = useParams();
   const navigate = useNavigate();
   const { width, height } = useWindowSize();
@@ -226,7 +239,7 @@ export const LessonPage = () => {
                     </Link>
                   </div>
                 </motion.div>
-              ) : (
+              ) : currentExercise ? (
                 <motion.div
                   key={currentExerciseIdx}
                   initial={{ opacity: 0, x: 20 }}
@@ -371,11 +384,16 @@ export const LessonPage = () => {
                     )}
                   </AnimatePresence>
                 </motion.div>
-              )}
+              ) : null}
             </AnimatePresence>
           </div>
         </div>
       </div>
     </div>
   );
+};
+
+export const LessonPage = () => {
+  const { courseSlug, lessonSlug } = useParams();
+  return <LessonPageContent key={`${courseSlug}-${lessonSlug}`} />;
 };
