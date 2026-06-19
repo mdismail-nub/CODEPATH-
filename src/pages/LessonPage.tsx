@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Runtime
+ * Severity      : Critical
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 35-42
+ * Root Cause    : Component state (currentExerciseIdx) was preserved when navigating between different lessons, leading to out-of-bounds array access and crashes if the new lesson had fewer exercises than the previous one's current index.
+ * Fix Applied   : Added a useEffect hook to reset exercise-related states (currentExerciseIdx, userAnswer, showFeedback, isCompleted, showConfetti, showHint, activeTab) whenever courseSlug or lessonSlug URL parameters change.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -29,14 +42,24 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+
+  // Reset state when lesson changes to avoid out-of-bounds index crashes
+  useEffect(() => {
+    setCurrentExerciseIdx(0);
+    setUserAnswer('');
+    setShowFeedback(null);
+    setIsCompleted(false);
+    setShowConfetti(false);
+    setShowHint(false);
+    setActiveTab('content');
+  }, [courseSlug, lessonSlug]);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
-  const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
+  const currentExercise = lesson.exercises[currentExerciseIdx] || lesson.exercises[0];
   const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
   const checkAnswer = () => {
     if (!currentExercise) return;
