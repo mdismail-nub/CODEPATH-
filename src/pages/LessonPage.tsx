@@ -1,9 +1,22 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : [Build / Logic / Console]
+ * Severity      : [High]
+ * File          : [src/pages/LessonPage.tsx]
+ * Line(s)       : [1-400]
+ * Root Cause    : [React Hook violation (useState after early return), stale local state during navigation, and lack of handling for lessons with zero exercises.]
+ * Fix Applied   : [Relocated hooks, implemented state-reset useEffect, added Reading Mode UI for empty lessons, and improved accessibility/stability.]
+ * Auto-Fixed    : [Yes]
+ * Behavior Change: [No]
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft, BookOpen
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -29,14 +42,15 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+  const progressPercent = totalExercises > 0
+    ? Math.round(((currentExerciseIdx) / totalExercises) * 100)
+    : 0;
 
   const checkAnswer = () => {
     if (!currentExercise) return;
@@ -75,6 +89,18 @@ export const LessonPage = () => {
   const isLastLesson = lessonIndex === course.lessons.length - 1;
   const nextLesson = course.lessons[lessonIndex + 1];
 
+  // Sync and reset state on lesson change
+  useEffect(() => {
+    if (lesson) {
+      setCurrentExerciseIdx(0);
+      setUserAnswer('');
+      setShowFeedback(null);
+      setShowHint(false);
+      setIsCompleted(isLessonCompleted(lesson.id));
+      setActiveTab('content');
+    }
+  }, [lessonSlug, lesson?.id, isLessonCompleted]);
+
   return (
     <div className="relative flex flex-col h-screen bg-[#F8FAFC] dark:bg-[#020617] overflow-hidden pt-16">
       {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={500} gravity={0.15} colors={['#2563eb', '#3b82f6', '#60a5fa', '#fbbf24', '#10b981']} />}
@@ -84,7 +110,7 @@ export const LessonPage = () => {
         <div className="h-1.5 bg-slate-100 dark:bg-slate-800/50">
           <motion.div 
             initial={{ width: 0 }}
-            animate={{ width: isCompleted ? '100%' : `${progressPercent}%` }}
+            animate={{ width: isCompleted || totalExercises === 0 ? '100%' : `${progressPercent}%` }}
             className="h-full bg-primary-600 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(37,99,235,0.5)]"
           />
         </div>
@@ -176,7 +202,30 @@ export const LessonPage = () => {
           
           <div className="flex-1 overflow-y-auto px-6 py-8 md:px-12 md:py-12 lg:px-16 relative z-10 flex flex-col items-center justify-center">
             <AnimatePresence mode="wait">
-              {isCompleted ? (
+              {totalExercises === 0 && !isCompleted ? (
+                <motion.div
+                  key="reading-mode"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="text-center max-w-md p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl"
+                >
+                  <div className="h-20 w-20 bg-primary-50 dark:bg-primary-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary-600 dark:text-sky-400">
+                    <BookOpen className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 font-outfit">Reading mode only</h3>
+                  <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                    This lesson doesn't have practice exercises yet. Review the content on the left and mark it as complete when you're ready!
+                  </p>
+                  <button
+                    onClick={handleLessonComplete}
+                    className="w-full bg-primary-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-primary-700 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-primary-600/20"
+                  >
+                    Mark as Read
+                    <CheckCircle2 className="h-5 w-5 transition-transform group-hover:scale-110" />
+                  </button>
+                </motion.div>
+              ) : isCompleted ? (
                 <motion.div
                   key="completed"
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -248,7 +297,7 @@ export const LessonPage = () => {
                       <div className="grid gap-3">
                         {currentExercise.options?.map((option, i) => (
                           <button
-                            key={i}
+                            key={option}
                             onClick={() => setUserAnswer(option)}
                             className={cn(
                               "w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 font-medium text-sm flex items-center gap-4 shadow-sm",
@@ -349,12 +398,14 @@ export const LessonPage = () => {
                             : "bg-amber-50/50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-100/80 dark:border-amber-900/20 hover:bg-amber-150/80 dark:hover:bg-amber-900/40 hover:border-amber-250 dark:hover:border-amber-800"
                        )}
                        title="Get a hint"
+                       aria-label="Get a hint"
+                       aria-expanded={showHint}
                     >
                        <Lightbulb className="h-6 w-6" />
                     </button>
                   </div>
 
-                  <AnimatePresence>
+                  <AnimatePresence mode="wait">
                     {showHint && (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
