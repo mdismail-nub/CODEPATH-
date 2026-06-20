@@ -11,11 +11,12 @@ interface TopicCardProps {
   index: number;
 }
 
-export const TopicCard: React.FC<TopicCardProps> = ({ topic, index }) => {
-  const { stats } = useAppState();
+export const TopicCard: React.FC<TopicCardProps> = React.memo(({ topic, index }) => {
+  const { isSolved } = useAppState();
   const Icon = (Icons as any)[topic.icon] || Icons.HelpCircle;
   
-  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+  // Performance Optimization: Use O(1) isSolved helper instead of O(N) array scans
+  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
   const totalCount = topic.problems.length;
   const progressPercent = Math.round((solvedCount / totalCount) * 100) || 0;
   const isCompleted = progressPercent === 100;
@@ -80,4 +81,4 @@ export const TopicCard: React.FC<TopicCardProps> = ({ topic, index }) => {
       </Link>
     </motion.div>
   );
-};
+});

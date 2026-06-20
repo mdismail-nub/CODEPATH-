@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { TOPICS } from '../data';
 import { TopicCard } from '../components/TopicCard';
@@ -8,11 +8,15 @@ import { BackButton } from '../components/BackButton';
 export const Topics = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredTopics = TOPICS.filter(t => 
-    t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.problems.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  // Performance Optimization: Memoize filtered topics to avoid O(N*M) filtering on every render
+  const filteredTopics = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    return TOPICS.filter(t =>
+      t.name.toLowerCase().includes(query) ||
+      t.description.toLowerCase().includes(query) ||
+      t.problems.some(p => p.name.toLowerCase().includes(query))
+    );
+  }, [searchQuery]);
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
