@@ -41,10 +41,14 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return (saved as 'light' | 'dark') || 'dark';
   });
 
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  const toggleTheme = useCallback(() => setTheme(prev => prev === 'light' ? 'dark' : 'light'), []);
 
   // Persistence Key
   const LOCAL_STORAGE_KEY = 'codepath_stats';
+
+  // Memoized sets for O(1) lookups
+  const solvedSet = React.useMemo(() => new Set(stats.solvedIds || []), [stats.solvedIds]);
+  const completedLessonsSet = React.useMemo(() => new Set(stats.completedLessonIds || []), [stats.completedLessonIds]);
 
   // 1. Listen for Auth Changes
   useEffect(() => {
@@ -113,12 +117,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [stats, loading, saveStats]);
 
-  const toggleSolved = (id: string) => {
-    const alreadySolved = stats.solvedIds.includes(id);
-    const now = Date.now();
-    
+  const setGitHubInfo = useCallback((info: GitHubInfo) => {
+    setStats(prev => ({ ...prev, github: info }));
+  }, []);
+
+  const toggleSolved = useCallback((id: string) => {
     setStats(prev => {
+      const alreadySolved = (prev.solvedIds || []).includes(id);
+      const now = Date.now();
       const newSolvedAt = { ...(prev.solvedAt || {}) };
+
       if (alreadySolved) {
         delete newSolvedAt[id];
       } else {
@@ -128,20 +136,20 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return {
         ...prev,
         solvedIds: alreadySolved
-          ? prev.solvedIds.filter(i => i !== id)
-          : [...prev.solvedIds, id],
+          ? (prev.solvedIds || []).filter(i => i !== id)
+          : [...(prev.solvedIds || []), id],
         solvedAt: newSolvedAt
       };
     });
-  };
+  }, []);
 
-  const isSolved = (id: string) => stats.solvedIds.includes(id);
+  const isSolved = useCallback((id: string) => solvedSet.has(id), [solvedSet]);
 
-  const updateVJudgeId = (vjudgeId: string) => {
+  const updateVJudgeId = useCallback((vjudgeId: string) => {
     setStats(prev => ({ ...prev, vjudgeId }));
-  };
+  }, []);
 
-  const loginWithGitHub = async () => {
+  const loginWithGitHub = useCallback(async () => {
     const provider = new GithubAuthProvider();
     provider.addScope('user,public_repo');
     
@@ -164,9 +172,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (error) {
       console.error("GitHub Login failed", error);
     }
-  };
+  }, [setGitHubInfo]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await signOut(auth);
       setStats(DEFAULT_STATS);
@@ -174,13 +182,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (e) {
       console.error("Logout failed", e);
     }
-  };
+  }, [LOCAL_STORAGE_KEY]);
 
-  const setGitHubInfo = (info: GitHubInfo) => {
-    setStats(prev => ({ ...prev, github: info }));
-  };
-
-  const checkGitHubStar = async (): Promise<boolean> => {
+  const checkGitHubStar = useCallback(async (): Promise<boolean> => {
     if (!stats.github?.token || !stats.github?.username) return false;
     
     try {
@@ -197,7 +201,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (data.starred) {
         setStats(prev => ({
           ...prev,
-          github: { ...(prev.github!), isStarred: true }
+          github: prev.github ? { ...prev.github, isStarred: true } : undefined
         }));
         return true;
       }
@@ -206,9 +210,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.error("Star check failed", e);
       return false;
     }
-  };
+  }, [stats.github?.token, stats.github?.username]);
 
-  const requestCertificate = async (topicSlug: string, topicName: string, recipientName: string) => {
+  const requestCertificate = useCallback(async (topicSlug: string, topicName: string, recipientName: string) => {
     // Generate unique ID
     const certId = `CERT-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
     
@@ -230,28 +234,37 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         [topicSlug]: certInfo
       }
     }));
-  };
+  }, [stats.github?.username]);
 
-  const completeLesson = (lessonId: string, xpReward: number) => {
-    const completed = stats.completedLessonIds || [];
-    if (completed.includes(lessonId)) return;
-    
-    setStats(prev => ({
-      ...prev,
-      completedLessonIds: [...(prev.completedLessonIds || []), lessonId],
-      xp: (prev.xp || 0) + xpReward
-    }));
-  };
+  const completeLesson = useCallback((lessonId: string, xpReward: number) => {
+    setStats(prev => {
+      const completed = prev.completedLessonIds || [];
+      if (completed.includes(lessonId)) return prev;
 
-  const isLessonCompleted = (lessonId: string) => (stats.completedLessonIds || []).includes(lessonId);
+      return {
+        ...prev,
+        completedLessonIds: [...completed, lessonId],
+        xp: (prev.xp || 0) + xpReward
+      };
+    });
+  }, []);
+
+  const isLessonCompleted = useCallback((lessonId: string) => completedLessonsSet.has(lessonId), [completedLessonsSet]);
+
+  const contextValue = React.useMemo(() => ({
+    stats, user, loading, theme,
+    toggleSolved, isSolved, updateVJudgeId, requestCertificate,
+    completeLesson, isLessonCompleted, toggleTheme,
+    setGitHubInfo, checkGitHubStar, loginWithGitHub, logout
+  }), [
+    stats, user, loading, theme,
+    toggleSolved, isSolved, updateVJudgeId, requestCertificate,
+    completeLesson, isLessonCompleted, toggleTheme,
+    setGitHubInfo, checkGitHubStar, loginWithGitHub, logout
+  ]);
 
   return (
-    <AppStateContext.Provider value={{ 
-      stats, user, loading, theme, 
-      toggleSolved, isSolved, updateVJudgeId, requestCertificate, 
-      completeLesson, isLessonCompleted, toggleTheme,
-      setGitHubInfo, checkGitHubStar, loginWithGitHub, logout
-    }}>
+    <AppStateContext.Provider value={contextValue}>
       {children}
     </AppStateContext.Provider>
   );
