@@ -3,7 +3,8 @@ import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft,
+  Copy, Check
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -29,14 +30,24 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+
+  const copyCode = (code: string) => {
+    if (!navigator.clipboard) return;
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(err => {
+      console.error('Failed to copy code: ', err);
+    });
+  };
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
   const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
   const checkAnswer = () => {
     if (!currentExercise) return;
@@ -150,7 +161,20 @@ export const LessonPage = () => {
                     </div>
                     <span className="text-[10px] font-bold text-slate-500 ml-2 uppercase tracking-widest">Example: {lesson.codeExample.language}</span>
                   </div>
-                  <Play className="h-3 w-3 text-slate-600" />
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => copyCode(lesson.codeExample!.code)}
+                      className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-white transition-all active:scale-95"
+                      title="Copy code" aria-label="Copy code to clipboard"
+                    >
+                      <AnimatePresence mode="wait" initial={false}>
+                        <motion.div key={copied ? 'checked' : 'copy'} initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} transition={{ duration: 0.1 }}>
+                          {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                        </motion.div>
+                      </AnimatePresence>
+                    </button>
+                    <Play className="h-3 w-3 text-slate-600" />
+                  </div>
                 </div>
                 <pre className="p-6 text-sm font-mono text-slate-300 leading-relaxed overflow-x-auto">
                   <code>{lesson.codeExample.code}</code>
@@ -310,14 +334,14 @@ export const LessonPage = () => {
                       onClick={checkAnswer}
                       disabled={!userAnswer}
                       className={cn(
-                        "flex-1 py-5 rounded-2xl font-bold text-base transition-all duration-250 flex items-center justify-center gap-2 border shadow-sm",
+                        "flex-1 py-5 rounded-2xl font-bold text-base transition-all duration-250 flex items-center justify-center gap-2 border shadow-sm active:scale-95",
                         !userAnswer 
                           ? "bg-slate-100 dark:bg-slate-900/60 text-slate-400 dark:text-slate-600 border-slate-200/60 dark:border-slate-800/60 cursor-not-allowed" 
                           : showFeedback === 'correct'
                             ? "bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 border-transparent text-white shadow-lg shadow-emerald-600/10"
                             : showFeedback === 'incorrect'
                               ? "bg-rose-600 dark:bg-rose-500 hover:bg-rose-700 border-transparent text-white shadow-lg shadow-rose-600/10"
-                              : "bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 border-transparent text-white shadow-md shadow-primary-600/15 dark:shadow-primary-500/10 hover:scale-[1.01] active:scale-[0.99]"
+                              : "bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 border-transparent text-white shadow-md shadow-primary-600/15 dark:shadow-primary-500/10 hover:scale-[1.01]"
                       )}
                     >
                       {showFeedback === 'correct' ? (
@@ -343,12 +367,14 @@ export const LessonPage = () => {
                     <button 
                        onClick={() => setShowHint(!showHint)}
                        className={cn(
-                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm",
+                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm active:scale-95",
                           showHint
                             ? "bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-450 border-amber-300 dark:border-amber-800 shadow-inner"
                             : "bg-amber-50/50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-100/80 dark:border-amber-900/20 hover:bg-amber-150/80 dark:hover:bg-amber-900/40 hover:border-amber-250 dark:hover:border-amber-800"
                        )}
                        title="Get a hint"
+                       aria-label="Get a hint"
+                       aria-expanded={showHint}
                     >
                        <Lightbulb className="h-6 w-6" />
                     </button>
