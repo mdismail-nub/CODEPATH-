@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { useAppState } from '../AppStateContext';
 import { TOPICS } from '../data';
@@ -9,69 +9,72 @@ import {
   Download, 
   ShieldCheck,
   Calendar,
-  Award,
-  ChevronRight
+  Award
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export const Dashboard = () => {
-  const { stats } = useAppState();
+  const { stats, isSolved } = useAppState();
   const reportRef = useRef<HTMLDivElement>(null);
 
   const totalSolved = stats.solvedIds.length;
-  const totalProblems = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
+  const totalProblems = useMemo(() => TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0), []);
   const totalProgress = Math.round((totalSolved / totalProblems) * 100);
 
-  const formatDate = (date: Date) => date.toISOString().split('T')[0];
+  const formatDate = useCallback((date: Date) => date.toISOString().split('T')[0], []);
 
-  const history = stats.solvedAt || {};
-  const solvesByDate: Record<string, number> = {};
-  Object.values(history).forEach((timestamp: any) => {
-    if (timestamp) {
-      const dateStr = formatDate(new Date(timestamp));
-      solvesByDate[dateStr] = (solvesByDate[dateStr] || 0) + 1;
-    }
-  });
+  // Performance Optimization: Memoize history-based calculations
+  const solvesByDate = useMemo(() => {
+    const history = stats.solvedAt || {};
+    const result: Record<string, number> = {};
+    Object.values(history).forEach((timestamp: any) => {
+      if (timestamp) {
+        const dateStr = formatDate(new Date(timestamp));
+        result[dateStr] = (result[dateStr] || 0) + 1;
+      }
+    });
+    return result;
+  }, [stats.solvedAt, formatDate]);
 
-  const calculateStreak = () => {
-    let streak = 0;
-    let current = new Date();
+  const streak = useMemo(() => {
+    let streakCount = 0;
+    const current = new Date();
     
     if (solvesByDate[formatDate(current)]) {
-      streak++;
+      streakCount++;
     } else {
       current.setDate(current.getDate() - 1);
       if (!solvesByDate[formatDate(current)]) return 0;
-      streak++;
+      streakCount++;
     }
 
     while (true) {
       current.setDate(current.getDate() - 1);
       if (solvesByDate[formatDate(current)]) {
-        streak++;
+        streakCount++;
       } else {
         break;
       }
-      if (streak > 365) break;
+      if (streakCount > 365) break;
     }
-    return streak;
-  };
+    return streakCount;
+  }, [solvesByDate, formatDate]);
 
-  const streak = calculateStreak();
-
-  const heatmapData = Array.from({ length: 154 }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (153 - i));
-    const dateStr = formatDate(d);
-    const count = solvesByDate[dateStr] || 0;
-    return {
-      active: count > 0,
-      value: Math.min(count, 4),
-      date: dateStr
-    };
-  });
+  const heatmapData = useMemo(() => {
+    return Array.from({ length: 154 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (153 - i));
+      const dateStr = formatDate(d);
+      const count = solvesByDate[dateStr] || 0;
+      return {
+        active: count > 0,
+        value: Math.min(count, 4),
+        date: dateStr
+      };
+    });
+  }, [solvesByDate, formatDate]);
 
   const downloadProgress = async () => {
     if (!reportRef.current) return;
@@ -124,9 +127,9 @@ export const Dashboard = () => {
     pdf.save(`CodePath_Progress_Report.pdf`);
   };
 
-  const topicsCompleted = TOPICS.filter(t => 
-    t.problems.every(p => stats.solvedIds.includes(p.id))
-  ).length;
+  const topicsCompleted = useMemo(() => TOPICS.filter(t =>
+    t.problems.every(p => isSolved(p.id))
+  ).length, [isSolved]);
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
@@ -253,7 +256,8 @@ export const Dashboard = () => {
 
               <div className="space-y-6">
                 {TOPICS.slice(0, 6).map((topic) => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+                  // Optimization: use memoized isSolved
+                  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
                   const percent = Math.round((solvedCount / topic.problems.length) * 100);
                   
                   return (
@@ -328,7 +332,7 @@ export const Dashboard = () => {
              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-8 pb-4 border-b border-gray-100">Top Module Performance</h3>
              <div className="grid grid-cols-2 gap-x-12 gap-y-8">
                 {TOPICS.slice(0, 10).map(topic => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+                  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
                   const percent = Math.round((solvedCount / topic.problems.length) * 100);
                   return (
                     <div key={topic.id} className="flex items-center justify-between">
