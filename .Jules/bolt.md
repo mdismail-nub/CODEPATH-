@@ -1,0 +1,3 @@
+## 2025-05-22 - AppStateContext Optimization
+**Learning:** In applications with centralized state management, lookups on large arrays (like solved problem IDs) in the main context can become a performance bottleneck as they are performed frequently across many components. Converting these to memoized Sets provides O(1) lookup complexity. Additionally, unmemoized context values and unstable function references cause widespread redundant re-renders.
+**Action:** Always prefer memoized Sets for membership checks in state. Use useCallback with functional updates to ensure stable function references and useMemo for the context provider's value.
