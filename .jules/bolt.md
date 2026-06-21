@@ -1,0 +1,3 @@
+## 2025-05-15 - Context-based O(N) Array Bottlenecks
+**Learning:** Using arrays for state tracking (e.g., `solvedIds`) in a global React Context leads to O(N) search performance in every consumer component. This degrades exponentially as user history grows. Additionally, unmemoized context values trigger full-tree re-renders on every state update.
+**Action:** Always provide memoized `Set` objects or O(1) lookup helpers from the context. Ensure the context provider value and all exported handlers are wrapped in `useMemo` and `useCallback` to prevent redundant re-renders of the entire application.

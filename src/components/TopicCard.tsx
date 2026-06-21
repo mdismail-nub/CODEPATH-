@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import * as Icons from 'lucide-react';
@@ -12,10 +12,15 @@ interface TopicCardProps {
 }
 
 export const TopicCard: React.FC<TopicCardProps> = ({ topic, index }) => {
-  const { stats } = useAppState();
+  const { isSolved } = useAppState();
   const Icon = (Icons as any)[topic.icon] || Icons.HelpCircle;
   
-  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+  // Performance Optimization: Use the O(1) isSolved helper instead of stats.solvedIds.includes O(N) scan
+  const solvedCount = useMemo(() =>
+    topic.problems.filter(p => isSolved(p.id)).length,
+    [topic.problems, isSolved]
+  );
+
   const totalCount = topic.problems.length;
   const progressPercent = Math.round((solvedCount / totalCount) * 100) || 0;
   const isCompleted = progressPercent === 100;
