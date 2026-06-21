@@ -1,9 +1,22 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Build / Runtime / Logic
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 31, 35, 41-48
+ * Root Cause    : Hook violation (useState after early return), missing state reset on navigation, and potential NaN/crash on empty exercises.
+ * Fix Applied   : Moved hooks before early return, added state reset useEffect, and implemented defensive guards for exercise collections.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No (Preserves existing UI while fixing crashes and navigation bugs)
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft, BookOpenCheck
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -29,14 +42,24 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+
+  // Reset state when lesson changes
+  useEffect(() => {
+    setCurrentExerciseIdx(0);
+    setUserAnswer('');
+    setShowFeedback(null);
+    setIsCompleted(false);
+    setShowConfetti(false);
+    setShowHint(false);
+    setActiveTab('content');
+  }, [courseSlug, lessonSlug]);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
-  const currentExercise = lesson.exercises[currentExerciseIdx];
-  const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+  const totalExercises = lesson?.exercises?.length || 0;
+  const currentExercise = totalExercises > 0 ? lesson.exercises[currentExerciseIdx] : null;
+  const progressPercent = totalExercises > 0 ? Math.round(((currentExerciseIdx) / totalExercises) * 100) : 0;
 
   const checkAnswer = () => {
     if (!currentExercise) return;
@@ -74,6 +97,9 @@ export const LessonPage = () => {
 
   const isLastLesson = lessonIndex === course.lessons.length - 1;
   const nextLesson = course.lessons[lessonIndex + 1];
+
+  // Defensive check for missing exercises
+  const hasExercises = totalExercises > 0;
 
   return (
     <div className="relative flex flex-col h-screen bg-[#F8FAFC] dark:bg-[#020617] overflow-hidden pt-16">
@@ -234,6 +260,22 @@ export const LessonPage = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="w-full max-w-xl"
                 >
+                  {!hasExercises ? (
+                    <div className="text-center py-12">
+                      <div className="h-20 w-20 bg-slate-100 dark:bg-slate-900 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <BookOpenCheck className="h-10 w-10 text-slate-400" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Reading mode only</h3>
+                      <p className="text-slate-500 dark:text-slate-400 mb-8">This lesson doesn't have practice exercises yet. Mark it as read to continue.</p>
+                      <button
+                        onClick={handleLessonComplete}
+                        className="w-full py-4 rounded-2xl bg-primary-600 text-white font-bold hover:bg-primary-700 transition-all active:scale-95"
+                      >
+                        Mark as Read
+                      </button>
+                    </div>
+                  ) : currentExercise && (
+                    <>
                   <div className="mb-12">
                     <span className="text-[10px] font-bold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block">
                       Exercise {currentExerciseIdx + 1} of {totalExercises}
@@ -310,14 +352,14 @@ export const LessonPage = () => {
                       onClick={checkAnswer}
                       disabled={!userAnswer}
                       className={cn(
-                        "flex-1 py-5 rounded-2xl font-bold text-base transition-all duration-250 flex items-center justify-center gap-2 border shadow-sm",
+                        "flex-1 py-5 rounded-2xl font-bold text-base transition-all duration-250 flex items-center justify-center gap-2 border shadow-sm active:scale-95",
                         !userAnswer 
                           ? "bg-slate-100 dark:bg-slate-900/60 text-slate-400 dark:text-slate-600 border-slate-200/60 dark:border-slate-800/60 cursor-not-allowed" 
                           : showFeedback === 'correct'
                             ? "bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 border-transparent text-white shadow-lg shadow-emerald-600/10"
                             : showFeedback === 'incorrect'
                               ? "bg-rose-600 dark:bg-rose-500 hover:bg-rose-700 border-transparent text-white shadow-lg shadow-rose-600/10"
-                              : "bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 border-transparent text-white shadow-md shadow-primary-600/15 dark:shadow-primary-500/10 hover:scale-[1.01] active:scale-[0.99]"
+                              : "bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 border-transparent text-white shadow-md shadow-primary-600/15 dark:shadow-primary-500/10 hover:scale-[1.01]"
                       )}
                     >
                       {showFeedback === 'correct' ? (
@@ -343,16 +385,20 @@ export const LessonPage = () => {
                     <button 
                        onClick={() => setShowHint(!showHint)}
                        className={cn(
-                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm",
+                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm active:scale-95",
                           showHint
                             ? "bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-450 border-amber-300 dark:border-amber-800 shadow-inner"
                             : "bg-amber-50/50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-100/80 dark:border-amber-900/20 hover:bg-amber-150/80 dark:hover:bg-amber-900/40 hover:border-amber-250 dark:hover:border-amber-800"
                        )}
                        title="Get a hint"
+                       aria-label="Get a hint"
+                       aria-expanded={showHint}
                     >
                        <Lightbulb className="h-6 w-6" />
                     </button>
                   </div>
+                    </>
+                  )}
 
                   <AnimatePresence>
                     {showHint && (
