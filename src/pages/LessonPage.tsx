@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Runtime / Logic
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 38, 100-110, 230-380
+ * Root Cause    : Division by zero and undefined access when a lesson has no exercises.
+ * Fix Applied   : Added zero-exercise guard to progress calculation, implemented "Reading Mode" UI, and adjusted mobile tab navigation.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -34,7 +47,9 @@ export const LessonPage = () => {
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
+  const progressPercent = totalExercises > 0
+    ? Math.round((currentExerciseIdx / totalExercises) * 100)
+    : 0;
 
   const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
@@ -90,7 +105,7 @@ export const LessonPage = () => {
         </div>
         
         {/* Mobile Tab Switcher */}
-        {!isCompleted && (
+        {!isCompleted && totalExercises > 0 && (
           <div className="flex lg:hidden p-2 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800">
              <div className="flex w-full bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
                <button 
@@ -113,7 +128,7 @@ export const LessonPage = () => {
                      : "text-slate-500 hover:text-slate-950 dark:text-slate-400"
                  )}
                >
-                 Practice {totalExercises > 0 && `(${currentExerciseIdx + 1}/${totalExercises})`}
+                 Practice ({currentExerciseIdx + 1}/{totalExercises})
                </button>
             </div>
           </div>
@@ -226,6 +241,29 @@ export const LessonPage = () => {
                     </Link>
                   </div>
                 </motion.div>
+              ) : totalExercises === 0 ? (
+                <motion.div
+                  key="reading-only"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center max-w-md"
+                >
+                  <div className="mb-8">
+                    <div className="h-20 w-20 bg-blue-100 dark:bg-blue-900/30 rounded-3xl flex items-center justify-center mx-auto">
+                      <Sparkles className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 font-outfit">Ready to move on?</h3>
+                  <p className="text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                    This lesson is reading-only. Take your time to review the content on the left, and click the button below when you're done!
+                  </p>
+                  <button
+                    onClick={handleLessonComplete}
+                    className="w-full bg-primary-600 text-white px-8 py-5 rounded-2xl font-bold text-lg hover:bg-primary-700 transition-all shadow-lg shadow-primary-600/10 active:scale-95"
+                  >
+                    Mark as Read & Continue
+                  </button>
+                </motion.div>
               ) : (
                 <motion.div
                   key={currentExerciseIdx}
@@ -239,14 +277,14 @@ export const LessonPage = () => {
                       Exercise {currentExerciseIdx + 1} of {totalExercises}
                     </span>
                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-outfit leading-snug">
-                      {currentExercise.question}
+                      {currentExercise?.question}
                     </h3>
                   </div>
 
                   <div className="space-y-4 mb-12">
-                    {currentExercise.type === 'multiple-choice' ? (
+                    {currentExercise?.type === 'multiple-choice' ? (
                       <div className="grid gap-3">
-                        {currentExercise.options?.map((option, i) => (
+                        {currentExercise?.options?.map((option, i) => (
                           <button
                             key={i}
                             onClick={() => setUserAnswer(option)}
@@ -269,7 +307,7 @@ export const LessonPage = () => {
                           </button>
                         ))}
                       </div>
-                    ) : currentExercise.type === 'fill-in-the-blank' ? (
+                    ) : currentExercise?.type === 'fill-in-the-blank' ? (
                       <div className="relative group">
                         <input
                           type="text"
@@ -293,12 +331,12 @@ export const LessonPage = () => {
                             value={userAnswer}
                             onChange={(e) => setUserAnswer(e.target.value)}
                             className="w-full h-40 p-6 font-mono text-sm bg-transparent border-none text-slate-200 focus:outline-none resize-none"
-                            placeholder={currentExercise.inputTemplate}
+                            placeholder={currentExercise?.inputTemplate}
                             onKeyDown={(e) => e.ctrlKey && e.key === 'Enter' && checkAnswer()}
                           />
                         </div>
                         <div className="flex justify-between items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
-                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected: {currentExercise.correctAnswer}</p>
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected: {currentExercise?.correctAnswer}</p>
                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Press Ctrl + Enter to run</p>
                         </div>
                       </div>
@@ -365,7 +403,7 @@ export const LessonPage = () => {
                          <MessageCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                          <div>
                             <p className="font-bold mb-1">Hint</p>
-                            {currentExercise.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
+                            {currentExercise?.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
                          </div>
                       </motion.div>
                     )}
