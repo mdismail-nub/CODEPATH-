@@ -3,7 +3,8 @@ import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft,
+  Copy, Check
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -29,8 +30,11 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
+
+  const handleCopy = (text: string) => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); };
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
@@ -150,7 +154,19 @@ export const LessonPage = () => {
                     </div>
                     <span className="text-[10px] font-bold text-slate-500 ml-2 uppercase tracking-widest">Example: {lesson.codeExample.language}</span>
                   </div>
-                  <Play className="h-3 w-3 text-slate-600" />
+                  <button
+                    onClick={() => handleCopy(lesson.codeExample!.code)}
+                    className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-slate-300 transition-all active:scale-95 flex items-center justify-center min-w-[32px]"
+                    title="Copy code" aria-label="Copy code"
+                  >
+                    <AnimatePresence mode="wait">
+                      {copied ? (
+                        <motion.div key="check" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.15 }}><Check className="h-3.5 w-3.5 text-emerald-500" /></motion.div>
+                      ) : (
+                        <motion.div key="copy" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.15 }}><Copy className="h-3.5 w-3.5" /></motion.div>
+                      )}
+                    </AnimatePresence>
+                  </button>
                 </div>
                 <pre className="p-6 text-sm font-mono text-slate-300 leading-relaxed overflow-x-auto">
                   <code>{lesson.codeExample.code}</code>
@@ -205,7 +221,7 @@ export const LessonPage = () => {
                     {nextLesson ? (
                       <button
                         onClick={() => navigate(`/learn/${course.slug}/${nextLesson.slug}`)}
-                        className="w-full bg-primary-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-primary-700 transition-all flex items-center justify-center gap-2 group"
+                        className="w-full bg-primary-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-primary-700 transition-all active:scale-95 flex items-center justify-center gap-2 group"
                       >
                         Next Lesson: {nextLesson.title}
                         <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -314,10 +330,10 @@ export const LessonPage = () => {
                         !userAnswer 
                           ? "bg-slate-100 dark:bg-slate-900/60 text-slate-400 dark:text-slate-600 border-slate-200/60 dark:border-slate-800/60 cursor-not-allowed" 
                           : showFeedback === 'correct'
-                            ? "bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 border-transparent text-white shadow-lg shadow-emerald-600/10"
+                            ? "bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 border-transparent text-white shadow-lg shadow-emerald-600/10 active:scale-95"
                             : showFeedback === 'incorrect'
-                              ? "bg-rose-600 dark:bg-rose-500 hover:bg-rose-700 border-transparent text-white shadow-lg shadow-rose-600/10"
-                              : "bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 border-transparent text-white shadow-md shadow-primary-600/15 dark:shadow-primary-500/10 hover:scale-[1.01] active:scale-[0.99]"
+                              ? "bg-rose-600 dark:bg-rose-500 hover:bg-rose-700 border-transparent text-white shadow-lg shadow-rose-600/10 active:scale-95"
+                              : "bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 border-transparent text-white shadow-md shadow-primary-600/15 dark:shadow-primary-500/10 hover:scale-[1.01] active:scale-95"
                       )}
                     >
                       {showFeedback === 'correct' ? (
@@ -343,12 +359,14 @@ export const LessonPage = () => {
                     <button 
                        onClick={() => setShowHint(!showHint)}
                        className={cn(
-                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm",
+                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm active:scale-95",
                           showHint
                             ? "bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-450 border-amber-300 dark:border-amber-800 shadow-inner"
                             : "bg-amber-50/50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-100/80 dark:border-amber-900/20 hover:bg-amber-150/80 dark:hover:bg-amber-900/40 hover:border-amber-250 dark:hover:border-amber-800"
                        )}
                        title="Get a hint"
+                       aria-label="Get a hint"
+                       aria-expanded={showHint}
                     >
                        <Lightbulb className="h-6 w-6" />
                     </button>
