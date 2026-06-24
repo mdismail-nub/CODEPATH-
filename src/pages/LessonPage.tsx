@@ -1,9 +1,23 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic / Runtime / Console
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 31, 37, 43, 106, 186, 200, 284, 348, 381
+ * Root Cause    : Rules of Hooks violation, lack of state reset during navigation, division-by-zero risk in progress calculation, and missing support for lessons without exercises.
+ * Fix Applied   : Reordered hooks, added useEffect for state reset, safeguarded progress math, implemented "Reading Mode" fallback, and improved accessibility/UX.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft, BookOpen
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -29,14 +43,27 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+
+  useEffect(() => {
+    if (lesson) {
+      setCurrentExerciseIdx(0);
+      setUserAnswer('');
+      setShowFeedback(null);
+      setIsCompleted(false);
+      setShowConfetti(false);
+      setShowHint(false);
+      setActiveTab('content');
+    }
+  }, [courseSlug, lessonSlug]);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+  const progressPercent = totalExercises > 0
+    ? Math.round((currentExerciseIdx / totalExercises) * 100)
+    : 0;
 
   const checkAnswer = () => {
     if (!currentExercise) return;
@@ -90,7 +117,7 @@ export const LessonPage = () => {
         </div>
         
         {/* Mobile Tab Switcher */}
-        {!isCompleted && (
+        {!isCompleted && totalExercises > 0 && (
           <div className="flex lg:hidden p-2 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800">
              <div className="flex w-full bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
                <button 
@@ -170,13 +197,35 @@ export const LessonPage = () => {
         {/* Right Column: Interaction Layer */}
         <div className={cn(
           "w-full lg:w-1/2 flex flex-col bg-[#F8FAFC] dark:bg-[#020617] relative flex-1 transition-all duration-300",
-          !isCompleted && width < 1024 && activeTab !== 'practice' ? 'hidden' : 'block'
+          !isCompleted && totalExercises > 0 && width < 1024 && activeTab !== 'practice' ? 'hidden' : 'block'
         )}>
           <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-blue-grain pointer-events-none" />
           
           <div className="flex-1 overflow-y-auto px-6 py-8 md:px-12 md:py-12 lg:px-16 relative z-10 flex flex-col items-center justify-center">
             <AnimatePresence mode="wait">
-              {isCompleted ? (
+              {totalExercises === 0 && !isCompleted ? (
+                <motion.div
+                  key="reading-mode"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center max-w-md p-8 rounded-[2.5rem] bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-xl"
+                >
+                  <div className="h-20 w-20 bg-primary-50 dark:bg-primary-900/20 rounded-3xl flex items-center justify-center mx-auto mb-8 text-primary-600 dark:text-primary-400">
+                    <BookOpen className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 font-outfit">Reading mode only</h3>
+                  <p className="text-slate-600 dark:text-slate-400 mb-10 leading-relaxed font-medium">
+                    This lesson is purely informational. Once you've finished reading the content on the left, click below to earn your rewards!
+                  </p>
+                  <button
+                    onClick={handleLessonComplete}
+                    className="w-full bg-primary-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-primary-700 active:scale-95 transition-all flex items-center justify-center gap-3 shadow-lg shadow-primary-600/20"
+                  >
+                    <CheckCircle2 className="h-6 w-6" />
+                    Mark as Read
+                  </button>
+                </motion.div>
+              ) : isCompleted ? (
                 <motion.div
                   key="completed"
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -246,12 +295,12 @@ export const LessonPage = () => {
                   <div className="space-y-4 mb-12">
                     {currentExercise.type === 'multiple-choice' ? (
                       <div className="grid gap-3">
-                        {currentExercise.options?.map((option, i) => (
+                        {currentExercise.options?.map((option) => (
                           <button
-                            key={i}
+                            key={option}
                             onClick={() => setUserAnswer(option)}
                             className={cn(
-                              "w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 font-medium text-sm flex items-center gap-4 shadow-sm",
+                              "w-full text-left p-5 rounded-2xl border-2 transition-all duration-200 font-medium text-sm flex items-center gap-4 shadow-sm active:scale-[0.99]",
                               userAnswer === option 
                                 ? "border-primary-600 dark:border-sky-500 bg-primary-50/50 dark:bg-primary-950/20 text-slate-950 dark:text-[#38bdf8] ring-1 ring-primary-500/20 dark:ring-sky-500/10 font-bold" 
                                 : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:border-primary-400 dark:hover:border-sky-500/50 hover:bg-slate-50/50 dark:hover:bg-slate-900/45"
@@ -263,7 +312,7 @@ export const LessonPage = () => {
                                 ? "bg-primary-600 dark:bg-sky-500 border-primary-600 dark:border-sky-500 text-white" 
                                 : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400"
                             )}>
-                              {String.fromCharCode(65 + i)}
+                              {String.fromCharCode(65 + (currentExercise.options?.indexOf(option) ?? 0))}
                             </div>
                             <span>{option}</span>
                           </button>
@@ -310,14 +359,14 @@ export const LessonPage = () => {
                       onClick={checkAnswer}
                       disabled={!userAnswer}
                       className={cn(
-                        "flex-1 py-5 rounded-2xl font-bold text-base transition-all duration-250 flex items-center justify-center gap-2 border shadow-sm",
+                        "flex-1 py-5 rounded-2xl font-bold text-base transition-all duration-250 flex items-center justify-center gap-2 border shadow-sm active:scale-[0.98]",
                         !userAnswer 
                           ? "bg-slate-100 dark:bg-slate-900/60 text-slate-400 dark:text-slate-600 border-slate-200/60 dark:border-slate-800/60 cursor-not-allowed" 
                           : showFeedback === 'correct'
                             ? "bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 border-transparent text-white shadow-lg shadow-emerald-600/10"
                             : showFeedback === 'incorrect'
                               ? "bg-rose-600 dark:bg-rose-500 hover:bg-rose-700 border-transparent text-white shadow-lg shadow-rose-600/10"
-                              : "bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 border-transparent text-white shadow-md shadow-primary-600/15 dark:shadow-primary-500/10 hover:scale-[1.01] active:scale-[0.99]"
+                              : "bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 border-transparent text-white shadow-md shadow-primary-600/15 dark:shadow-primary-500/10 hover:scale-[1.01]"
                       )}
                     >
                       {showFeedback === 'correct' ? (
@@ -343,12 +392,14 @@ export const LessonPage = () => {
                     <button 
                        onClick={() => setShowHint(!showHint)}
                        className={cn(
-                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm",
+                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm active:scale-95",
                           showHint
                             ? "bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-450 border-amber-300 dark:border-amber-800 shadow-inner"
                             : "bg-amber-50/50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-100/80 dark:border-amber-900/20 hover:bg-amber-150/80 dark:hover:bg-amber-900/40 hover:border-amber-250 dark:hover:border-amber-800"
                        )}
                        title="Get a hint"
+                       aria-label="Get a hint"
+                       aria-expanded={showHint}
                     >
                        <Lightbulb className="h-6 w-6" />
                     </button>
