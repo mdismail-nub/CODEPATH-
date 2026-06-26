@@ -87,12 +87,13 @@ export const Navbar = () => {
               <button
                 onClick={toggleTheme}
                 className={cn(
-                  "p-2 rounded-lg transition-all",
+                  "p-2 rounded-lg transition-all active:scale-95",
                   isLandingPage 
                     ? "text-slate-300 hover:text-white hover:bg-white/5" 
                     : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                 )}
                 title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               >
                 {theme === 'dark' || isLandingPage ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </button>
