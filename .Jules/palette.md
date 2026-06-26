@@ -1,0 +1,3 @@
+## 2025-06-26 - [Copy Code & Tactile Feedback]
+**Learning:** Adding functional improvements like "Copy Code" alongside micro-UX touches like `active:scale-95` and accessibility labels significantly enhances the perceived quality of the interface. Automated verification of these features requires careful coordination with app-specific loading states and clipboard permissions.
+**Action:** Always include both `aria-label` and `title` for icon-only buttons to satisfy both screen readers and desktop hover users. Ensure React hooks like `useEffect` are correctly imported when adding new logic to existing components.

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  ChevronLeft, CheckCircle2, ChevronRight, X,
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft,
+  Copy, Check
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -29,6 +30,14 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (copied) {
+      const timer = setTimeout(() => setCopied(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [copied]);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
@@ -60,6 +69,13 @@ export const LessonPage = () => {
     } else {
       setShowFeedback('incorrect');
       setTimeout(() => setShowFeedback(null), 1500);
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (lesson.codeExample) {
+      navigator.clipboard.writeText(lesson.codeExample.code);
+      setCopied(true);
     }
   };
 
@@ -129,7 +145,7 @@ export const LessonPage = () => {
           <div className="max-w-[700px] mx-auto px-6 py-10 md:px-8 md:py-12 lg:px-12">
             <Link 
               to={`/learn/${courseSlug}`} 
-              className="inline-flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] w-fit mb-8"
+              className="inline-flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-slate-800 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.95] w-fit mb-8"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back to {course.title}</span>
@@ -150,7 +166,34 @@ export const LessonPage = () => {
                     </div>
                     <span className="text-[10px] font-bold text-slate-500 ml-2 uppercase tracking-widest">Example: {lesson.codeExample.language}</span>
                   </div>
-                  <Play className="h-3 w-3 text-slate-600" />
+                  <button
+                    onClick={copyToClipboard}
+                    className="p-1.5 rounded-md hover:bg-slate-800 text-slate-500 hover:text-white transition-all active:scale-95"
+                    title="Copy code"
+                    aria-label="Copy code to clipboard"
+                  >
+                    <AnimatePresence mode="wait">
+                      {copied ? (
+                        <motion.div
+                          key="check"
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.5 }}
+                        >
+                          <Check className="h-3.5 w-3.5 text-emerald-500" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="copy"
+                          initial={{ opacity: 0, scale: 0.5 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.5 }}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </button>
                 </div>
                 <pre className="p-6 text-sm font-mono text-slate-300 leading-relaxed overflow-x-auto">
                   <code>{lesson.codeExample.code}</code>
@@ -317,7 +360,7 @@ export const LessonPage = () => {
                             ? "bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 border-transparent text-white shadow-lg shadow-emerald-600/10"
                             : showFeedback === 'incorrect'
                               ? "bg-rose-600 dark:bg-rose-500 hover:bg-rose-700 border-transparent text-white shadow-lg shadow-rose-600/10"
-                              : "bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 border-transparent text-white shadow-md shadow-primary-600/15 dark:shadow-primary-500/10 hover:scale-[1.01] active:scale-[0.99]"
+                              : "bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 border-transparent text-white shadow-md shadow-primary-600/15 dark:shadow-primary-500/10 hover:scale-[1.01] active:scale-[0.95]"
                       )}
                     >
                       {showFeedback === 'correct' ? (
@@ -343,12 +386,14 @@ export const LessonPage = () => {
                     <button 
                        onClick={() => setShowHint(!showHint)}
                        className={cn(
-                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm",
+                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm active:scale-95",
                           showHint
                             ? "bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-450 border-amber-300 dark:border-amber-800 shadow-inner"
                             : "bg-amber-50/50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-100/80 dark:border-amber-900/20 hover:bg-amber-150/80 dark:hover:bg-amber-900/40 hover:border-amber-250 dark:hover:border-amber-800"
                        )}
                        title="Get a hint"
+                       aria-label="Get a hint"
+                       aria-expanded={showHint}
                     >
                        <Lightbulb className="h-6 w-6" />
                     </button>
