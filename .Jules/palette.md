@@ -1,0 +1,3 @@
+## 2025-05-14 - Interactive Code Blocks & Accessibility Polish
+**Learning:** Functional micro-interactions like 'Copy to Clipboard' significantly enhance the utility of educational content. Providing visual feedback via icon state changes (Copy -> Check) makes the interaction feel responsive and trustworthy. Additionally, descriptive `aria-label`s for external links that include both the destination name and platform are essential for non-visual navigation in complex lists.
+**Action:** Always look for static code examples and consider making them interactive. Ensure all icon-only or externally-pointing interactive elements have context-rich ARIA labels.
