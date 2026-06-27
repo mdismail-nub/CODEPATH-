@@ -13,6 +13,20 @@ import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 import { Exercise } from '../types';
 
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic / Runtime
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 37, 111-121, 229-350
+ * Root Cause    : Zero exercises in a lesson caused NaN in progress and TypeError when accessing undefined currentExercise.
+ * Fix Applied   : Added zero-guard for progressPercent, hid Practice tab when exercises are missing, and added fallback UI with "Complete Lesson" button.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
+
 export const LessonPage = () => {
   const { courseSlug, lessonSlug } = useParams();
   const navigate = useNavigate();
@@ -34,7 +48,7 @@ export const LessonPage = () => {
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
+  const progressPercent = totalExercises > 0 ? Math.round(((currentExerciseIdx) / totalExercises) * 100) : 0;
 
   const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
@@ -104,17 +118,19 @@ export const LessonPage = () => {
                >
                  Lesson
                </button>
-               <button 
-                 onClick={() => setActiveTab('practice')}
-                 className={cn(
-                   "flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all",
-                   activeTab === 'practice' 
-                     ? "bg-white dark:bg-slate-900 text-primary-600 dark:text-sky-400 shadow-sm" 
-                     : "text-slate-500 hover:text-slate-950 dark:text-slate-400"
-                 )}
-               >
-                 Practice {totalExercises > 0 && `(${currentExerciseIdx + 1}/${totalExercises})`}
-               </button>
+               {totalExercises > 0 && (
+                 <button
+                   onClick={() => setActiveTab('practice')}
+                   className={cn(
+                     "flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all",
+                     activeTab === 'practice'
+                       ? "bg-white dark:bg-slate-900 text-primary-600 dark:text-sky-400 shadow-sm"
+                       : "text-slate-500 hover:text-slate-950 dark:text-slate-400"
+                   )}
+                 >
+                   Practice ({currentExerciseIdx + 1}/{totalExercises})
+                 </button>
+               )}
             </div>
           </div>
         )}
@@ -170,7 +186,7 @@ export const LessonPage = () => {
         {/* Right Column: Interaction Layer */}
         <div className={cn(
           "w-full lg:w-1/2 flex flex-col bg-[#F8FAFC] dark:bg-[#020617] relative flex-1 transition-all duration-300",
-          !isCompleted && width < 1024 && activeTab !== 'practice' ? 'hidden' : 'block'
+          !isCompleted && width < 1024 && activeTab !== 'practice' && totalExercises > 0 ? 'hidden' : 'block'
         )}>
           <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-blue-grain pointer-events-none" />
           
@@ -226,7 +242,7 @@ export const LessonPage = () => {
                     </Link>
                   </div>
                 </motion.div>
-              ) : (
+              ) : totalExercises > 0 ? (
                 <motion.div
                   key={currentExerciseIdx}
                   initial={{ opacity: 0, x: 20 }}
@@ -370,6 +386,28 @@ export const LessonPage = () => {
                       </motion.div>
                     )}
                   </AnimatePresence>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="no-exercises"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center max-w-md"
+                >
+                  <div className="mb-8 h-20 w-20 bg-primary-50 dark:bg-primary-900/20 rounded-2xl flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="h-10 w-10 text-primary-600 dark:text-primary-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3 font-outfit">Lesson Content Complete!</h3>
+                  <p className="text-slate-600 dark:text-slate-400 mb-8 font-medium">
+                    You've finished reading the material. Click below to complete this lesson and earn your XP.
+                  </p>
+                  <button
+                    onClick={handleLessonComplete}
+                    className="w-full bg-primary-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-primary-700 transition-all flex items-center justify-center gap-2 group active:scale-95"
+                  >
+                    Complete Lesson
+                    <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
