@@ -1,0 +1,3 @@
+## 2025-06-30 - [O(1) State Lookups & Stable Context References]
+**Learning:** In a highly interactive app where global state (like solved problem IDs) is used across many components (like TopicCards and LessonPages), converting tracking arrays into `useMemo`ed Sets provides O(1) lookup performance for UI status checks. Additionally, memoizing the context value and its functions is critical to preventing application-wide re-render cascades.
+**Action:** Always prefer memoized Sets over repeated `.includes()` calls on large state arrays, and ensure context providers use `useMemo` for their value objects.
