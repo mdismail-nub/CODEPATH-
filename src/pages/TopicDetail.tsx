@@ -153,8 +153,9 @@ export const TopicDetail = () => {
               >
                 <button
                   onClick={() => toggleSolved(problem.id)}
+                  aria-label={isSolved(problem.id) ? `Mark ${problem.name} as unsolved` : `Mark ${problem.name} as solved`}
                   className={cn(
-                    "flex-shrink-0 h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
+                    "flex-shrink-0 h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300 active:scale-95",
                     isSolved(problem.id)
                       ? "bg-emerald-500 dark:bg-emerald-400 border-emerald-500 dark:border-emerald-400 text-white"
                       : "border-slate-200 dark:border-slate-800 text-transparent group-hover:border-primary-300 dark:group-hover:border-primary-700 font-bold"
