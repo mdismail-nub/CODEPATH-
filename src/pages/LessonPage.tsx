@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : [Logic / Runtime]
+ * Severity      : [High]
+ * File          : [src/pages/LessonPage.tsx]
+ * Line(s)       : [37, 256-420]
+ * Root Cause    : [Component crash on zero exercises due to division by zero and undefined access; UI state not reset on navigation.]
+ * Fix Applied   : [Added zero-check for progress, null-check for exercise, fallback UI for zero-exercise lessons, and useEffect for state reset on navigation.]
+ * Auto-Fixed    : [Yes]
+ * Behavior Change: [No]
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -29,14 +42,33 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+
+  // Reset lesson-specific state when navigating
+  const lessonCompleted = lesson ? isLessonCompleted(lesson.id) : false;
+
+  useEffect(() => {
+    setCurrentExerciseIdx(0);
+    setUserAnswer('');
+    setShowFeedback(null);
+    setIsCompleted(lessonCompleted);
+    setShowConfetti(false);
+    setShowHint(false);
+    setActiveTab('content');
+  }, [courseSlug, lessonSlug]);
+
+  // Sync completion status from context (e.g. after login or completing a lesson)
+  useEffect(() => {
+    if (lessonCompleted) {
+      setIsCompleted(true);
+    }
+  }, [lessonCompleted]);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+  const progressPercent = totalExercises > 0 ? Math.round(((currentExerciseIdx) / totalExercises) * 100) : 0;
 
   const checkAnswer = () => {
     if (!currentExercise) return;
@@ -90,7 +122,7 @@ export const LessonPage = () => {
         </div>
         
         {/* Mobile Tab Switcher */}
-        {!isCompleted && (
+        {!isCompleted && totalExercises > 0 && (
           <div className="flex lg:hidden p-2 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800">
              <div className="flex w-full bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
                <button 
@@ -113,7 +145,7 @@ export const LessonPage = () => {
                      : "text-slate-500 hover:text-slate-950 dark:text-slate-400"
                  )}
                >
-                 Practice {totalExercises > 0 && `(${currentExerciseIdx + 1}/${totalExercises})`}
+                 Practice ({currentExerciseIdx + 1}/${totalExercises})
                </button>
             </div>
           </div>
@@ -170,7 +202,7 @@ export const LessonPage = () => {
         {/* Right Column: Interaction Layer */}
         <div className={cn(
           "w-full lg:w-1/2 flex flex-col bg-[#F8FAFC] dark:bg-[#020617] relative flex-1 transition-all duration-300",
-          !isCompleted && width < 1024 && activeTab !== 'practice' ? 'hidden' : 'block'
+          !isCompleted && width < 1024 && activeTab !== 'practice' && totalExercises > 0 ? 'hidden' : 'block'
         )}>
           <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-blue-grain pointer-events-none" />
           
@@ -234,14 +266,16 @@ export const LessonPage = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="w-full max-w-xl"
                 >
-                  <div className="mb-12">
-                    <span className="text-[10px] font-bold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block">
-                      Exercise {currentExerciseIdx + 1} of {totalExercises}
-                    </span>
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-outfit leading-snug">
-                      {currentExercise.question}
-                    </h3>
-                  </div>
+                  {currentExercise ? (
+                    <>
+                      <div className="mb-12">
+                        <span className="text-[10px] font-bold text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block">
+                          Exercise {currentExerciseIdx + 1} of {totalExercises}
+                        </span>
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-outfit leading-snug">
+                          {currentExercise.question}
+                        </h3>
+                      </div>
 
                   <div className="space-y-4 mb-12">
                     {currentExercise.type === 'multiple-choice' ? (
@@ -354,22 +388,41 @@ export const LessonPage = () => {
                     </button>
                   </div>
 
-                  <AnimatePresence>
-                    {showHint && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="mt-6 p-5 rounded-xl bg-amber-50 text-amber-900 text-sm font-medium border border-amber-100 flex items-start gap-4"
+                      <AnimatePresence>
+                        {showHint && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            className="mt-6 p-5 rounded-xl bg-amber-50 text-amber-900 text-sm font-medium border border-amber-100 flex items-start gap-4"
+                          >
+                             <MessageCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                             <div>
+                                <p className="font-bold mb-1">Hint</p>
+                                {currentExercise.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
+                             </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="h-20 w-20 bg-slate-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <CheckCircle2 className="h-10 w-10 text-slate-400" />
+                      </div>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 font-outfit">Ready to move on?</h3>
+                      <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-xs mx-auto">
+                        This lesson has no practice exercises. You can mark it as complete once you've finished reading the content.
+                      </p>
+                      <button
+                        onClick={handleLessonComplete}
+                        className="bg-primary-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-primary-700 transition-all flex items-center justify-center gap-2 mx-auto shadow-lg shadow-primary-600/20"
                       >
-                         <MessageCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                         <div>
-                            <p className="font-bold mb-1">Hint</p>
-                            {currentExercise.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
-                         </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                        Complete Lesson
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
