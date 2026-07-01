@@ -342,6 +342,7 @@ export const LessonPage = () => {
                     
                     <button 
                        onClick={() => setShowHint(!showHint)}
+                       aria-label="Get a hint"
                        className={cn(
                           "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm",
                           showHint

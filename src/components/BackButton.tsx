@@ -8,6 +8,7 @@ export const BackButton = () => {
   return (
     <button 
       onClick={() => navigate(-1)}
+      aria-label="Go back"
       className="group mb-8 flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-slate-950 dark:hover:text-white"
     >
       <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 transition-colors group-hover:border-slate-300 dark:group-hover:border-white/20 group-hover:bg-slate-100 dark:group-hover:bg-white/10">
