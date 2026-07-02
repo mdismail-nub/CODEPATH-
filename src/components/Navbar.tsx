@@ -86,8 +86,9 @@ export const Navbar = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleTheme}
+                aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                 className={cn(
-                  "p-2 rounded-lg transition-all",
+                  "p-2 rounded-lg transition-all active:scale-95",
                   isLandingPage 
                     ? "text-slate-300 hover:text-white hover:bg-white/5" 
                     : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -134,8 +135,9 @@ export const Navbar = () => {
           <div className="md:hidden flex items-center gap-2">
             <button
               onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               className={cn(
-                "p-2 rounded-lg transition-colors",
+                "p-2 rounded-lg transition-all active:scale-95",
                 isLandingPage ? "text-slate-300 hover:bg-white/5" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               )}
             >
@@ -144,7 +146,7 @@ export const Navbar = () => {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={cn(
-                "p-3 rounded-xl transition-colors",
+                "p-3 rounded-xl transition-all active:scale-95",
                 isLandingPage ? "text-slate-300 hover:bg-white/10" : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
               )}
               aria-label="Toggle Menu"
@@ -222,7 +224,8 @@ export const Navbar = () => {
                       </div>
                       <button 
                         onClick={() => { logout(); setIsOpen(false); }}
-                        className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        aria-label="Sign out"
+                        className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors active:scale-95"
                       >
                         <LogOut className="h-5 w-5" />
                       </button>

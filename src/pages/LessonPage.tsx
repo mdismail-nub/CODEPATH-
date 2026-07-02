@@ -34,7 +34,9 @@ export const LessonPage = () => {
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
+  const progressPercent = totalExercises > 0
+    ? Math.round((currentExerciseIdx / totalExercises) * 100)
+    : 0;
 
   const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
@@ -95,6 +97,7 @@ export const LessonPage = () => {
              <div className="flex w-full bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
                <button 
                  onClick={() => setActiveTab('content')}
+                 aria-label="View lesson content"
                  className={cn(
                    "flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all",
                    activeTab === 'content' 
@@ -106,6 +109,7 @@ export const LessonPage = () => {
                </button>
                <button 
                  onClick={() => setActiveTab('practice')}
+                 aria-label="View practice exercises"
                  className={cn(
                    "flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all",
                    activeTab === 'practice' 
@@ -342,8 +346,9 @@ export const LessonPage = () => {
                     
                     <button 
                        onClick={() => setShowHint(!showHint)}
+                       aria-label={showHint ? "Hide hint" : "Show hint"}
                        className={cn(
-                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm",
+                          "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm active:scale-95",
                           showHint
                             ? "bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-450 border-amber-300 dark:border-amber-800 shadow-inner"
                             : "bg-amber-50/50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-100/80 dark:border-amber-900/20 hover:bg-amber-150/80 dark:hover:bg-amber-900/40 hover:border-amber-250 dark:hover:border-amber-800"
