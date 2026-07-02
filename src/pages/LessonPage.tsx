@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Runtime
+ * Severity      : Critical
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 35-50
+ * Root Cause    : Component state (currentExerciseIdx, isCompleted) not resetting upon navigation between lessons, leading to out-of-bounds array access and UI inconsistency.
+ * Fix Applied   : Added useEffect hook to reset all lesson-specific states when courseSlug or lessonSlug changes.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -29,14 +42,24 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+
+  // Reset state when navigating between lessons
+  useEffect(() => {
+    setCurrentExerciseIdx(0);
+    setUserAnswer('');
+    setShowFeedback(null);
+    setIsCompleted(lesson ? isLessonCompleted(lesson.id) : false);
+    setShowConfetti(false);
+    setShowHint(false);
+    setActiveTab('content');
+  }, [courseSlug, lessonSlug, isLessonCompleted, lesson?.id]);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+  const progressPercent = totalExercises > 0 ? Math.round(((currentExerciseIdx) / totalExercises) * 100) : 0;
 
   const checkAnswer = () => {
     if (!currentExercise) return;
