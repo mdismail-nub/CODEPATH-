@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { UserStats, CertificateInfo, GitHubInfo } from './types';
 import { db, auth } from './lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
@@ -42,6 +42,10 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
 
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+
+  // Performance: Memoized Sets for O(1) lookups
+  const solvedIdsSet = useMemo(() => new Set(stats.solvedIds), [stats.solvedIds]);
+  const completedLessonIdsSet = useMemo(() => new Set(stats.completedLessonIds || []), [stats.completedLessonIds]);
 
   // Persistence Key
   const LOCAL_STORAGE_KEY = 'codepath_stats';
@@ -113,8 +117,11 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [stats, loading, saveStats]);
 
+  const isSolved = useCallback((id: string) => solvedIdsSet.has(id), [solvedIdsSet]);
+  const isLessonCompleted = useCallback((id: string) => completedLessonIdsSet.has(id), [completedLessonIdsSet]);
+
   const toggleSolved = (id: string) => {
-    const alreadySolved = stats.solvedIds.includes(id);
+    const alreadySolved = isSolved(id);
     const now = Date.now();
     
     setStats(prev => {
@@ -134,8 +141,6 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       };
     });
   };
-
-  const isSolved = (id: string) => stats.solvedIds.includes(id);
 
   const updateVJudgeId = (vjudgeId: string) => {
     setStats(prev => ({ ...prev, vjudgeId }));
@@ -233,8 +238,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const completeLesson = (lessonId: string, xpReward: number) => {
-    const completed = stats.completedLessonIds || [];
-    if (completed.includes(lessonId)) return;
+    if (isLessonCompleted(lessonId)) return;
     
     setStats(prev => ({
       ...prev,
@@ -242,8 +246,6 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       xp: (prev.xp || 0) + xpReward
     }));
   };
-
-  const isLessonCompleted = (lessonId: string) => (stats.completedLessonIds || []).includes(lessonId);
 
   return (
     <AppStateContext.Provider value={{ 

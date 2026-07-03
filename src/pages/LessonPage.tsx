@@ -39,7 +39,7 @@ export const LessonPage = () => {
   const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
   const checkAnswer = () => {
-    if (!currentExercise) return;
+    if (!currentExercise || isCompleted) return;
     
     const isCorrect = userAnswer.trim().toLowerCase() === currentExercise.correctAnswer.trim().toLowerCase();
     
