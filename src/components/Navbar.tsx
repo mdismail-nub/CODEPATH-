@@ -93,6 +93,7 @@ export const Navbar = () => {
                     : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
                 )}
                 title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               >
                 {theme === 'dark' || isLandingPage ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </button>
@@ -138,6 +139,7 @@ export const Navbar = () => {
                 "p-2 rounded-lg transition-colors",
                 isLandingPage ? "text-slate-300 hover:bg-white/5" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               )}
+              aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               {theme === 'dark' || isLandingPage ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
