@@ -153,6 +153,7 @@ export const TopicDetail = () => {
               >
                 <button
                   onClick={() => toggleSolved(problem.id)}
+                  aria-label={`Mark ${problem.name} as ${isSolved(problem.id) ? 'unsolved' : 'solved'}`}
                   className={cn(
                     "flex-shrink-0 h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
                     isSolved(problem.id)
@@ -190,6 +191,7 @@ export const TopicDetail = () => {
                   href={problem.link}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`Open ${problem.name} on ${problem.platform}`}
                   className="flex-shrink-0 h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-primary-600 dark:hover:bg-primary-500 hover:text-white dark:hover:text-slate-900 transition-all transition-transform hover:scale-105 active:scale-95 shadow-sm"
                 >
                   <Icons.ExternalLink className="h-5 w-5" />
