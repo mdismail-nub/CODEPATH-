@@ -13,6 +13,20 @@ import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 import { Exercise } from '../types';
 
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : Medium
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 37
+ * Root Cause    : Division-by-zero when a lesson has no exercises.
+ * Fix Applied   : Added a guard to ensure progressPercent is 0 if totalExercises is 0.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
+
 export const LessonPage = () => {
   const { courseSlug, lessonSlug } = useParams();
   const navigate = useNavigate();
@@ -34,7 +48,9 @@ export const LessonPage = () => {
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
+  const progressPercent = totalExercises > 0
+    ? Math.round(((currentExerciseIdx) / totalExercises) * 100)
+    : 0;
 
   const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
