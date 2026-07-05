@@ -95,6 +95,7 @@ export const LessonPage = () => {
              <div className="flex w-full bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
                <button 
                  onClick={() => setActiveTab('content')}
+                 aria-label="View lesson content"
                  className={cn(
                    "flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all",
                    activeTab === 'content' 
@@ -106,6 +107,7 @@ export const LessonPage = () => {
                </button>
                <button 
                  onClick={() => setActiveTab('practice')}
+                 aria-label="View practice exercises"
                  className={cn(
                    "flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all",
                    activeTab === 'practice' 
@@ -342,6 +344,7 @@ export const LessonPage = () => {
                     
                     <button 
                        onClick={() => setShowHint(!showHint)}
+                       aria-label="Get a hint"
                        className={cn(
                           "h-16 w-16 flex items-center justify-center rounded-2xl border transition-all duration-200 flex-shrink-0 shadow-sm",
                           showHint
