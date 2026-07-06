@@ -4,13 +4,14 @@ import { Trophy, CheckCircle2, CircleDashed, LayoutGrid } from 'lucide-react';
 import { TOPICS } from '../data';
 import { useAppState } from '../AppStateContext';
 
+const TOTAL_PROBLEMS = TOPICS.reduce((sum, topic) => sum + topic.problems.length, 0);
+
 export const StatsDashboard = () => {
   const { stats, theme } = useAppState();
 
   const data = useMemo(() => {
-    const totalProblems = TOPICS.reduce((sum, topic) => sum + topic.problems.length, 0);
     const solvedCount = stats.solvedIds.length;
-    const remainingCount = totalProblems - solvedCount;
+    const remainingCount = TOTAL_PROBLEMS - solvedCount;
     const isDark = theme === 'dark';
 
     return [
@@ -19,9 +20,8 @@ export const StatsDashboard = () => {
     ];
   }, [stats.solvedIds, theme]);
 
-  const total = TOPICS.reduce((sum, topic) => sum + topic.problems.length, 0);
   const solved = stats.solvedIds.length;
-  const percent = Math.round((solved / total) * 100) || 0;
+  const percent = Math.round((solved / TOTAL_PROBLEMS) * 100) || 0;
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -40,7 +40,7 @@ export const StatsDashboard = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 relative z-10">
           <div className="p-8 rounded-[2rem] bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center group/card transition-all hover:bg-slate-50 dark:hover:bg-slate-950 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm dark:shadow-none">
-            <span className="text-5xl font-bold text-slate-900 dark:text-white tracking-tighter mb-2">{total}</span>
+            <span className="text-5xl font-bold text-slate-900 dark:text-white tracking-tighter mb-2">{TOTAL_PROBLEMS}</span>
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600">Inventory</span>
           </div>
           <div className="p-8 rounded-[2rem] bg-primary-50 dark:bg-sky-400/5 border border-primary-100 dark:border-sky-400/10 flex flex-col items-center justify-center text-center group/card transition-all hover:bg-primary-100 dark:hover:bg-sky-400/10 hover:border-primary-200 dark:hover:border-sky-400/20 shadow-sm dark:shadow-xl dark:shadow-sky-500/5">
@@ -50,7 +50,7 @@ export const StatsDashboard = () => {
             <span className="text-[10px] font-bold uppercase tracking-widest text-primary-600 dark:text-sky-500">Solved</span>
           </div>
           <div className="p-8 rounded-[2rem] bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center group/card transition-all hover:bg-slate-50 dark:hover:bg-slate-950 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm dark:shadow-none">
-            <span className="text-5xl font-bold text-slate-400 dark:text-slate-700 tracking-tighter mb-2">{total - solved}</span>
+            <span className="text-5xl font-bold text-slate-400 dark:text-slate-700 tracking-tighter mb-2">{TOTAL_PROBLEMS - solved}</span>
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600">Unsolved</span>
           </div>
         </div>
@@ -106,7 +106,7 @@ export const StatsDashboard = () => {
               <div className="h-2 w-2 rounded-full bg-slate-300 dark:bg-slate-800" />
               <span className="text-xs font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest">Unsolved</span>
             </div>
-            <span className="text-sm font-bold text-slate-500">{total - solved}</span>
+            <span className="text-sm font-bold text-slate-500">{TOTAL_PROBLEMS - solved}</span>
           </div>
         </div>
       </div>

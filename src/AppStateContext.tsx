@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { UserStats, CertificateInfo, GitHubInfo } from './types';
 import { db, auth } from './lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
@@ -34,6 +34,11 @@ const AppStateContext = createContext<AppStateContextType | undefined>(undefined
 
 export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [stats, setStats] = useState<UserStats>(DEFAULT_STATS);
+
+  // Memoized Sets for O(1) lookups
+  const solvedIdsSet = useMemo(() => new Set(stats.solvedIds), [stats.solvedIds]);
+  const completedLessonIdsSet = useMemo(() => new Set(stats.completedLessonIds || []), [stats.completedLessonIds]);
+
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -135,7 +140,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
-  const isSolved = (id: string) => stats.solvedIds.includes(id);
+  const isSolved = useCallback((id: string) => solvedIdsSet.has(id), [solvedIdsSet]);
 
   const updateVJudgeId = (vjudgeId: string) => {
     setStats(prev => ({ ...prev, vjudgeId }));
@@ -243,7 +248,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }));
   };
 
-  const isLessonCompleted = (lessonId: string) => (stats.completedLessonIds || []).includes(lessonId);
+  const isLessonCompleted = useCallback((lessonId: string) => completedLessonIdsSet.has(lessonId), [completedLessonIdsSet]);
 
   return (
     <AppStateContext.Provider value={{ 

@@ -1,0 +1,3 @@
+## 2025-05-15 - Set-based lookup for global state
+**Learning:** In this architecture, the global state `stats` contains arrays like `solvedIds` which are frequently used for lookups in multiple components (TopicCard, TopicDetail, LessonPage). Using `Array.includes()` in these lookups creates O(N) complexity inside render loops, leading to performance degradation as the user progresses and solves more problems.
+**Action:** Always provide memoized `Set` versions of these arrays in the context for O(1) lookups, and ensure components use helper functions (like `isSolved`) that leverage these Sets.
