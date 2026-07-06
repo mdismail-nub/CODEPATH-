@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import * as Icons from 'lucide-react';
@@ -15,16 +15,23 @@ export const TopicDetail = () => {
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'All'>('All');
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
 
-  const topic = TOPICS.find(t => t.slug === slug);
+  const topic = useMemo(() => TOPICS.find(t => t.slug === slug), [slug]);
+
+  const filteredProblems = useMemo(() => {
+    if (!topic) return [];
+    return difficultyFilter === 'All'
+      ? topic.problems
+      : topic.problems.filter(p => p.difficulty === difficultyFilter);
+  }, [topic, difficultyFilter]);
+
+  const solvedCount = useMemo(() => {
+    if (!topic) return 0;
+    return topic.problems.filter(p => isSolved(p.id)).length;
+  }, [topic, isSolved]);
+
   if (!topic) return <Navigate to="/topics" />;
 
   const Icon = (Icons as any)[topic.icon] || Icons.HelpCircle;
-
-  const filteredProblems = difficultyFilter === 'All'
-    ? topic.problems
-    : topic.problems.filter(p => p.difficulty === difficultyFilter);
-
-  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
   const totalCount = topic.problems.length;
   const progressPercent = Math.round((solvedCount / totalCount) * 100) || 0;
   const isAllSolved = solvedCount === totalCount && totalCount > 0;
