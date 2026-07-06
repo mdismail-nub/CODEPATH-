@@ -1,3 +1,17 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : Medium
+ * File          : src/pages/TopicDetail.tsx
+ * Line(s)       : 96
+ * Root Cause    : Mismatched route for "View Certificate" link; used /certificate/ instead of /certificates/.
+ * Fix Applied   : Updated the Link to point to the correct route /certificates/${topic.slug}.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
+
 import React, { useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -90,7 +104,7 @@ export const TopicDetail = () => {
                   <div className="pt-8 border-t border-slate-100 dark:border-slate-800">
                      {existingCert ? (
                       <Link 
-                        to={`/certificate/${topic.slug}`}
+                        to={`/certificates/${topic.slug}`}
                         className={cn(
                         "w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3",
                         "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30 hover:bg-emerald-100 transition-colors"

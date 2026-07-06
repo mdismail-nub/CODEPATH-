@@ -1,3 +1,17 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : Medium
+ * File          : src/AppStateContext.tsx
+ * Line(s)       : 223
+ * Root Cause    : Mismatched route for verification URL; used /verify/ instead of /certificate/.
+ * Fix Applied   : Updated the verificationUrl to point to /certificate/${certId} to match App.tsx routing.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserStats, CertificateInfo, GitHubInfo } from './types';
 import { db, auth } from './lib/firebase';
@@ -220,7 +234,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       topicName,
       issuedAt: Date.now(),
       githubUsername: stats.github?.username,
-      verificationUrl: `${window.location.origin}/verify/${certId}`
+      verificationUrl: `${window.location.origin}/certificate/${certId}`
     };
     
     setStats(prev => ({
