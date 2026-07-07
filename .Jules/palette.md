@@ -1,0 +1,3 @@
+## 2026-07-07 - Enhanced tactile feedback and accessibility for problem items
+**Learning:** In `TopicDetail.tsx`, the problem solved toggle lacked a descriptive `aria-label`, making it difficult for screen reader users to understand the current state and action. Additionally, adding `active:scale-95` with a fast transition (`duration-150`) provides a much more satisfying and responsive "click" feeling compared to a slower duration.
+**Action:** Always provide dynamic `aria-label` for toggles that describe both the item and the target state. Use `active:scale-95` combined with `duration-150` for crisp tactile feedback.
