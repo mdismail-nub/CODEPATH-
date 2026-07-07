@@ -13,6 +13,19 @@ import { useAppState } from '../AppStateContext';
 import { cn } from '../lib/utils';
 import { Exercise } from '../types';
 
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic / Runtime
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 28-35, 41-43, 222-250
+ * Root Cause    : Lesson state (exercise index, answer, completion) was not resetting when navigating between lessons, and progress calculation lacked division-by-zero protection.
+ * Fix Applied   : Added useEffect to reset state on route change, added guard for progressPercent, and applied optional chaining to currentExercise.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 export const LessonPage = () => {
   const { courseSlug, lessonSlug } = useParams();
   const navigate = useNavigate();
@@ -30,13 +43,25 @@ export const LessonPage = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
 
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+
+  useEffect(() => {
+    if (lesson) {
+      setCurrentExerciseIdx(0);
+      setUserAnswer('');
+      setShowFeedback(null);
+      setShowHint(false);
+      setShowConfetti(false);
+      setIsCompleted(isLessonCompleted(lesson.id));
+      setActiveTab('content');
+    }
+  }, [courseSlug, lessonSlug, lesson?.id, isLessonCompleted]);
+
   if (!course || !lesson) return <Navigate to="/learn" />;
 
   const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+  const progressPercent = totalExercises > 0 ? Math.round(((currentExerciseIdx) / totalExercises) * 100) : 0;
 
   const checkAnswer = () => {
     if (!currentExercise) return;
@@ -239,12 +264,12 @@ export const LessonPage = () => {
                       Exercise {currentExerciseIdx + 1} of {totalExercises}
                     </span>
                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-outfit leading-snug">
-                      {currentExercise.question}
+                      {currentExercise?.question}
                     </h3>
                   </div>
 
                   <div className="space-y-4 mb-12">
-                    {currentExercise.type === 'multiple-choice' ? (
+                    {currentExercise?.type === 'multiple-choice' ? (
                       <div className="grid gap-3">
                         {currentExercise.options?.map((option, i) => (
                           <button
@@ -269,7 +294,7 @@ export const LessonPage = () => {
                           </button>
                         ))}
                       </div>
-                    ) : currentExercise.type === 'fill-in-the-blank' ? (
+                    ) : currentExercise?.type === 'fill-in-the-blank' ? (
                       <div className="relative group">
                         <input
                           type="text"
@@ -293,12 +318,12 @@ export const LessonPage = () => {
                             value={userAnswer}
                             onChange={(e) => setUserAnswer(e.target.value)}
                             className="w-full h-40 p-6 font-mono text-sm bg-transparent border-none text-slate-200 focus:outline-none resize-none"
-                            placeholder={currentExercise.inputTemplate}
+                            placeholder={currentExercise?.inputTemplate}
                             onKeyDown={(e) => e.ctrlKey && e.key === 'Enter' && checkAnswer()}
                           />
                         </div>
                         <div className="flex justify-between items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
-                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected: {currentExercise.correctAnswer}</p>
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected: {currentExercise?.correctAnswer}</p>
                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Press Ctrl + Enter to run</p>
                         </div>
                       </div>
@@ -365,7 +390,7 @@ export const LessonPage = () => {
                          <MessageCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                          <div>
                             <p className="font-bold mb-1">Hint</p>
-                            {currentExercise.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
+                            {currentExercise?.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
                          </div>
                       </motion.div>
                     )}
