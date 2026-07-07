@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import * as Icons from 'lucide-react';
@@ -6,19 +6,38 @@ import { Topic } from '../types';
 import { cn } from '../lib/utils';
 import { useAppState } from '../AppStateContext';
 
+/**
+ * SESSION REPORT: src/components/TopicCard.tsx
+ * Error Type: Performance Optimization
+ * Severity: Low
+ * Line(s): 15-18
+ * Root Cause: Progress calculations were running on every render of each TopicCard.
+ * Fix Applied: Wrapped progress and solvedCount in useMemo and used isSolved from context.
+ * Auto-Fixed: No
+ * Behavior Change: None
+ */
+
 interface TopicCardProps {
   topic: Topic;
   index: number;
 }
 
 export const TopicCard: React.FC<TopicCardProps> = ({ topic, index }) => {
-  const { stats } = useAppState();
-  const Icon = (Icons as any)[topic.icon] || Icons.HelpCircle;
+  const { isSolved } = useAppState();
+
+  const Icon = useMemo(() => (Icons as any)[topic.icon] || Icons.HelpCircle, [topic.icon]);
   
-  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
-  const totalCount = topic.problems.length;
-  const progressPercent = Math.round((solvedCount / totalCount) * 100) || 0;
-  const isCompleted = progressPercent === 100;
+  const { solvedCount, totalCount, progressPercent, isCompleted } = useMemo(() => {
+    const solved = topic.problems.filter(p => isSolved(p.id)).length;
+    const total = topic.problems.length;
+    const percent = Math.round((solved / total) * 100) || 0;
+    return {
+      solvedCount: solved,
+      totalCount: total,
+      progressPercent: percent,
+      isCompleted: percent === 100
+    };
+  }, [topic.problems, isSolved]);
 
   return (
     <motion.div

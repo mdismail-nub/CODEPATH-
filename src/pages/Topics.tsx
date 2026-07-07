@@ -1,18 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { TOPICS } from '../data';
 import { TopicCard } from '../components/TopicCard';
 import { LayoutGrid, Search, X } from 'lucide-react';
 import { BackButton } from '../components/BackButton';
 
+/**
+ * SESSION REPORT: src/pages/Topics.tsx
+ * Error Type: Performance Optimization
+ * Severity: Low
+ * Line(s): 11-15
+ * Root Cause: Topic filtering logic was executing on every render, including during unrelated state changes.
+ * Fix Applied: Wrapped filtering logic in useMemo to only recompute when searchQuery changes.
+ * Auto-Fixed: No
+ * Behavior Change: None
+ */
+
 export const Topics = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredTopics = TOPICS.filter(t => 
-    t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.problems.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredTopics = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    if (!query) return TOPICS;
+
+    return TOPICS.filter(t =>
+      t.name.toLowerCase().includes(query) ||
+      t.description.toLowerCase().includes(query) ||
+      t.problems.some(p => p.name.toLowerCase().includes(query))
+    );
+  }, [searchQuery]);
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">

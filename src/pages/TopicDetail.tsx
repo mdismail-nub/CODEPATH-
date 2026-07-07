@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import * as Icons from 'lucide-react';
@@ -9,25 +9,51 @@ import { cn } from '../lib/utils';
 import { GetCertificateModal } from '../components/GetCertificateModal';
 import { BackButton } from '../components/BackButton';
 
+/**
+ * SESSION REPORT: src/pages/TopicDetail.tsx
+ * Error Type: Performance Optimization
+ * Severity: Low
+ * Line(s): 24-32
+ * Root Cause: Expensive filtering and progress calculations were running on every render.
+ * Fix Applied: Memoized filteredProblems, solvedCount, totalCount, and progressPercent.
+ * Auto-Fixed: No
+ * Behavior Change: None
+ */
+
 export const TopicDetail = () => {
   const { slug } = useParams();
   const { isSolved, toggleSolved, stats } = useAppState();
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | 'All'>('All');
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
 
-  const topic = TOPICS.find(t => t.slug === slug);
+  const topic = useMemo(() => TOPICS.find(t => t.slug === slug), [slug]);
+
+  const Icon = useMemo(() => {
+    if (!topic) return Icons.HelpCircle;
+    return (Icons as any)[topic.icon] || Icons.HelpCircle;
+  }, [topic]);
+
+  const filteredProblems = useMemo(() => {
+    if (!topic) return [];
+    return difficultyFilter === 'All'
+      ? topic.problems
+      : topic.problems.filter(p => p.difficulty === difficultyFilter);
+  }, [topic, difficultyFilter]);
+
+  const { solvedCount, totalCount, progressPercent, isAllSolved } = useMemo(() => {
+    if (!topic) return { solvedCount: 0, totalCount: 0, progressPercent: 0, isAllSolved: false };
+    const solved = topic.problems.filter(p => isSolved(p.id)).length;
+    const total = topic.problems.length;
+    const percent = Math.round((solved / total) * 100) || 0;
+    return {
+      solvedCount: solved,
+      totalCount: total,
+      progressPercent: percent,
+      isAllSolved: solved === total && total > 0
+    };
+  }, [topic, isSolved]);
+
   if (!topic) return <Navigate to="/topics" />;
-
-  const Icon = (Icons as any)[topic.icon] || Icons.HelpCircle;
-
-  const filteredProblems = difficultyFilter === 'All'
-    ? topic.problems
-    : topic.problems.filter(p => p.difficulty === difficultyFilter);
-
-  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
-  const totalCount = topic.problems.length;
-  const progressPercent = Math.round((solvedCount / totalCount) * 100) || 0;
-  const isAllSolved = solvedCount === totalCount && totalCount > 0;
   
   const existingCert = stats.certificates[topic.slug];
 

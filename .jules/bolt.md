@@ -1,0 +1,3 @@
+## 2025-05-15 - [Global Context Bottleneck]
+**Learning:** In applications where a central Context Provider (like AppStateContext) is consumed by a large number of components (30+), any unmemoized value or function in the provider causes a full application re-render on every state change. Additionally, repeated O(n) array lookups (e.g., .includes) in these components compound the performance degradation.
+**Action:** Always memoize the Context Provider's value using `useMemo` and its functions using `useCallback`. For frequently checked collections, maintain memoized `Set` instances to enable O(1) lookups.
