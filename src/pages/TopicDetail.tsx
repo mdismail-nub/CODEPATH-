@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : High
+ * File          : src/pages/TopicDetail.tsx
+ * Line(s)       : 115
+ * Root Cause    : The "View Certificate" link used the wrong route prefix, causing it to pass a topic slug to the public verification route which expects a unique certificate ID.
+ * Fix Applied   : Corrected the link to use the internal certificate view route (/certificates/:topicSlug).
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -90,7 +103,7 @@ export const TopicDetail = () => {
                   <div className="pt-8 border-t border-slate-100 dark:border-slate-800">
                      {existingCert ? (
                       <Link 
-                        to={`/certificate/${topic.slug}`}
+                        to={`/certificates/${topic.slug}`}
                         className={cn(
                         "w-full py-4 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-3",
                         "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/30 hover:bg-emerald-100 transition-colors"
