@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Runtime / Console
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 29-34
+ * Root Cause    : Rules of Hooks violation (hook called after conditional return) and missing defensive guards for empty exercises.
+ * Fix Applied   : Moved activeTab hook above the conditional return and added defensive guards for exercise access.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -29,14 +42,13 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
-  const currentExercise = lesson.exercises[currentExerciseIdx];
-  const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
-
-  const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
+  const totalExercises = lesson.exercises?.length || 0;
+  const currentExercise = totalExercises > 0 ? lesson.exercises[currentExerciseIdx] : null;
+  const progressPercent = totalExercises > 0 ? Math.round(((currentExerciseIdx) / totalExercises) * 100) : 0;
 
   const checkAnswer = () => {
     if (!currentExercise) return;
