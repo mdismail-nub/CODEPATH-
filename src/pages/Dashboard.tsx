@@ -17,7 +17,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export const Dashboard = () => {
-  const { stats } = useAppState();
+  const { stats, isSolved } = useAppState();
   const reportRef = useRef<HTMLDivElement>(null);
 
   const totalSolved = stats.solvedIds.length;
@@ -125,7 +125,7 @@ export const Dashboard = () => {
   };
 
   const topicsCompleted = TOPICS.filter(t => 
-    t.problems.every(p => stats.solvedIds.includes(p.id))
+    t.problems.every(p => isSolved(p.id))
   ).length;
 
   return (
@@ -253,7 +253,7 @@ export const Dashboard = () => {
 
               <div className="space-y-6">
                 {TOPICS.slice(0, 6).map((topic) => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+                  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
                   const percent = Math.round((solvedCount / topic.problems.length) * 100);
                   
                   return (
@@ -328,7 +328,7 @@ export const Dashboard = () => {
              <h3 className="text-xs font-bold text-gray-900 uppercase tracking-widest mb-8 pb-4 border-b border-gray-100">Top Module Performance</h3>
              <div className="grid grid-cols-2 gap-x-12 gap-y-8">
                 {TOPICS.slice(0, 10).map(topic => {
-                  const solvedCount = topic.problems.filter(p => stats.solvedIds.includes(p.id)).length;
+                  const solvedCount = topic.problems.filter(p => isSolved(p.id)).length;
                   const percent = Math.round((solvedCount / topic.problems.length) * 100);
                   return (
                     <div key={topic.id} className="flex items-center justify-between">
