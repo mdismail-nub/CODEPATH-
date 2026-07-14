@@ -1,3 +1,16 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 28-34
+ * Root Cause    : Component state is not reset when navigating between lessons due to React component reuse.
+ * Fix Applied   : Added a useEffect hook to reset all lesson-related states when courseSlug or lessonSlug changes.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -29,6 +42,16 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+
+  useEffect(() => {
+    setCurrentExerciseIdx(0);
+    setUserAnswer('');
+    setShowFeedback(null);
+    setIsCompleted(false);
+    setShowConfetti(false);
+    setShowHint(false);
+    setActiveTab('content');
+  }, [courseSlug, lessonSlug]);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
