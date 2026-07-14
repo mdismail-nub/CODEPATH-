@@ -154,11 +154,12 @@ export const TopicDetail = () => {
                 <button
                   onClick={() => toggleSolved(problem.id)}
                   className={cn(
-                    "flex-shrink-0 h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300",
+                    "flex-shrink-0 h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300 active:scale-95",
                     isSolved(problem.id)
                       ? "bg-emerald-500 dark:bg-emerald-400 border-emerald-500 dark:border-emerald-400 text-white"
                       : "border-slate-200 dark:border-slate-800 text-transparent group-hover:border-primary-300 dark:group-hover:border-primary-700 font-bold"
                   )}
+                  aria-label={isSolved(problem.id) ? "Mark as unsolved" : "Mark as solved"}
                 >
                   <Icons.Check className={cn("h-5 w-5 md:h-6 md:w-6 stroke-[2.5px]", isSolved(problem.id) ? "opacity-100" : "opacity-0")} />
                 </button>
@@ -191,6 +192,7 @@ export const TopicDetail = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-shrink-0 h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-primary-600 dark:hover:bg-primary-500 hover:text-white dark:hover:text-slate-900 transition-all transition-transform hover:scale-105 active:scale-95 shadow-sm"
+                  aria-label={`Open ${problem.name} on ${problem.platform}`}
                 >
                   <Icons.ExternalLink className="h-5 w-5" />
                 </a>
