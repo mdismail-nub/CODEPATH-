@@ -1,4 +1,17 @@
-import React, { useState, useEffect } from 'react';
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Runtime
+ * Severity      : High
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 34, 185-230, 276
+ * Root Cause    : Potential NaN in progress calculation and missing guards/cleanups for transient state.
+ * Fix Applied   : Added zero-division guard for progress, optional chaining for exercise properties, and cleanup logic for timers.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -32,44 +45,60 @@ export const LessonPage = () => {
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
-  const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
+  const currentExercise = totalExercises > 0 ? lesson.exercises[currentExerciseIdx] : null;
+  const progressPercent = totalExercises > 0
+    ? Math.round(((currentExerciseIdx) / totalExercises) * 100)
+    : 0;
 
   const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
-  const checkAnswer = () => {
-    if (!currentExercise) return;
+  const handleLessonComplete = useCallback(() => {
+    setShowConfetti(true);
+    setIsCompleted(true);
+    completeLesson(lesson.id, lesson.xpReward);
+  }, [lesson.id, lesson.xpReward, completeLesson]);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
     
-    const isCorrect = userAnswer.trim().toLowerCase() === currentExercise.correctAnswer.trim().toLowerCase();
-    
-    if (isCorrect) {
-      setShowFeedback('correct');
+    if (showFeedback === 'correct') {
       if (currentExerciseIdx === totalExercises - 1) {
         handleLessonComplete();
       } else {
-        setTimeout(() => {
+        timer = setTimeout(() => {
           setCurrentExerciseIdx(prev => prev + 1);
           setUserAnswer('');
           setShowFeedback(null);
           setShowHint(false);
-          // Auto switch to practice tab if it's a new exercise on mobile
           if (width < 1024) setActiveTab('practice');
         }, 1500);
       }
+    } else if (showFeedback === 'incorrect') {
+      timer = setTimeout(() => setShowFeedback(null), 1500);
+    }
+
+    return () => clearTimeout(timer);
+  }, [showFeedback, currentExerciseIdx, totalExercises, width, handleLessonComplete]);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    if (showConfetti) {
+      timer = setTimeout(() => setShowConfetti(false), 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [showConfetti]);
+
+  const checkAnswer = () => {
+    if (!currentExercise) return;
+
+    const isCorrect = userAnswer.trim().toLowerCase() === currentExercise.correctAnswer.trim().toLowerCase();
+
+    if (isCorrect) {
+      setShowFeedback('correct');
     } else {
       setShowFeedback('incorrect');
-      setTimeout(() => setShowFeedback(null), 1500);
     }
-  };
-
-  const handleLessonComplete = () => {
-    setShowConfetti(true);
-    setIsCompleted(true);
-    completeLesson(lesson.id, lesson.xpReward);
-    setTimeout(() => {
-      setShowConfetti(false);
-    }, 5000);
   };
 
   const isLastLesson = lessonIndex === course.lessons.length - 1;
@@ -239,14 +268,14 @@ export const LessonPage = () => {
                       Exercise {currentExerciseIdx + 1} of {totalExercises}
                     </span>
                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-outfit leading-snug">
-                      {currentExercise.question}
+                      {currentExercise?.question}
                     </h3>
                   </div>
 
                   <div className="space-y-4 mb-12">
-                    {currentExercise.type === 'multiple-choice' ? (
+                    {currentExercise?.type === 'multiple-choice' ? (
                       <div className="grid gap-3">
-                        {currentExercise.options?.map((option, i) => (
+                        {currentExercise?.options?.map((option, i) => (
                           <button
                             key={i}
                             onClick={() => setUserAnswer(option)}
@@ -293,12 +322,12 @@ export const LessonPage = () => {
                             value={userAnswer}
                             onChange={(e) => setUserAnswer(e.target.value)}
                             className="w-full h-40 p-6 font-mono text-sm bg-transparent border-none text-slate-200 focus:outline-none resize-none"
-                            placeholder={currentExercise.inputTemplate}
+                            placeholder={currentExercise?.inputTemplate}
                             onKeyDown={(e) => e.ctrlKey && e.key === 'Enter' && checkAnswer()}
                           />
                         </div>
                         <div className="flex justify-between items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
-                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected: {currentExercise.correctAnswer}</p>
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected: {currentExercise?.correctAnswer}</p>
                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Press Ctrl + Enter to run</p>
                         </div>
                       </div>
@@ -365,7 +394,7 @@ export const LessonPage = () => {
                          <MessageCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                          <div>
                             <p className="font-bold mb-1">Hint</p>
-                            {currentExercise.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
+                            {currentExercise?.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
                          </div>
                       </motion.div>
                     )}
