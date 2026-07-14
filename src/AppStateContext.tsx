@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { UserStats, CertificateInfo, GitHubInfo } from './types';
 import { db, auth } from './lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
@@ -113,8 +113,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [stats, loading, saveStats]);
 
+  /**
+   * Performance Optimization: Memoize sets for O(1) lookups.
+   * Transforms isSolved and isLessonCompleted from O(N) to O(1).
+   * Impact: Significant latency reduction as user history grows.
+   */
+  const solvedIdsSet = useMemo(() => new Set(stats.solvedIds), [stats.solvedIds]);
+  const completedLessonIdsSet = useMemo(() => new Set(stats.completedLessonIds || []), [stats.completedLessonIds]);
+
   const toggleSolved = (id: string) => {
-    const alreadySolved = stats.solvedIds.includes(id);
+    const alreadySolved = solvedIdsSet.has(id);
     const now = Date.now();
     
     setStats(prev => {
@@ -135,7 +143,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
-  const isSolved = (id: string) => stats.solvedIds.includes(id);
+  const isSolved = (id: string) => solvedIdsSet.has(id);
 
   const updateVJudgeId = (vjudgeId: string) => {
     setStats(prev => ({ ...prev, vjudgeId }));
@@ -243,7 +251,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }));
   };
 
-  const isLessonCompleted = (lessonId: string) => (stats.completedLessonIds || []).includes(lessonId);
+  const isLessonCompleted = (lessonId: string) => completedLessonIdsSet.has(lessonId);
 
   return (
     <AppStateContext.Provider value={{ 
