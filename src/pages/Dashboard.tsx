@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { useAppState } from '../AppStateContext';
 import { TOPICS } from '../data';
@@ -17,51 +17,53 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 export const Dashboard = () => {
-  const { stats } = useAppState();
+  const { stats, isSolved } = useAppState();
   const reportRef = useRef<HTMLDivElement>(null);
 
   const totalSolved = stats.solvedIds.length;
-  const totalProblems = TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0);
+  const totalProblems = useMemo(() => TOPICS.reduce((acc, topic) => acc + topic.problems.length, 0), []);
   const totalProgress = Math.round((totalSolved / totalProblems) * 100);
 
   const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
-  const history = stats.solvedAt || {};
-  const solvesByDate: Record<string, number> = {};
-  Object.values(history).forEach((timestamp: any) => {
-    if (timestamp) {
-      const dateStr = formatDate(new Date(timestamp));
-      solvesByDate[dateStr] = (solvesByDate[dateStr] || 0) + 1;
-    }
-  });
+  const solvesByDate = useMemo(() => {
+    const data: Record<string, number> = {};
+    const history = stats.solvedAt || {};
+    Object.values(history).forEach((timestamp: any) => {
+      if (timestamp) {
+        const dateStr = formatDate(new Date(timestamp));
+        data[dateStr] = (data[dateStr] || 0) + 1;
+      }
+    });
+    return data;
+  }, [stats.solvedAt]);
 
-  const calculateStreak = () => {
-    let streak = 0;
+  const streak = useMemo(() => {
+    let s = 0;
     let current = new Date();
+    const today = formatDate(current);
     
-    if (solvesByDate[formatDate(current)]) {
-      streak++;
+    if (solvesByDate[today]) {
+      s++;
     } else {
       current.setDate(current.getDate() - 1);
       if (!solvesByDate[formatDate(current)]) return 0;
-      streak++;
+      s++;
     }
 
     while (true) {
       current.setDate(current.getDate() - 1);
       if (solvesByDate[formatDate(current)]) {
-        streak++;
+        s++;
       } else {
         break;
       }
-      if (streak > 365) break;
+      if (s > 365) break;
     }
-    return streak;
-  };
+    return s;
+  }, [solvesByDate]);
 
-  const streak = calculateStreak();
-
-  const heatmapData = Array.from({ length: 154 }, (_, i) => {
+  const heatmapData = useMemo(() => Array.from({ length: 154 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (153 - i));
     const dateStr = formatDate(d);
@@ -71,7 +73,7 @@ export const Dashboard = () => {
       value: Math.min(count, 4),
       date: dateStr
     };
-  });
+  }), [solvesByDate]);
 
   const downloadProgress = async () => {
     if (!reportRef.current) return;
@@ -124,9 +126,9 @@ export const Dashboard = () => {
     pdf.save(`CodePath_Progress_Report.pdf`);
   };
 
-  const topicsCompleted = TOPICS.filter(t => 
-    t.problems.every(p => stats.solvedIds.includes(p.id))
-  ).length;
+  const topicsCompleted = useMemo(() => TOPICS.filter(t =>
+    t.problems.every(p => isSolved(p.id))
+  ).length, [isSolved]);
 
   return (
     <div className="relative min-h-screen bg-white dark:bg-[#020617] transition-colors duration-300">
