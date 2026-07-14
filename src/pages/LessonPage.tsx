@@ -1,9 +1,22 @@
+/*
+ * 🚨 ERROR DETECTIVE — Session Report
+ * ─────────────────────────────────────
+ * Error Type    : Logic
+ * Severity      : Medium
+ * File          : src/pages/LessonPage.tsx
+ * Line(s)       : 35, 231-253, 266+
+ * Root Cause    : progressPercent calculation didn't account for zero exercises, and the component lacked UI to complete lessons without exercises.
+ * Fix Applied   : Added safety guards for zero exercises, optional chaining for exercise access, and a "Mark as Read" button for reading-only lessons.
+ * Auto-Fixed    : Yes
+ * Behavior Change: No
+ * ─────────────────────────────────────
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft, BookOpen
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -32,9 +45,11 @@ export const LessonPage = () => {
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
-  const currentExercise = lesson.exercises[currentExerciseIdx];
   const totalExercises = lesson.exercises.length;
-  const progressPercent = Math.round(((currentExerciseIdx) / totalExercises) * 100);
+  const progressPercent = totalExercises > 0
+    ? Math.round(((currentExerciseIdx) / totalExercises) * 100)
+    : 0;
+  const currentExercise = totalExercises > 0 ? lesson.exercises[currentExerciseIdx] : null;
 
   const [activeTab, setActiveTab] = useState<'content' | 'practice'>('content');
 
@@ -226,6 +241,28 @@ export const LessonPage = () => {
                     </Link>
                   </div>
                 </motion.div>
+              ) : totalExercises === 0 ? (
+                <motion.div
+                  key="reading-only"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center max-w-md"
+                >
+                  <div className="mb-8 h-20 w-20 bg-primary-50 dark:bg-primary-900/20 rounded-3xl flex items-center justify-center mx-auto text-primary-600 dark:text-primary-400">
+                    <BookOpen className="h-10 w-10" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 font-outfit">Reading mode only</h2>
+                  <p className="text-slate-600 dark:text-slate-400 mb-10 leading-relaxed font-medium">
+                    This lesson is purely informative and doesn't have any interactive exercises. You can mark it as read whenever you're ready!
+                  </p>
+                  <button
+                    onClick={handleLessonComplete}
+                    className="w-full bg-primary-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-primary-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-600/20 active:scale-95"
+                  >
+                    Mark as Read
+                    <CheckCircle2 className="h-5 w-5" />
+                  </button>
+                </motion.div>
               ) : (
                 <motion.div
                   key={currentExerciseIdx}
@@ -239,14 +276,14 @@ export const LessonPage = () => {
                       Exercise {currentExerciseIdx + 1} of {totalExercises}
                     </span>
                     <h3 className="text-2xl font-bold text-slate-900 dark:text-white font-outfit leading-snug">
-                      {currentExercise.question}
+                      {currentExercise?.question}
                     </h3>
                   </div>
 
                   <div className="space-y-4 mb-12">
-                    {currentExercise.type === 'multiple-choice' ? (
+                    {currentExercise?.type === 'multiple-choice' ? (
                       <div className="grid gap-3">
-                        {currentExercise.options?.map((option, i) => (
+                        {currentExercise?.options?.map((option, i) => (
                           <button
                             key={i}
                             onClick={() => setUserAnswer(option)}
@@ -269,7 +306,7 @@ export const LessonPage = () => {
                           </button>
                         ))}
                       </div>
-                    ) : currentExercise.type === 'fill-in-the-blank' ? (
+                    ) : currentExercise?.type === 'fill-in-the-blank' ? (
                       <div className="relative group">
                         <input
                           type="text"
@@ -298,7 +335,7 @@ export const LessonPage = () => {
                           />
                         </div>
                         <div className="flex justify-between items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
-                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected: {currentExercise.correctAnswer}</p>
+                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Expected: {currentExercise?.correctAnswer}</p>
                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Press Ctrl + Enter to run</p>
                         </div>
                       </div>
@@ -365,7 +402,7 @@ export const LessonPage = () => {
                          <MessageCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                          <div>
                             <p className="font-bold mb-1">Hint</p>
-                            {currentExercise.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
+                            {currentExercise?.hint || "Take another look at the lesson content on the left. The answer is usually explicitly mentioned there!"}
                          </div>
                       </motion.div>
                     )}
