@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { UserStats, CertificateInfo, GitHubInfo } from './types';
 import { db, auth } from './lib/firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
@@ -113,8 +113,12 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [stats, loading, saveStats]);
 
-  const toggleSolved = (id: string) => {
-    const alreadySolved = stats.solvedIds.includes(id);
+  // Memoized Sets for O(1) lookups
+  const solvedIdsSet = useMemo(() => new Set(stats.solvedIds), [stats.solvedIds]);
+  const completedLessonIdsSet = useMemo(() => new Set(stats.completedLessonIds || []), [stats.completedLessonIds]);
+
+  const toggleSolved = useCallback((id: string) => {
+    const alreadySolved = solvedIdsSet.has(id);
     const now = Date.now();
     
     setStats(prev => {
@@ -133,15 +137,19 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         solvedAt: newSolvedAt
       };
     });
-  };
+  }, [solvedIdsSet]);
 
-  const isSolved = (id: string) => stats.solvedIds.includes(id);
+  const isSolved = useCallback((id: string) => solvedIdsSet.has(id), [solvedIdsSet]);
 
-  const updateVJudgeId = (vjudgeId: string) => {
+  const updateVJudgeId = useCallback((vjudgeId: string) => {
     setStats(prev => ({ ...prev, vjudgeId }));
-  };
+  }, []);
 
-  const loginWithGitHub = async () => {
+  const setGitHubInfo = useCallback((info: GitHubInfo) => {
+    setStats(prev => ({ ...prev, github: info }));
+  }, []);
+
+  const loginWithGitHub = useCallback(async () => {
     const provider = new GithubAuthProvider();
     provider.addScope('user,public_repo');
     
@@ -164,9 +172,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (error) {
       console.error("GitHub Login failed", error);
     }
-  };
+  }, [setGitHubInfo]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await signOut(auth);
       setStats(DEFAULT_STATS);
@@ -174,13 +182,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch (e) {
       console.error("Logout failed", e);
     }
-  };
+  }, []);
 
-  const setGitHubInfo = (info: GitHubInfo) => {
-    setStats(prev => ({ ...prev, github: info }));
-  };
-
-  const checkGitHubStar = async (): Promise<boolean> => {
+  const checkGitHubStar = useCallback(async (): Promise<boolean> => {
     if (!stats.github?.token || !stats.github?.username) return false;
     
     try {
@@ -206,9 +210,9 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.error("Star check failed", e);
       return false;
     }
-  };
+  }, [stats.github?.token, stats.github?.username]);
 
-  const requestCertificate = async (topicSlug: string, topicName: string, recipientName: string) => {
+  const requestCertificate = useCallback(async (topicSlug: string, topicName: string, recipientName: string) => {
     // Generate unique ID
     const certId = `CERT-${Math.random().toString(36).substring(2, 10).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
     
@@ -230,20 +234,19 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         [topicSlug]: certInfo
       }
     }));
-  };
+  }, [stats.github?.username]);
 
-  const completeLesson = (lessonId: string, xpReward: number) => {
-    const completed = stats.completedLessonIds || [];
-    if (completed.includes(lessonId)) return;
+  const completeLesson = useCallback((lessonId: string, xpReward: number) => {
+    if (completedLessonIdsSet.has(lessonId)) return;
     
     setStats(prev => ({
       ...prev,
       completedLessonIds: [...(prev.completedLessonIds || []), lessonId],
       xp: (prev.xp || 0) + xpReward
     }));
-  };
+  }, [completedLessonIdsSet]);
 
-  const isLessonCompleted = (lessonId: string) => (stats.completedLessonIds || []).includes(lessonId);
+  const isLessonCompleted = useCallback((lessonId: string) => completedLessonIdsSet.has(lessonId), [completedLessonIdsSet]);
 
   return (
     <AppStateContext.Provider value={{ 
