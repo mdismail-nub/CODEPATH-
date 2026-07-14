@@ -3,7 +3,8 @@ import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronLeft, CheckCircle2, ChevronRight, X, Play, 
-  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft
+  Lightbulb, HelpCircle, Trophy, Sparkles, MessageCircle, ArrowLeft,
+  Copy, Check
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import Confetti from 'react-confetti';
@@ -29,6 +30,7 @@ export const LessonPage = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   if (!course || !lesson) return <Navigate to="/learn" />;
 
@@ -70,6 +72,26 @@ export const LessonPage = () => {
     setTimeout(() => {
       setShowConfetti(false);
     }, 5000);
+  };
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (isCopied) {
+      timeout = setTimeout(() => setIsCopied(false), 2000);
+    }
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [isCopied]);
+
+  const handleCopyCode = () => {
+    if (!lesson.codeExample) return;
+    try {
+      navigator.clipboard.writeText(lesson.codeExample.code);
+      setIsCopied(true);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
   };
 
   const isLastLesson = lessonIndex === course.lessons.length - 1;
@@ -150,7 +172,35 @@ export const LessonPage = () => {
                     </div>
                     <span className="text-[10px] font-bold text-slate-500 ml-2 uppercase tracking-widest">Example: {lesson.codeExample.language}</span>
                   </div>
-                  <Play className="h-3 w-3 text-slate-600" />
+                  <button
+                    onClick={handleCopyCode}
+                    className="p-1.5 rounded-md text-slate-500 hover:text-white hover:bg-slate-800 transition-all active:scale-90"
+                    aria-label={isCopied ? "Copied!" : "Copy code"}
+                  >
+                    <AnimatePresence mode="wait">
+                      {isCopied ? (
+                        <motion.div
+                          key="check"
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.5, opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          <Check className="h-3.5 w-3.5 text-emerald-500" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="copy"
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.5, opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </button>
                 </div>
                 <pre className="p-6 text-sm font-mono text-slate-300 leading-relaxed overflow-x-auto">
                   <code>{lesson.codeExample.code}</code>
